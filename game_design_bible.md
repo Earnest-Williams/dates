@@ -273,3 +273,166 @@ After completion of the 18th-year choice, the player starts their new life as th
    $$\text{Heir Starting Stat} = \text{Childhood Decision Gains} + 10\% \text{ of Parent's Final Stat}$$
 6. **Lineage Ledger**: The parent's final statistics (money, career, education, spouse name, days survived) are recorded in the family parent history and displayed on the dashboard under **Lineage**.
 
+---
+
+## 10. Update Set: Daily Life & Relationship Depth (Designer Notes)
+
+This update set expands experiential content and social depth while keeping implementation risk bounded. It may add narrowly scoped state fields, reducer cases, and persistence keys needed for these features, while avoiding unrelated rewrites to test tooling, CI, and developer docs outside this section.
+
+### A. Daily Routine Gameplay Loop Expansion
+- Add a **Daily Planner** view that previews available morning/day/evening blocks as a UX layer over the existing tick clock.
+  - Morning block maps to current-day ticks from 08:00-11:59.
+  - Day block maps to current-day ticks from 12:00-17:59.
+  - Evening block maps to current-day ticks from 18:00-23:59.
+  - Planner actions still consume/advance the same tick-based time simulation used by dialogue and dates.
+- Add low-pressure routine actions that are not pure stat grind:
+  - Reading
+  - Cooking
+  - Errands
+  - Calls
+  - Self-care rituals
+- Add evening activity options that bias mood recovery and social setup.
+- Add weekly rhythm with soft goals (non-fail-state nudges).
+- Add small mood bonuses for balanced routine diversity.
+
+**Design intent:** Players can enjoy several in-game days without dating or repeating a single stat action.
+
+### B. Romance Arc Chapters Per NPC
+Each romanceable NPC route is expanded into explicit chapter states:
+1. First impression
+2. Friendship stage
+3. Personal reveal
+4. Conflict
+5. Trust-building event
+6. Confession
+7. Committed relationship content
+8. Marriage / long-term content
+
+Implementation mapping for existing relationship-cap architecture:
+- Story Tier 0 (cap 25): Chapters 1-2
+- Story Tier 1 (cap 50): Chapters 3-4
+- Story Tier 2 (cap 75): Chapters 5-6
+- Story Tier 3 (cap 100): Chapters 7-8
+
+**Design intent:** Relationship progression should feel narrative and emotional, not just point accumulation.
+
+### C. Hidden Long-Term Compatibility Layer
+In addition to existing match chance systems, add hidden compatibility dimensions:
+- Ambition level
+- Affection style
+- Conflict style
+- Social preference
+- Family orientation
+- Spending style
+- Emotional openness
+- Long-term goals
+
+**Design intent:** High initial attraction can still lead to poor long-term fit; replay outcomes should diverge.
+
+### D. Multi-Step Date Event Structure
+Expand dates into scene-style multi-step events:
+- Date activity selection
+- Conversation choices
+- Flirting style choices
+- Budget choices
+- Venue-specific complications
+- Outcome bands: good, awkward, funny, failed
+
+**Design intent:** Dates should feel story-driven; failed dates should still create memorable narrative value.
+
+### E. Gift Memory & Preference Discovery
+Per-NPC gift preference layers:
+- Loved
+- Liked
+- Neutral
+- Disliked
+
+Additional gift systems:
+- Dialogue hints that expose preferences through play
+- Remembered gifts and callbacks in future dialogue
+- Diminishing returns on repeated gifts
+- Milestone gift bonuses
+- Unique story-event gifts
+
+**Design intent:** Gifting becomes personal learning, not one-time optimization.
+
+### F. Town Identity & Location Social Texture
+Locations should behave like recurring places, not static menus:
+- NPC schedules
+- Weekday/weekend differences
+- Venue-specific events
+- Chance encounters
+- Recurring town events
+- Ambient descriptions
+- Location reputation
+
+**Design intent:** Visiting the same place on different days can produce distinct social outcomes.
+
+### G. Social Circles & Reputation Spillover
+Add wider social graph entities and consequences:
+- Friends and acquaintances
+- Introductions via friends
+- Exes
+- Coworkers
+- Neighbors
+- Community-specific social reputation
+- Relationship spillover effects
+
+**Design intent:** Dating outcomes affect the broader social world, not isolated NPC tracks.
+
+### H. NPC Roster Expansion Targets
+- Increase romanceable NPC roster from 5 to **at least 10**.
+- Add non-romance recurring NPCs.
+- Add rivals, friends, coworkers, and neighbors.
+- Add personality variants within broad archetypes.
+
+**Design intent:** Different playthroughs should produce meaningfully different social networks and plausible romantic paths.
+
+### I. Home Identity & Cozy Social Play
+Expand home expression beyond utility optimization:
+- Room themes
+- Style tags
+- NPC reactions to home style
+- Comfort score
+- Hosted dinners
+- Movie nights
+- Cohabitation changes post move-in/marriage
+
+**Design intent:** Home choices communicate identity and influence mood and relationships.
+
+### J. Acceptance Criteria Mapping
+This update set is considered complete when:
+- Routine play supports multiple satisfying days without mandatory dating/stat grind.
+- Every romanceable NPC has a complete chaptered emotional arc.
+- Compatibility can diverge from first-match quality in long-term outcomes.
+- Date events read as scenes with varied emotional outcomes.
+- Gift preferences are discoverable and remembered by NPCs.
+- Locations produce day-variant and event-variant outcomes.
+- Social reputation and circles create spillover between relationships.
+- Expanded NPC roster supports multiple viable romantic trajectories.
+- Home customization affects identity, mood, and relationship expression.
+
+
+### K. Pass 1 (Structure Tightening for Designers)
+To make implementation sequencing clearer, this pass adds explicit ordering guidance without broad architectural rewrites (while allowing targeted reducer/persistence additions needed for new systems):
+
+1. **Routine-first slice**: ship daily planner + low-pressure activities + weekly soft-goal nudges first.
+2. **Narrative backbone slice**: convert all romanceable NPC routes into chaptered progression states.
+3. **Expression slice**: expand date scenes, gifting memory, and home/social identity reactions.
+4. **World depth slice**: add location schedules/events, reputation spillover, and expanded NPC roster.
+
+**Pass 1 completion signal:** A designer can map every deliverable to one of the four slices above and schedule content production with minimal ambiguity.
+
+### L. Pass 2 (Content QA & Replayability Tightening)
+This pass defines content quality checks to prevent shallow implementations:
+
+- **Routine variance check**: at least three distinct day plans (non-dating) can end with neutral-or-better mood and no forced stat grind loop.
+- **Romance chapter check**: each romanceable NPC has at least one unique scene in each chapter stage (first impression through long-term content).
+- **Compatibility divergence check**: at least two high-initial-match NPC routes can branch to lower long-term outcomes for different hidden-trait reasons.
+- **Date tone check**: each major venue supports at least one positive, one awkward/funny, and one failed outcome path that still advances narrative context.
+- **Gift memory check**: NPC dialogue must reference at least one prior meaningful gift in a later interaction window.
+- **Town identity check**: the same location visited on weekday vs weekend produces different social possibilities.
+- **Social spillover check**: at least one relationship event changes reactions from a third-party social circle member.
+- **Home expression check**: at least one NPC response changes based on room style tags/comfort profile.
+
+**Pass 2 completion signal:** two full playthroughs with different partner priorities generate measurably different social outcomes and romance pacing.
