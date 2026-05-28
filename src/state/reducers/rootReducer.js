@@ -147,6 +147,11 @@ export const initialState = {
     courseProgress: 0,
     studentLoans: 0,
   },
+  routineTracker: {
+    day: 1,
+    completedToday: [],
+    weeklyCounts: {},
+  },
   logs: ["Welcome to Life Sim! Start by studying, working out, or looking for a date."],
 };
 

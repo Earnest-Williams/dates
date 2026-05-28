@@ -56,3 +56,27 @@ test('routine reducer ignores non-numeric effect targets', () => {
   assert.deepEqual(updatedStats.credentials, state.stats.credentials);
   assert.equal(updatedNeeds.mood, Math.min(100, state.needs.mood + 1));
 });
+
+test('routine tracker resets weekly counts when crossing week boundary after skipped routine days', () => {
+  const state = cloneState();
+  state.time.day = 9;
+  state.routineTracker = {
+    day: 7,
+    completedToday: ['read_fiction'],
+    weeklyCounts: { read_fiction: 3 },
+  };
+  const next = gameReducer(state, { type: 'DO_ROUTINE', payload: { routineId: 'call_family_friend' } });
+
+  assert.equal(next.routineTracker.day, 9);
+  assert.deepEqual(next.routineTracker.weeklyCounts, { call_family_friend: 1 });
+});
+
+test('routine reducer tolerates partially initialized tracker from older saves', () => {
+  const state = cloneState();
+  state.routineTracker = { day: 1 };
+  const next = gameReducer(state, { type: 'DO_ROUTINE', payload: { routineId: 'read_fiction' } });
+
+  assert.equal(next.routineTracker.day, 1);
+  assert.deepEqual(next.routineTracker.completedToday, ['read_fiction']);
+  assert.equal(next.routineTracker.weeklyCounts.read_fiction, 1);
+});

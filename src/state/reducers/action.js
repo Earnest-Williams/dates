@@ -334,12 +334,27 @@ export const actionReducer = (state, action) => {
       const msgLog = memoryRoll && routine.id === 'call_family_friend'
         ? ' A friend texted right after your call.'
         : '';
-      const logMsg = `${routine.logTemplate || `Completed routine: ${routine.label}.`}${memoryLog}${msgLog}`;
+      const prevTracker = nextState.routineTracker || {};
+      const isNewDay = prevTracker.day !== nextState.time.day;
+      const completedToday = isNewDay ? [routine.id] : [...(prevTracker.completedToday || []), routine.id];
+      const prevDay = prevTracker.day || nextState.time.day;
+      const isNewWeek = Math.floor((nextState.time.day - 1) / 7) > Math.floor((prevDay - 1) / 7);
+      const weeklyCounts = isNewWeek ? {} : { ...(prevTracker.weeklyCounts || {}) };
+      weeklyCounts[routine.id] = (weeklyCounts[routine.id] || 0) + 1;
+      const uniqueTags = new Set();
+      completedToday.forEach((rid) => {
+        const doneRoutine = ROUTINES.find((item) => item.id === rid);
+        (doneRoutine?.tags || []).forEach((tag) => uniqueTags.add(tag));
+      });
+      const balancedBonus = uniqueTags.size >= 5 ? 4 : 0;
+      updatedNeeds.mood = Math.min(100, updatedNeeds.mood + balancedBonus);
+      const logMsg = `${routine.logTemplate || `Completed routine: ${routine.label}.`}${memoryLog}${msgLog}${balancedBonus ? ` Balanced day bonus: +${balancedBonus} Mood.` : ''}`;
 
       return {
         ...nextState,
         stats: updatedStats,
         needs: updatedNeeds,
+        routineTracker: { day: nextState.time.day, completedToday, weeklyCounts },
         logs: [logMsg, ...nextState.logs].slice(0, 20),
       };
     }
