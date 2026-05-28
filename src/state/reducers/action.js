@@ -334,10 +334,12 @@ export const actionReducer = (state, action) => {
       const msgLog = memoryRoll && routine.id === 'call_family_friend'
         ? ' A friend texted right after your call.'
         : '';
-      const prevTracker = nextState.routineTracker || { day: nextState.time.day, completedToday: [], weeklyCounts: {} };
+      const prevTracker = nextState.routineTracker || {};
       const isNewDay = prevTracker.day !== nextState.time.day;
-      const completedToday = isNewDay ? [routine.id] : [...prevTracker.completedToday, routine.id];
-      const weeklyCounts = isNewDay && nextState.time.day % 7 === 1 ? {} : { ...prevTracker.weeklyCounts };
+      const completedToday = isNewDay ? [routine.id] : [...(prevTracker.completedToday || []), routine.id];
+      const prevDay = prevTracker.day || nextState.time.day;
+      const isNewWeek = Math.floor((nextState.time.day - 1) / 7) > Math.floor((prevDay - 1) / 7);
+      const weeklyCounts = isNewWeek ? {} : { ...(prevTracker.weeklyCounts || {}) };
       weeklyCounts[routine.id] = (weeklyCounts[routine.id] || 0) + 1;
       const uniqueTags = new Set();
       completedToday.forEach((rid) => {

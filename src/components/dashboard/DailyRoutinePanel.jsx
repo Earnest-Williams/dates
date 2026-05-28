@@ -2,10 +2,10 @@ import { ROUTINES, getRoutineTimeBucket, isRoutineAvailable } from '../../data/r
 
 const DailyRoutinePanel = ({ gameState, doRoutine }) => {
   const timeBucket = getRoutineTimeBucket(gameState.time.hour);
-  const tracker = gameState.routineTracker || { completedToday: [], weeklyCounts: {} };
+  const tracker = gameState.routineTracker || {};
   const available = ROUTINES.filter((routine) => isRoutineAvailable(routine, gameState));
   const filtered = available.slice(0, 6);
-  const weeklyGoalProgress = Object.values(tracker.weeklyCounts).reduce((sum, n) => sum + n, 0);
+  const weeklyGoalProgress = Object.values(tracker.weeklyCounts || {}).reduce((sum, n) => sum + n, 0);
 
   return (
     <div className="bento-card routine">
@@ -25,7 +25,7 @@ const DailyRoutinePanel = ({ gameState, doRoutine }) => {
         )}
       </div>
       <p style={{ opacity: 0.75, marginTop: 8 }}>
-        Completed today: {tracker.completedToday.length} • Mix reading, cooking, errands, calls, and self-care for mood bonuses.
+        Completed today: {(tracker.completedToday || []).length} • Mix reading, cooking, errands, calls, and self-care for mood bonuses.
       </p>
     </div>
   );
