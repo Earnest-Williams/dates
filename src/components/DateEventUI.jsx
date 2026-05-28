@@ -33,7 +33,7 @@ const DateEventUI = () => {
   const location = LOCATIONS[template.venueKey] || LOCATIONS[activeDateEvent.locationKey];
   const currentPhase = template.phases[currentPhaseIndex];
 
-  if (!npc || !currentPhase) return null;
+  if (!npc || !currentPhase || !location) return null;
 
   const appendUnique = (items, value) => {
     if (!value || items.includes(value)) return items;

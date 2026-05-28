@@ -35,9 +35,11 @@ const updateRelationshipMemory = (state, npcId, updates = {}) => {
     ...(state.relationshipMemory?.[npcId] || {})
   };
   const nextMemory = {
-    rememberedChoices: updates.rememberedChoice
-      ? addUnique(currentMemory.rememberedChoices, updates.rememberedChoice)
-      : currentMemory.rememberedChoices,
+    rememberedChoices: updates.rememberedChoices
+      ? updates.rememberedChoices.reduce((items, v) => addUnique(items, v), currentMemory.rememberedChoices)
+      : updates.rememberedChoice
+        ? addUnique(currentMemory.rememberedChoices, updates.rememberedChoice)
+        : currentMemory.rememberedChoices,
     sharedActivities: updates.sharedActivities
       ? updates.sharedActivities.reduce(
         (items, value) => addUnique(items, value),
@@ -53,9 +55,11 @@ const updateRelationshipMemory = (state, npcId, updates = {}) => {
     importantMoments: updates.importantMoment
       ? addUnique(currentMemory.importantMoments, updates.importantMoment)
       : currentMemory.importantMoments,
-    comfortKnown: updates.comfortKnown
-      ? addUnique(currentMemory.comfortKnown, updates.comfortKnown)
-      : currentMemory.comfortKnown,
+    comfortKnown: updates.comfortKnowns
+      ? updates.comfortKnowns.reduce((items, v) => addUnique(items, v), currentMemory.comfortKnown)
+      : updates.comfortKnown
+        ? addUnique(currentMemory.comfortKnown, updates.comfortKnown)
+        : currentMemory.comfortKnown,
     lastMeaningfulInteractionDay: updates.lastMeaningfulInteractionDay
       ?? currentMemory.lastMeaningfulInteractionDay
   };
@@ -339,7 +343,7 @@ export const socialReducer = (state, action) => {
       let relGain;
       let chemChange;
       
-      const qualityScore = clamp(Math.round((finalVibe + connectionScore) / 2));
+      const qualityScore = finalVibe;
 
       if (qualityScore >= 80) {
         relGain = 20;
@@ -398,13 +402,16 @@ export const socialReducer = (state, action) => {
             `date_${state.activeDateEvent.locationKey}`,
             ...(dateType ? [`date_${dateType}`] : [])
           ],
-          rememberedChoice: dateOutcome.memories?.[0] || null,
+          rememberedChoices: dateOutcome.memories || [],
           importantMoment: qualityScore >= 80 || finalVibe >= 80
             ? 'memorable_date'
             : dateOutcome.repairScene || dateOutcome.conflict || null,
-          comfortKnown: dateOutcome.discoveries?.[0] || (qualityScore >= 30 ? 'learned_from_mediocre_date' : null),
+          comfortKnowns: [
+            ...(dateOutcome.discoveries || []),
+            ...(qualityScore >= 30 ? ['learned_from_mediocre_date'] : [])
+          ],
           promises: {
-            ...(dateOutcome.callbacks?.[0] ? { [dateOutcome.callbacks[0]]: 'pending' } : {}),
+            ...Object.fromEntries((dateOutcome.callbacks || []).map((cb) => [cb, 'pending'])),
             ...(dateOutcome.repairScene ? { [dateOutcome.repairScene]: 'pending' } : {})
           },
           lastMeaningfulInteractionDay: nextState.time.day

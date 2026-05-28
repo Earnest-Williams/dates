@@ -246,7 +246,9 @@ const DialogueUI = ({ npcId, onClose }) => {
             <div className="selection-grid">
               {(NPC_DATE_PREFERENCES[npcId] || ['coffee_date', 'park_walk']).map((dateType) => {
                 const template = DATE_TEMPLATES[dateType];
+                if (!template) return null;
                 const loc = LOCATIONS[template.venueKey];
+                if (!loc) return null;
                 const isGated = loc.gated && !gameState.properties.vehicles.includes('sports_car') && stats.style < loc.reqStyle;
                 return (
                   <button key={dateType} className="btn-mini btn-select-item" onClick={() => handleDate(dateType)} disabled={isGated}>
