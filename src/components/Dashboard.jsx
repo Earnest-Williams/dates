@@ -1,7 +1,5 @@
+import React from 'react';
 import { useGameStore } from '../state/store';
-import { ITEMS } from '../state/ItemDatabase';
-import { HOUSING_TIERS } from '../data/housing';
-import { calculateWorkSalary } from '../sim/economy';
 import { abilities } from '../data/abilities';
 import DashboardHeader from './dashboard/DashboardHeader';
 import NeedsPanel from './dashboard/NeedsPanel';
@@ -18,16 +16,11 @@ const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) =
     sleep, 
     eat, 
     shower, 
-    payBills, 
-    upgradeHousing,
-    placeFurniture,
-    storeFurniture,
-    sellAsset,
     useAbility,
     doRoutine
   } = useGameStore();
 
-  const { day } = gameState.time;
+
   const { healthLow, healthCritical, moodDepressed, moodHigh, energy, hunger } = gameState.needs;
   const { money } = gameState.stats;
   const { utilitiesActive } = gameState.living;
@@ -49,7 +42,6 @@ const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) =
   // Energy costs
   const studyEnergyCost = 15;
   const workoutEnergyCost = 20;
-  const workEnergyCost = 35;
 
   const homeSettlements = { 0: 'Endleigh', 1: 'Bramblewick', 2: 'Stagborough', 3: 'Brockleigh' };
   const homeSettlement = homeSettlements[gameState.stats.housingTier] || 'Endleigh';
@@ -86,7 +78,7 @@ const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) =
         <DailyRoutinePanel gameState={gameState} doRoutine={doRoutine} />
 
         {/* Active Perks & Traits */}
-        <div className="bento-card perks-panel">
+        <div className="bento-card perks-panel perks">
           <h2 className="section-title">Active Perks & Traits</h2>
           <div className="perks-grid">
             {activeTraits?.map(trait => (
@@ -212,6 +204,7 @@ const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) =
            return (
              <React.Fragment key={ability.id}>
                <div className="dock-divider"></div>
+               {/* eslint-disable-next-line react-hooks/rules-of-hooks */}
                <button className="dock-btn" onClick={() => useAbility(ability.id)} disabled={energy < ability.energyCost}>
                  <span className="dock-icon">✨</span>
                  <span className="dock-label" style={{ color: 'var(--neon-pink)' }}>{ability.name}</span>

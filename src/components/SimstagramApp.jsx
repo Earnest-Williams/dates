@@ -1,11 +1,10 @@
-import React from 'react';
 import { useGameStore } from '../state/store';
 import { SOCIAL_MEDIA_CONTENT, SPONSORSHIP_TIERS } from '../data/socialMedia';
 import './SimstagramApp.css';
 
 export default function SimstagramApp({ onClose }) {
   const { gameState, postSimstagram } = useGameStore();
-  const { simstagram, stats, needs } = gameState;
+  const { simstagram, needs } = gameState;
 
   return (
     <div className="simstagram-app">

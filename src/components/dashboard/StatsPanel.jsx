@@ -13,7 +13,7 @@ const StatsPanel = () => {
 
   return (
     <>
-      <div className="bento-card core-stats">
+      <div className="bento-card core-stats core">
         <h2 className="section-title">Core Stats</h2>
         <div className="stats-list">
           <StatBar label="Fitness" value={fitness || 10} color="#ef4444" />
@@ -23,7 +23,7 @@ const StatsPanel = () => {
         </div>
       </div>
 
-      <div className="bento-card career-skills">
+      <div className="bento-card career-skills prof">
         <h2 className="section-title">Career Skills</h2>
         <div className="stats-list">
           <StatBar label="Corporate" value={corporate || 10} color="#64748b" />

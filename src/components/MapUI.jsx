@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useGameStore } from '../state/store';
 import { ITEMS } from '../state/ItemDatabase';
+import { HOUSING_TIERS } from '../data/housing';
 import { NPCS } from '../state/NpcDatabase';
 import { courses } from '../data/education';
 import { 
   SETTLEMENTS, 
   ROADS, 
   calculateTravelStats, 
-  computeSettlementMetrics, 
-  VEHICLE_PROFILES 
+  computeSettlementMetrics 
 } from '../data/geography';
 import './MapUI.css';
 
@@ -24,7 +24,7 @@ const MapUI = ({ onClose, onTalkNpc }) => {
     workOnProject
   } = useGameStore();
 
-  const { activeLocation, stats, properties, matches, education } = gameState;
+  const { activeLocation, stats, properties, matches, education, placedFurniture } = gameState;
 
   // Helper to check housing location
   const getHomeSettlement = (tier) => {
@@ -49,7 +49,8 @@ const MapUI = ({ onClose, onTalkNpc }) => {
     if (saved) {
       try {
         return JSON.parse(saved);
-      } catch (e) {
+      } catch (error) {
+        console.error("Failed to load pins:", error);
         return defaultPins;
       }
     }
@@ -58,6 +59,7 @@ const MapUI = ({ onClose, onTalkNpc }) => {
 
   // Keep home pin's settlementKey synchronized dynamically with housing tier moves
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPinnedLocations(prev => {
       let changed = false;
       const updated = prev.map(pin => {

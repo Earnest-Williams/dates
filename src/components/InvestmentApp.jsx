@@ -71,18 +71,7 @@ const InvestmentApp = ({ onClose }) => {
     );
   };
 
-  const getTrendAdvice = (assetId) => {
-    const history = priceHistories[assetId] || [];
-    if (history.length < 3) return "Stable";
-    const cur = history[history.length - 1];
-    const prev = history[history.length - 2];
-    const prevPrev = history[history.length - 3];
-    const changeSum = (cur - prev) + (prev - prevPrev);
 
-    if (changeSum > 0.05 * cur) return "Bullish Trend 📈";
-    if (changeSum < -0.05 * cur) return "Bearish Trend 📉";
-    return "Stable ➖";
-  };
 
   const holdingsValue = calculatePortfolioValue();
   const totalWealth = money + holdingsValue;
@@ -133,8 +122,6 @@ const InvestmentApp = ({ onClose }) => {
 
           const canBuy = money >= tradeCost;
           const canSell = owned >= qty;
-
-          const trendAdvice = finance >= 30 ? getTrendAdvice(assetId) : null;
 
           return (
             <div key={assetId} className="asset-row">

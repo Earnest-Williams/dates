@@ -424,7 +424,7 @@ export const VEHICLE_PROFILES = {
   sports_car: { id: "sports_car", name: "Luxury Sports Car", speed: 95, energy_per_km: 0.04 }
 };
 
-export const calculateEdgeCost = (road, profile = 'normal_travel', state = {}) => {
+export const calculateEdgeCost = (road, profile = 'normal_travel') => {
   // Check if passable for profile
   let isPassable = true;
   

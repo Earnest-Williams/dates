@@ -327,7 +327,7 @@ export const socialReducer = (state, action) => {
     case 'RESOLVE_DATE_EVENT': {
       const { finalVibe, logText, dateOutcome = {} } = action.payload;
       if (!state.activeDateEvent) return state;
-      const { npcId, dateType, connectionScore = finalVibe } = state.activeDateEvent;
+      const { npcId, dateType } = state.activeDateEvent;
       const npc = NPCS.find(n => n.id === npcId);
       if (!npc) return state;
       const npcCompatibility = state.compatibility?.npcTraits?.[npcId] || generateCompatibilityTraits(npcId);

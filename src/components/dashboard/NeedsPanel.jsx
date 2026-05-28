@@ -8,8 +8,8 @@ const NeedsPanel = () => {
 
   return (
     <div className="bento-card needs">
-      <h2 className="section-title">Current Needs</h2>
-      <div className="needs-rings">
+      <h2 className="section-title">Needs</h2>
+      <div className="needs-rings-container">
         <NeedRing label="Energy" value={energy} color="#f1c40f" />
         <NeedRing label="Hunger" value={hunger} displayValue={Math.round(100 - hunger)} displayInverse color="#e67e22" />
         <NeedRing label="Hygiene" value={hygiene} color="#3498db" />

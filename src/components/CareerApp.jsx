@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useGameStore } from '../state/store';
 import { getProjectsForTrackAndTier, CAREER_TRACKS } from '../data/projects';
 import { gigs, sideHustles } from '../data/gigs';

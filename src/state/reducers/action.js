@@ -1,10 +1,9 @@
 import { HOUSING_TIERS } from '../../data/housing.js';
-import { LOCATIONS } from '../../data/locations.js';
 import { getSleepMultiplier } from '../../sim/needs.js';
 import { getGroceriesCost } from '../../sim/economy.js';
 import { calculateTravelStats, SETTLEMENTS } from '../../data/geography.js';
 import { simulateTicks } from './time.js';
-import { WORK_EVENTS, getCurrentCareer } from '../../data/careers.js';
+import { WORK_EVENTS } from '../../data/careers.js';
 import { courses } from '../../data/education.js';
 import { abilities } from '../../data/abilities.js';
 import { ROUTINES } from '../../data/routines.js';
@@ -149,7 +148,6 @@ export const actionReducer = (state, action) => {
       const choice = event.choices[optionIndex];
 
       const success = state.stats[choice.checkStat] >= choice.threshold;
-      let relGain = success ? choice.successRelation : choice.failRelation;
       const logText = success ? choice.successText : choice.failText;
 
       const bonusMoney = success ? choice.bonusMoney : 0;
@@ -572,10 +570,7 @@ export const actionReducer = (state, action) => {
       nextState.needs.energy = Math.max(0, nextState.needs.energy - ability.energyCost);
       
       let logMsg = `Used ability: ${ability.name}.`;
-      let isRiskTriggered = false;
-
       if (ability.riskChance && Math.random() < ability.riskChance) {
-        isRiskTriggered = true;
         logMsg = `Ability failed! ${ability.name} triggered a penalty.`;
         if (ability.effectType === 'money') {
            nextState.stats.money = Math.max(0, nextState.stats.money - ability.riskPenalty);

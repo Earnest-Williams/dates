@@ -1,4 +1,3 @@
-import React from 'react';
 import { useGameStore } from '../state/store';
 import { calculateTraits, TRAITS } from '../data/traits';
 import './ChildhoodRaising.css';
@@ -58,7 +57,7 @@ const PARENTING_STEPS = [
 
 const ChildhoodRaising = () => {
   const { gameState, selectParentingChoice, reduceChildStress, beginLegacy } = useGameStore();
-  const { money: parentMoney, energy: parentEnergy } = gameState.stats;
+  const { money: parentMoney } = gameState.stats;
   const childName = gameState.family.childName || 'Heir';
   const { currentStep: step, heirStats, stress } = gameState.parentingGame;
 
