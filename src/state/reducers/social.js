@@ -263,8 +263,10 @@ export const socialReducer = (state, action) => {
 
     case 'RESOLVE_DATE_EVENT': {
       const { finalVibe, logText } = action.payload;
+      if (!state.activeDateEvent) return state;
       const { npcId } = state.activeDateEvent;
       const npc = NPCS.find(n => n.id === npcId);
+      if (!npc) return state;
       const npcCompatibility = state.compatibility?.npcTraits?.[npcId] || generateCompatibilityTraits(npcId);
       const playerCompatibility = inferPlayerCompatibilityTraits(state.stats, state.compatibility?.playerTraits);
       const compatibilityScore = calculateCompatibilityScore(playerCompatibility, npcCompatibility);
@@ -407,8 +409,14 @@ export const socialReducer = (state, action) => {
     case 'ASK_TO_MOVE_IN': {
       const { npcId } = action.payload;
       const npc = NPCS.find(n => n.id === npcId);
+      if (!npc) return state;
       const matchData = state.matches[npcId] || {};
-      const fitLabel = getCompatibilityBand(matchData.compatibilityScore || 0);
+      const npcCompatibility = state.compatibility?.npcTraits?.[npcId] || generateCompatibilityTraits(npcId);
+      const playerCompatibility = inferPlayerCompatibilityTraits(state.stats, state.compatibility?.playerTraits);
+      const score = matchData.compatibilityScore !== undefined
+        ? matchData.compatibilityScore
+        : calculateCompatibilityScore(playerCompatibility, npcCompatibility);
+      const fitLabel = getCompatibilityBand(score);
       const moveInBonus = fitLabel === 'strong' ? 5 : fitLabel === 'fragile' ? -5 : 0;
       const adjustedRelationship = applyRelationshipCap(matchData.relationship || 10, moveInBonus, matchData.storyTier || 0, state.stats);
       const logMsg = `🏠 ${npc.name.toUpperCase()} moved in with you! (${fitLabel} cohab fit)`;
@@ -432,8 +440,14 @@ export const socialReducer = (state, action) => {
     case 'PROPOSE_MARRIAGE': {
       const { npcId } = action.payload;
       const npc = NPCS.find(n => n.id === npcId);
+      if (!npc) return state;
       const matchData = state.matches[npcId] || {};
-      const readiness = (matchData.relationship || 0) + ((matchData.compatibilityScore || 0) * 0.4);
+      const npcCompatibility = state.compatibility?.npcTraits?.[npcId] || generateCompatibilityTraits(npcId);
+      const playerCompatibility = inferPlayerCompatibilityTraits(state.stats, state.compatibility?.playerTraits);
+      const score = matchData.compatibilityScore !== undefined
+        ? matchData.compatibilityScore
+        : calculateCompatibilityScore(playerCompatibility, npcCompatibility);
+      const readiness = (matchData.relationship || 0) + (score * 0.4);
       if (readiness < 85) {
         return {
           ...state,

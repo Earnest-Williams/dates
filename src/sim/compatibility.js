@@ -38,7 +38,8 @@ export const generateCompatibilityTraits = (seed) => {
     emotionalOpenness: ['slow_burn', 'open_book', 'guarded'],
   };
 
-  const suffix = [...seed].reduce((total, char) => total + char.charCodeAt(0), 0);
+  const safeSeed = typeof seed === 'string' ? seed : String(seed || '');
+  const suffix = [...safeSeed].reduce((total, char) => total + char.charCodeAt(0), 0);
   const traits = {};
 
   COMPATIBILITY_TRAIT_KEYS.forEach((key, index) => {
@@ -49,7 +50,7 @@ export const generateCompatibilityTraits = (seed) => {
   return traits;
 };
 
-export const inferPlayerCompatibilityTraits = (stats, currentTraits = DEFAULT_PLAYER_TRAITS) => {
+export const inferPlayerCompatibilityTraits = (stats = {}, currentTraits = DEFAULT_PLAYER_TRAITS) => {
   const nextTraits = { ...currentTraits };
 
   Object.entries(PLAYER_TRAIT_INFERENCE_MAP).forEach(([statKey, inferredTraits]) => {
