@@ -1,6 +1,7 @@
 import { checkActionFeasibility } from '../selectors.js';
 import { getGroceriesCost } from '../../sim/economy.js';
 import { calculateTravelStats, SETTLEMENTS } from '../../data/geography.js';
+import { ROUTINES, isRoutineAvailable } from '../../data/routines.js';
 
 export const performAction = (
   state,
@@ -112,5 +113,22 @@ export const travelToLocation = (state, dispatch, locationKey) => {
 
 export const resolveWorkEvent = (state, dispatch, optionIndex) => {
   dispatch({ type: 'RESOLVE_WORK_EVENT', payload: { optionIndex } });
+  return true;
+};
+
+
+export const doRoutine = (state, dispatch, routineId) => {
+  const routine = ROUTINES.find((item) => item.id === routineId);
+  if (!routine) {
+    dispatch({ type: 'ADD_LOG', payload: { message: 'Routine not found.' } });
+    return false;
+  }
+
+  if (!isRoutineAvailable(routine, state)) {
+    dispatch({ type: 'ADD_LOG', payload: { message: `Cannot do "${routine.label}" right now.` } });
+    return false;
+  }
+
+  dispatch({ type: 'DO_ROUTINE', payload: { routineId } });
   return true;
 };

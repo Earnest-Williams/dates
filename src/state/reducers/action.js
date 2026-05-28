@@ -7,6 +7,26 @@ import { simulateTicks } from './time.js';
 import { WORK_EVENTS, getCurrentCareer } from '../../data/careers.js';
 import { courses } from '../../data/education.js';
 import { abilities } from '../../data/abilities.js';
+import { ROUTINES } from '../../data/routines.js';
+
+const clampRoutineValue = (value) => Math.min(100, Math.max(0, value));
+
+export const applyRoutineEffects = (nextState, routine) => {
+  const updatedStats = { ...nextState.stats };
+  const updatedNeeds = { ...nextState.needs };
+
+  Object.entries(routine.effects || {}).forEach(([key, value]) => {
+    if (typeof updatedNeeds[key] === 'number') {
+      updatedNeeds[key] = clampRoutineValue(updatedNeeds[key] + value);
+    } else if (typeof updatedStats[key] === 'number') {
+      updatedStats[key] = clampRoutineValue(updatedStats[key] + value);
+    }
+  });
+
+  updatedNeeds.energy = Math.max(0, updatedNeeds.energy - (routine.energyCost || 0));
+
+  return { updatedStats, updatedNeeds };
+};
 
 export const actionReducer = (state, action) => {
   switch (action.type) {
@@ -297,6 +317,30 @@ export const actionReducer = (state, action) => {
           hasHealthInsurance: newStatus
         },
         logs: [logMsg, ...state.logs].slice(0, 20)
+      };
+    }
+
+
+    case 'DO_ROUTINE': {
+      const { routineId } = action.payload;
+      const routine = ROUTINES.find((item) => item.id === routineId);
+      if (!routine) return state;
+
+      const nextState = simulateTicks(state, routine.durationTicks);
+      const { updatedStats, updatedNeeds } = applyRoutineEffects(nextState, routine);
+
+      const memoryRoll = routine.memoryChance && Math.random() < routine.memoryChance;
+      const memoryLog = memoryRoll ? ' A memory of someone close surfaced.' : '';
+      const msgLog = memoryRoll && routine.id === 'call_family_friend'
+        ? ' A friend texted right after your call.'
+        : '';
+      const logMsg = `${routine.logTemplate || `Completed routine: ${routine.label}.`}${memoryLog}${msgLog}`;
+
+      return {
+        ...nextState,
+        stats: updatedStats,
+        needs: updatedNeeds,
+        logs: [logMsg, ...nextState.logs].slice(0, 20),
       };
     }
 

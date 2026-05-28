@@ -46,7 +46,7 @@
   grid-template-areas:
     "needs needs core prof"
     "needs needs lifestyle social"
-    "housing furniture furniture lineage"
+    "housing furniture routine lineage"
     "logs logs logs logs";
 }
 
@@ -58,7 +58,7 @@
       "core prof"
       "lifestyle social"
       "housing lineage"
-      "furniture furniture"
+      "furniture routine"
       "logs logs";
   }
 }
@@ -74,6 +74,7 @@
       "social"
       "housing"
       "furniture"
+      "routine"
       "lineage"
       "logs";
   }
@@ -635,3 +636,8 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
+
+.bento-card.routine { grid-area: routine; }
+.routine-list { display: flex; flex-direction: column; gap: 0.6rem; }
+.routine-btn { text-align: left; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: var(--text-primary); border-radius: 10px; padding: 0.7rem; }
+.routine-btn:hover { border-color: var(--accent-pink); }

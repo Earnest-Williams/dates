@@ -202,6 +202,7 @@ export const gameReducer = (state, action) => {
     case 'WATCH_TV':
     case 'VISIT_HOSPITAL':
     case 'TRAVEL':
+    case 'DO_ROUTINE':
       return actionReducer(state, action);
 
     case 'ADD_LOG': {
