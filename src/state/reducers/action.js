@@ -9,6 +9,25 @@ import { courses } from '../../data/education.js';
 import { abilities } from '../../data/abilities.js';
 import { ROUTINES } from '../../data/routines.js';
 
+const clampRoutineValue = (value) => Math.min(100, Math.max(0, value));
+
+export const applyRoutineEffects = (nextState, routine) => {
+  const updatedStats = { ...nextState.stats };
+  const updatedNeeds = { ...nextState.needs };
+
+  Object.entries(routine.effects || {}).forEach(([key, value]) => {
+    if (typeof updatedNeeds[key] === 'number') {
+      updatedNeeds[key] = clampRoutineValue(updatedNeeds[key] + value);
+    } else if (typeof updatedStats[key] === 'number') {
+      updatedStats[key] = clampRoutineValue(updatedStats[key] + value);
+    }
+  });
+
+  updatedNeeds.energy = Math.max(0, updatedNeeds.energy - (routine.energyCost || 0));
+
+  return { updatedStats, updatedNeeds };
+};
+
 export const actionReducer = (state, action) => {
   switch (action.type) {
     case 'PERFORM_ACTION': {
@@ -308,18 +327,7 @@ export const actionReducer = (state, action) => {
       if (!routine) return state;
 
       const nextState = simulateTicks(state, routine.durationTicks);
-      const updatedStats = { ...nextState.stats };
-      const updatedNeeds = { ...nextState.needs };
-
-      Object.entries(routine.effects || {}).forEach(([key, value]) => {
-        if (typeof updatedNeeds[key] === 'number') {
-          updatedNeeds[key] = Math.min(100, Math.max(0, updatedNeeds[key] + value));
-        } else if (typeof updatedStats[key] === 'number') {
-          updatedStats[key] = Math.min(100, Math.max(0, updatedStats[key] + value));
-        }
-      });
-
-      updatedNeeds.energy = Math.max(0, updatedNeeds.energy - (routine.energyCost || 0));
+      const { updatedStats, updatedNeeds } = applyRoutineEffects(nextState, routine);
 
       const memoryRoll = routine.memoryChance && Math.random() < routine.memoryChance;
       const memoryLog = memoryRoll ? ' A memory of someone close surfaced.' : '';

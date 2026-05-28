@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { ROUTINES, isRoutineAvailable } from '../src/data/routines.js';
+import { applyRoutineEffects } from '../src/state/reducers/action.js';
 import { initialState, gameReducer } from '../src/state/reducers/rootReducer.js';
 
 const cloneState = () => structuredClone(initialState);
@@ -47,24 +48,11 @@ test('routine availability tolerates partially initialized state', () => {
 
 test('routine reducer ignores non-numeric effect targets', () => {
   const state = cloneState();
-  state.needs.energy = 100;
-
-  ROUTINES.push({
-    id: 'test_non_numeric_routine',
-    label: 'Test Routine',
-    durationTicks: 0,
-    energyCost: 0,
+  const { updatedStats, updatedNeeds } = applyRoutineEffects(state, {
     effects: { credentials: 5, mood: 1 },
-    tags: [],
-    allowedTimes: ['morning', 'afternoon', 'evening'],
-    location: 'any',
+    energyCost: 0,
   });
 
-  try {
-    const next = gameReducer(state, { type: 'DO_ROUTINE', payload: { routineId: 'test_non_numeric_routine' } });
-    assert.deepEqual(next.stats.credentials, state.stats.credentials);
-    assert.equal(next.needs.mood, Math.min(100, state.needs.mood + 1));
-  } finally {
-    ROUTINES.pop();
-  }
+  assert.deepEqual(updatedStats.credentials, state.stats.credentials);
+  assert.equal(updatedNeeds.mood, Math.min(100, state.needs.mood + 1));
 });
