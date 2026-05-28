@@ -48,8 +48,8 @@ You begin your journey in **Generation 1** as **Alex**, renting a basic Studio A
 
 ### 4. Dating, Matching, & Relationship Memory
 * **Swipe App**: Swipe on NPCs like **Elena** (Scholar), **Brad** (Gym Rat), **Sophia** (Socialite), **Marcus** (Executive), and **Chloe** (Artist). Matching chance depends on your Style, Charm, and how well you meet their archetype stat requirements.
-* **Socializing**: Build relationships through shared time, conversations, meaningful choices, remembered context, compatibility, routines, conflict/repair, emotional support, and long-term follow-through. Items may appear in specific story moments, but relationships are not advanced through repeatable item use.
-* **Relationship Memory Rule**: dates intentionally does not include a typical visual-novel gift-giving system. Relationship progress should come from shared time, meaningful choices, remembered context, compatibility, dates, routines, conflict/repair, and long-term follow-through. Items may appear as contextual story props, but they must not function as repeatable affection currency.
+* **Socializing**: Build relationships through shared time, conversations, meaningful choices, remembered context, compatibility, routines, conflict/repair, emotional support, and long-term follow-through.
+* **Relationship Memory Rule**: **Life Sim** intentionally does not include a typical visual-novel gift-giving system. Items may appear as contextual story props in specific moments, but they must not function as repeatable affection currency or advance relationships.
 * **Dates**: Meet NPCs at locations. Shared time, compatibility, conversation tone, and remembered follow-through shape relationship and mood outcomes.
 
 ### 5. Marriage & Generational Legacy Shift
@@ -141,4 +141,3 @@ npm run lint
 * Keep romance progression grounded in shared time, meaningful choices, remembered context, compatibility, dates, routines, conflict/repair, and long-term follow-through.
 * Do not add custom gift-giving as a core loop, NPC gift preference lists, archetype item bonuses, gift multipliers, repeatable item-based relationship gains, or shopping paths for romance progress.
 * Contextual items can appear as one-off story props only when an authored scene calls for them.
-

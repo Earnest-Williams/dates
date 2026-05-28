@@ -2,7 +2,7 @@
 
 ## Relationship progression rule
 
-dates intentionally does not include a typical visual-novel gift-giving system. Relationship progress should come from shared time, meaningful choices, remembered context, compatibility, dates, routines, conflict/repair, and long-term follow-through. Items may appear as contextual story props, but they must not function as repeatable affection currency.
+**Life Sim** intentionally does not include a typical visual-novel gift-giving system. Relationship progress should come from shared time, meaningful choices, remembered context, compatibility, dates, routines, conflict/repair, and long-term follow-through. Items may appear as contextual story props, but they must not function as repeatable affection currency.
 
 Do not author NPC loved/liked/disliked gift tables, archetype item bonuses, gift multipliers, repeatable gift penalties, gift farming loops, or “give X to NPC for +relationship” content.
 

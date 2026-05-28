@@ -27,4 +27,4 @@ START_PROJECT, WORK_ON_PROJECT, RESOLVE_WORK_EVENT, ENROLL_COURSE, STUDY_COURSE,
 - Inventory can be validated via `npm run audit:actions`.
 
 ## Relationship memory rule
-dates intentionally does not include a typical visual-novel gift-giving system. Relationship progress should come from shared time, meaningful choices, remembered context, compatibility, dates, routines, conflict/repair, and long-term follow-through. Items may appear as contextual story props, but they must not function as repeatable affection currency.
+**Life Sim** intentionally does not include a typical visual-novel gift-giving system. Relationship progress should come from shared time, meaningful choices, remembered context, compatibility, dates, routines, conflict/repair, and long-term follow-through. Items may appear as contextual story props, but they must not function as repeatable affection currency.
