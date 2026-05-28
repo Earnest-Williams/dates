@@ -407,10 +407,10 @@ This update set is considered complete when:
 - Every romanceable NPC has a complete chaptered emotional arc.
 - Compatibility can diverge from first-match quality in long-term outcomes.
 - Date events read as scenes with varied emotional outcomes.
-- Gift preferences are discoverable and remembered by NPCs.
+- Contextual relationship memories are discoverable and remembered by NPCs; there are no loved/liked/disliked gift tables or gift-based route shortcuts.
 - Locations produce day-variant and event-variant outcomes.
 - Social reputation and circles create spillover between relationships.
-- Expanded NPC roster supports multiple viable romantic trajectories.
+- Existing core NPCs meet the depth pass before any further roster expansion supports additional romantic trajectories.
 - Home customization affects identity, mood, and relationship expression.
 
 
@@ -437,3 +437,13 @@ This pass defines content quality checks to prevent shallow implementations:
 - **Home expression check**: at least one NPC response changes based on room style tags/comfort profile.
 
 **Pass 2 completion signal:** two full playthroughs with different partner priorities generate measurably different social outcomes and romance pacing.
+
+### M. Pass 3 (Relationship Repair and Existing Cast Depth)
+
+The current core cast must demonstrate emotional resilience before more roster expansion. Each of Elena, Brad, Sophia, Marcus, and Chloe requires six romance chapters, hidden compatibility traits, relationship memories, two preferred non-gift date types, one conflict event, one repair event, one home reaction, one location-based encounter, one long-term relationship scene, one legacy/family reaction, and at least three callbacks to earlier player choices.
+
+Conflict triggers may include ignored messages, incompatible choices, low mood, jealousy or social reputation, missed planned dates, poor date endings, ambition mismatch, home/lifestyle mismatch, broken promises, and repeated inattentive dialogue. Conflict should pause, complicate, or branch the route rather than hard-failing it immediately.
+
+Repair actions include apology, giving space, following through on a previous promise, choosing a thoughtful activity, revisiting a meaningful location, asking a friend for advice, writing a message, helping with a specific problem, and spending quiet time together. Repair success depends on memories, compatibility, timing, and prior behavior rather than raw stats or purchased items.
+
+No standard gift system should be introduced: no loved gifts, liked gifts, disliked gifts, repeatable gifts, gift farming, archetype gift bonuses, gift guide logic, affection items, or gift-based route progression. Contextual props are allowed only inside specific authored scenes and cannot become universal repair currency.

@@ -99,7 +99,7 @@ const ROMANCE_ARCS = {
 };
 
 
-export const NPCS = [
+const BASE_NPCS = [
   {
     id: "elena",
     name: "Elena",
@@ -317,3 +317,393 @@ export const NPCS = [
     }
   }
 ];
+
+export const CORE_NPC_IDS = ["elena", "brad", "sophia", "marcus", "chloe"];
+
+export const RELATIONSHIP_CONFLICT_TRIGGERS = [
+  "ignored_messages",
+  "incompatible_choices",
+  "low_mood",
+  "jealousy_social_reputation",
+  "missed_planned_date",
+  "poor_date_ending",
+  "ambition_mismatch",
+  "home_lifestyle_mismatch",
+  "broken_promises",
+  "repeated_inattentive_dialogue",
+];
+
+export const RELATIONSHIP_REPAIR_ACTIONS = [
+  "apologize",
+  "give_space",
+  "follow_through_on_previous_promise",
+  "choose_thoughtful_activity",
+  "revisit_meaningful_location",
+  "ask_friend_for_advice",
+  "write_message",
+  "help_with_specific_problem",
+  "spend_quiet_time_together",
+];
+
+const CORE_RELATIONSHIP_CONTENT = {
+  elena: {
+    hiddenCompatibilityTraits: {
+      ambitionLevel: "high_and_structured",
+      affectionStyle: "careful_words_and_reliable_presence",
+      conflictStyle: "withdraws_until_safe",
+      socialPreference: "quiet_intellectual_spaces",
+      familyOrientation: "chosen_family_with_academic_mentors",
+      spendingStyle: "practical_books_and_savings",
+      emotionalOpenness: "guarded_then_deep",
+      longTermGoals: "research_fellowship_with_shared_rituals",
+    },
+    relationshipMemories: [
+      "elena_knows_player_reads",
+      "elena_allows_soft_structure",
+      "elena_shared_waitlist",
+      "elena_trusts_player_under_stress",
+      "elena_presentation_anchor",
+      "elena_chosen_partnership",
+    ],
+    preferredDateTypes: ["library_date", "quiet_evening_in"],
+    conflictEvent: {
+      id: "elena_missed_deadline_dinner",
+      trigger: "missed_planned_date",
+      title: "The Dinner That Became a Footnote",
+      routeImpact: "relationship pauses until the player acknowledges the broken plan",
+      doesNotHardFailRoute: true,
+      setup: "A planned dinner is ignored while Elena spirals over fellowship edits, and a second inattentive reply makes her pull back.",
+      memoriesChecked: ["elena_assigns_reading", "elena_allows_soft_structure"],
+      compatibilityChecked: ["ambitionLevel", "conflictStyle", "emotionalOpenness"],
+      timingWindow: "best repaired within two in-game evenings, before her presentation scene",
+      poorResponses: ["reply_with_sarcasm", "turn_it_into_a_scorekeeping_argument"],
+    },
+    repairEvent: {
+      id: "elena_margin_note_repair",
+      action: "write_message",
+      title: "Margins, Not Excuses",
+      successDependsOn: ["remembered reading preference", "timely apology", "prior patience during stress"],
+      noPurchasedItemRequired: true,
+      contextualItemRule: "The player may return her annotated draft if they promised to review it; buying a book cannot clear the conflict.",
+      choices: [
+        "write a concise apology that names the missed dinner",
+        "follow through by reviewing the draft she already shared",
+        "offer a quiet library walk only if she wants company",
+      ],
+    },
+    homeReaction: {
+      id: "elena_home_quiet_corners",
+      likes: ["literary", "cozy"],
+      dislikes: ["chaotic_party"],
+      text: "Elena notices whether the home has a quiet place to read before she relaxes into the evening.",
+    },
+    locationBasedEncounter: {
+      id: "elena_archive_encounter",
+      locationKey: "library",
+      callback: "If the player once recommended a personal book, she has it open beside her notes.",
+    },
+    longTermRelationshipScene: {
+      id: "elena_two_calendars_one_life",
+      premise: "A fellowship abroad forces the couple to design weekly rituals instead of relying on chemistry alone.",
+      compatibilityChecks: ["ambitionLevel", "longTermGoals", "conflictStyle"],
+    },
+    legacyFamilyReaction: {
+      id: "elena_mentor_family_dinner",
+      text: "Elena treats trusted mentors as family and watches whether the player respects their role in her life.",
+    },
+    choiceCallbacks: [
+      "elena_book_club_dynamic",
+      "elena_oral_drill_ritual",
+      "elena_repair_letter",
+    ],
+  },
+  brad: {
+    hiddenCompatibilityTraits: {
+      ambitionLevel: "steady_self_improvement",
+      affectionStyle: "enthusiastic_encouragement_and_presence",
+      conflictStyle: "direct_then_needs_reassurance",
+      socialPreference: "active_groups_with_private_cooldowns",
+      familyOrientation: "protective_team_as_family",
+      spendingStyle: "budgeted_health_routines",
+      emotionalOpenness: "jokes_first_then_honest",
+      longTermGoals: "sustainable_strength_and_shared_routines",
+    },
+    relationshipMemories: [
+      "brad_likes_motivation_talk",
+      "brad_trusts_player_prep",
+      "brad_injury_vulnerability",
+      "brad_recovery_patience",
+      "brad_private_confidence_check",
+      "brad_chosen_cooldown_ritual",
+    ],
+    preferredDateTypes: ["gym_date", "park_walk"],
+    conflictEvent: {
+      id: "brad_public_scoreboard_conflict",
+      trigger: "jealousy_social_reputation",
+      title: "Challenge Board Pressure",
+      routeImpact: "Brad loses confidence in the player's support but keeps the route open for repair.",
+      doesNotHardFailRoute: true,
+      setup: "The player repeatedly turns workouts into public performance and ignores Brad's low mood after an injury.",
+      memoriesChecked: ["brad_likes_motivation_talk", "brad_trusts_player_prep"],
+      compatibilityChecked: ["conflictStyle", "socialPreference", "emotionalOpenness"],
+      timingWindow: "best repaired before the next public gym challenge",
+      poorResponses: ["post_his_score_without_permission", "mock_recovery_limits"],
+    },
+    repairEvent: {
+      id: "brad_recovery_walk_repair",
+      action: "spend_quiet_time_together",
+      title: "No PRs Today",
+      successDependsOn: ["respected privacy", "acknowledged injury fear", "chose a low-pressure activity"],
+      noPurchasedItemRequired: true,
+      contextualItemRule: "A smoothie can be shared after the walk as scene dressing, but it does not function as a repeatable repair gift.",
+      choices: [
+        "apologize for making confidence a public contest",
+        "take a slow recovery walk and let him set the pace",
+        "ask his training friend how to support rehab without hovering",
+      ],
+    },
+    homeReaction: {
+      id: "brad_home_recovery_space",
+      likes: ["fitness", "cozy"],
+      dislikes: ["cramped_low_hygiene"],
+      text: "Brad lights up at room for stretching, then softens if the space also allows real rest.",
+    },
+    locationBasedEncounter: {
+      id: "brad_park_bootcamp_encounter",
+      locationKey: "park",
+      callback: "If the player once checked his boundaries, he asks for the same before inviting them into bootcamp.",
+    },
+    longTermRelationshipScene: {
+      id: "brad_sustainable_strength",
+      premise: "Brad considers stepping back from constant sponsor challenges to build a healthier routine with the player.",
+      compatibilityChecks: ["ambitionLevel", "spendingStyle", "emotionalOpenness"],
+    },
+    legacyFamilyReaction: {
+      id: "brad_team_family_barbecue",
+      text: "Brad's clients and gym friends are his family, and he notices whether the player treats them with warmth rather than ego.",
+    },
+    choiceCallbacks: [
+      "brad_sponsor_stream_callback",
+      "brad_rehab_walk_callback",
+      "brad_private_hype_callback",
+    ],
+  },
+  sophia: {
+    hiddenCompatibilityTraits: {
+      ambitionLevel: "public_brand_growth",
+      affectionStyle: "attentive_presence_in_public_and_private",
+      conflictStyle: "sharp_words_then_tests_reliability",
+      socialPreference: "high_visibility_with_private_sincerity",
+      familyOrientation: "legacy_image_and_chosen_inner_circle",
+      spendingStyle: "luxury_with_reputation_risk",
+      emotionalOpenness: "curated_until_trust_is_earned",
+      longTermGoals: "influence_that_does_not_cost_intimacy",
+    },
+    relationshipMemories: [
+      "sophia_vip_boundaries",
+      "sophia_contract_respect",
+      "sophia_private_photo_support",
+      "sophia_afterparty_honesty",
+      "sophia_home_sincerity",
+      "sophia_chosen_inner_circle",
+    ],
+    preferredDateTypes: ["fine_dining", "gallery_date"],
+    conflictEvent: {
+      id: "sophia_caption_afterparty_conflict",
+      trigger: "jealousy_social_reputation",
+      title: "Tagged for the Wrong Reason",
+      routeImpact: "Sophia becomes guarded about being seen with the player, but trust can be rebuilt.",
+      doesNotHardFailRoute: true,
+      setup: "A careless public caption and repeated inattentive dialogue make her feel like an accessory to the player's image.",
+      memoriesChecked: ["sophia_vip_boundaries", "sophia_private_photo_support"],
+      compatibilityChecked: ["socialPreference", "spendingStyle", "emotionalOpenness"],
+      timingWindow: "best repaired before the next brand event or family legacy dinner",
+      poorResponses: ["chase_clout_in_comments", "dismiss_privacy_as_bad_branding"],
+    },
+    repairEvent: {
+      id: "sophia_private_table_repair",
+      action: "choose_thoughtful_activity",
+      title: "No Cameras at the Corner Table",
+      successDependsOn: ["respected image boundaries", "chose privacy over status", "remembered her contract fear"],
+      noPurchasedItemRequired: true,
+      contextualItemRule: "Dinner works because it is a private authored activity; ordering an expensive item cannot substitute for accountability.",
+      choices: [
+        "apologize without making a public spectacle",
+        "plan a no-post dinner at a place tied to an honest prior conversation",
+        "ask her publicist friend what boundary would actually reduce harm",
+      ],
+    },
+    homeReaction: {
+      id: "sophia_home_image_vs_intimacy",
+      likes: ["stylish", "clean"],
+      dislikes: ["performative_luxury_without_comfort"],
+      text: "Sophia compliments polish but only relaxes when the home feels private rather than staged.",
+    },
+    locationBasedEncounter: {
+      id: "sophia_gallery_flashbulb_encounter",
+      locationKey: "gallery",
+      callback: "If the player protected her privacy before, she trusts them to steer her away from a gossip photographer.",
+    },
+    longTermRelationshipScene: {
+      id: "sophia_offline_anniversary",
+      premise: "Sophia chooses an anniversary with no cameras and asks whether the player can love the person behind the brand.",
+      compatibilityChecks: ["socialPreference", "familyOrientation", "longTermGoals"],
+    },
+    legacyFamilyReaction: {
+      id: "sophia_legacy_name_reaction",
+      text: "Her family measures relationships as reputation alliances, and Sophia watches whether the player defends her autonomy.",
+    },
+    choiceCallbacks: [
+      "sophia_vip_lounge_boundary",
+      "sophia_brand_contract_callback",
+      "sophia_no_post_anniversary",
+    ],
+  },
+  marcus: {
+    hiddenCompatibilityTraits: {
+      ambitionLevel: "very_high_but_rebalancing",
+      affectionStyle: "strategic_help_and_kept_promises",
+      conflictStyle: "problem_solves_before_feeling",
+      socialPreference: "networking_with_deliberate_private_time",
+      familyOrientation: "provider_pressure_from_family_history",
+      spendingStyle: "investment_first",
+      emotionalOpenness: "controlled_until_burnout",
+      longTermGoals: "build_something_without_losing_home",
+    },
+    relationshipMemories: [
+      "marcus_respects_clear_pitch",
+      "marcus_accepts_rest_day",
+      "marcus_board_meeting_notes",
+      "marcus_dnd_vulnerability",
+      "marcus_takeout_after_pitch",
+      "marcus_shared_exit_plan",
+    ],
+    preferredDateTypes: ["coffee_date", "fine_dining"],
+    conflictEvent: {
+      id: "marcus_pitch_deck_promise_conflict",
+      trigger: "broken_promises",
+      title: "The Missing Meeting Notes",
+      routeImpact: "Marcus questions reliability, but the route branches into repair instead of failing.",
+      doesNotHardFailRoute: true,
+      setup: "The player promised to bring notes from a community meeting, then missed the planned date and minimized his low mood.",
+      memoriesChecked: ["marcus_respects_clear_pitch", "marcus_accepts_rest_day"],
+      compatibilityChecked: ["ambitionLevel", "affectionStyle", "conflictStyle"],
+      timingWindow: "best repaired before his board meeting story event",
+      poorResponses: ["say_it_was_just_notes", "pitch_a_new_promise_without_action"],
+    },
+    repairEvent: {
+      id: "marcus_follow_through_notes_repair",
+      action: "follow_through_on_previous_promise",
+      title: "Receipts, Not Speeches",
+      successDependsOn: ["kept the original promise", "understood his burnout", "timed help before the board meeting"],
+      noPurchasedItemRequired: true,
+      contextualItemRule: "Bringing meeting notes is valid because it fulfills a specific promise; buying a business accessory cannot clear the conflict.",
+      choices: [
+        "deliver organized notes from the meeting",
+        "apologize for making him manage the reminder",
+        "protect one phone-free hour after the work is handled",
+      ],
+    },
+    homeReaction: {
+      id: "marcus_home_work_boundary",
+      likes: ["organized", "calm"],
+      dislikes: ["always_on_office"],
+      text: "Marcus admires an efficient home but needs proof that the couch is not just another desk.",
+    },
+    locationBasedEncounter: {
+      id: "marcus_coffee_investor_encounter",
+      locationKey: "cafe",
+      callback: "If the player once urged real rest, he cuts a meeting short instead of stacking another call.",
+    },
+    longTermRelationshipScene: {
+      id: "marcus_exit_strategy_for_two",
+      premise: "Marcus considers a slower growth plan that protects the relationship from permanent crunch time.",
+      compatibilityChecks: ["ambitionLevel", "spendingStyle", "longTermGoals"],
+    },
+    legacyFamilyReaction: {
+      id: "marcus_provider_history_reaction",
+      text: "Marcus's family history makes security feel like love, and he listens for whether the player understands that pressure.",
+    },
+    choiceCallbacks: [
+      "marcus_boardroom_error_callback",
+      "marcus_rest_day_callback",
+      "marcus_phone_free_hour",
+    ],
+  },
+  chloe: {
+    hiddenCompatibilityTraits: {
+      ambitionLevel: "creative_growth_without_selling_out",
+      affectionStyle: "emotional_presence_and_specific_help",
+      conflictStyle: "hurt_silence_then_candid_talk",
+      socialPreference: "small_creative_rooms",
+      familyOrientation: "messy_but_loyal_roots",
+      spendingStyle: "thrifty_resourceful_art_life",
+      emotionalOpenness: "open_when_not_rushed",
+      longTermGoals: "shared_home_that_protects_art_and_rest",
+    },
+    relationshipMemories: [
+      "chloe_raw_emotion_answer",
+      "chloe_gallery_confidence",
+      "chloe_damaged_supplies_context",
+      "chloe_songwriting_trust",
+      "chloe_quiet_studio_night",
+      "chloe_family_roots_seen",
+    ],
+    preferredDateTypes: ["gallery_date", "park_walk"],
+    conflictEvent: {
+      id: "chloe_studio_silence_conflict",
+      trigger: "ignored_messages",
+      title: "Unread at the Studio Door",
+      routeImpact: "Chloe stops initiating vulnerable conversations until the player repairs the emotional miss.",
+      doesNotHardFailRoute: true,
+      setup: "Ignored messages, low mood, and repeated inattentive dialogue make her feel like her art is being sampled instead of seen.",
+      memoriesChecked: ["chloe_raw_emotion_answer", "chloe_gallery_confidence"],
+      compatibilityChecked: ["affectionStyle", "conflictStyle", "emotionalOpenness"],
+      timingWindow: "best repaired during the damaged supplies scene or the next quiet studio night",
+      poorResponses: ["critique_before_listening", "offer_generic_inspiration_quote"],
+    },
+    repairEvent: {
+      id: "chloe_studio_supplies_repair",
+      action: "help_with_specific_problem",
+      title: "Tape, Turpentine, and Staying",
+      successDependsOn: ["noticed the damaged supplies", "waited through silence", "helped only where invited"],
+      noPurchasedItemRequired: true,
+      contextualItemRule: "Replacing Chloe's damaged supplies is allowed only inside this authored flood-repair event; there is no repeatable preferred-item table.",
+      choices: [
+        "apologize for disappearing when she reached out",
+        "replace only the damaged supplies she named after the flood",
+        "spend quiet time in the studio without trying to fix every feeling",
+      ],
+    },
+    homeReaction: {
+      id: "chloe_home_makeshift_studio",
+      likes: ["creative", "cozy"],
+      dislikes: ["sterile_showroom"],
+      text: "Chloe loves signs of a life being made by hand, especially a corner where mess is allowed to become art.",
+    },
+    locationBasedEncounter: {
+      id: "chloe_open_mic_encounter",
+      locationKey: "concert_hall",
+      callback: "If the player stayed quiet with her before, she invites them backstage instead of hiding after the song.",
+    },
+    longTermRelationshipScene: {
+      id: "chloe_home_studio_future",
+      premise: "Chloe asks whether a shared future can include uneven income, late-night work, and a room for unfinished canvases.",
+      compatibilityChecks: ["spendingStyle", "longTermGoals", "emotionalOpenness"],
+    },
+    legacyFamilyReaction: {
+      id: "chloe_family_roots_reaction",
+      text: "Chloe's family history is loving and chaotic; she trusts a player who does not romanticize or judge it.",
+    },
+    choiceCallbacks: [
+      "chloe_gallery_confidence_callback",
+      "chloe_flood_supplies_callback",
+      "chloe_quiet_studio_callback",
+    ],
+  },
+};
+
+export const NPCS = BASE_NPCS.map((npc) => ({
+  ...npc,
+  ...(CORE_RELATIONSHIP_CONTENT[npc.id] || {}),
+}));
