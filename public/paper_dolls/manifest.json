@@ -1,0 +1,495 @@
+{
+  "description": "Root manifest describing all paper doll characters and their associated files.",
+  "characters": [
+    {
+      "folder": "woman_01",
+      "label": "Character woman_01",
+      "canvas_size": [
+        1024,
+        1536
+      ],
+      "files": [
+        {
+          "path": "transparent_preview_checkerboard.png",
+          "description": "Transparent checkerboard preview."
+        },
+        {
+          "path": "00_full_character_transparent.png",
+          "description": "Flattened visible character with background removed."
+        },
+        {
+          "path": "04_hair_visible_layer.png",
+          "description": "Visible hair layer."
+        },
+        {
+          "path": "lbd_full_character.png",
+          "description": "Character wearing a Little Black Dress (LBD)."
+        },
+        {
+          "path": "composite_preview_from_layers.png",
+          "description": "Composite preview of all layers."
+        },
+        {
+          "path": "source_flat_original.png",
+          "description": "Source flat original image."
+        },
+        {
+          "path": "03_underwear_base_layer.png",
+          "description": "Visible neutral strapless bandeau and briefs."
+        },
+        {
+          "path": "01_skin_visible_layer.png",
+          "description": "Visible skin/body layer."
+        },
+        {
+          "path": "02_face_details_overlay_optional.png",
+          "description": "Optional facial detail overlay."
+        },
+        {
+          "path": "masks/mask_full_character.png",
+          "description": "Mask: mask_full_character.png"
+        },
+        {
+          "path": "masks/mask_hair_visible.png",
+          "description": "Mask: mask_hair_visible.png"
+        },
+        {
+          "path": "masks/mask_face_details.png",
+          "description": "Mask: mask_face_details.png"
+        },
+        {
+          "path": "masks/mask_underwear.png",
+          "description": "Mask: mask_underwear.png"
+        },
+        {
+          "path": "masks/mask_skin_tintable_no_face_details.png",
+          "description": "Mask: mask_skin_tintable_no_face_details.png"
+        },
+        {
+          "path": "masks/mask_skin_visible.png",
+          "description": "Mask: mask_skin_visible.png"
+        }
+      ]
+    },
+    {
+      "folder": "woman_02",
+      "label": "Character woman_02",
+      "canvas_size": [
+        1024,
+        1536
+      ],
+      "files": [
+        {
+          "path": "transparent_preview_checkerboard.png",
+          "description": "Transparent checkerboard preview."
+        },
+        {
+          "path": "00_full_character_transparent.png",
+          "description": "Flattened visible character with background removed."
+        },
+        {
+          "path": "04_hair_visible_layer.png",
+          "description": "Visible hair layer."
+        },
+        {
+          "path": "lbd_full_character.png",
+          "description": "Character wearing a Little Black Dress (LBD)."
+        },
+        {
+          "path": "composite_preview_from_layers.png",
+          "description": "Composite preview of all layers."
+        },
+        {
+          "path": "source_flat_original.png",
+          "description": "Source flat original image."
+        },
+        {
+          "path": "03_underwear_base_layer.png",
+          "description": "Visible neutral strapless bandeau and briefs."
+        },
+        {
+          "path": "01_skin_visible_layer.png",
+          "description": "Visible skin/body layer."
+        },
+        {
+          "path": "02_face_details_overlay_optional.png",
+          "description": "Optional facial detail overlay."
+        },
+        {
+          "path": "masks/mask_full_character.png",
+          "description": "Mask: mask_full_character.png"
+        },
+        {
+          "path": "masks/mask_hair_visible.png",
+          "description": "Mask: mask_hair_visible.png"
+        },
+        {
+          "path": "masks/mask_face_details.png",
+          "description": "Mask: mask_face_details.png"
+        },
+        {
+          "path": "masks/mask_underwear.png",
+          "description": "Mask: mask_underwear.png"
+        },
+        {
+          "path": "masks/mask_skin_tintable_no_face_details.png",
+          "description": "Mask: mask_skin_tintable_no_face_details.png"
+        },
+        {
+          "path": "masks/mask_skin_visible.png",
+          "description": "Mask: mask_skin_visible.png"
+        }
+      ]
+    },
+    {
+      "folder": "woman_03",
+      "label": "Character woman_03",
+      "canvas_size": [
+        1024,
+        1536
+      ],
+      "files": [
+        {
+          "path": "transparent_preview_checkerboard.png",
+          "description": "Transparent checkerboard preview."
+        },
+        {
+          "path": "00_full_character_transparent.png",
+          "description": "Flattened visible character with background removed."
+        },
+        {
+          "path": "04_hair_visible_layer.png",
+          "description": "Visible hair layer."
+        },
+        {
+          "path": "lbd_full_character.png",
+          "description": "Character wearing a Little Black Dress (LBD)."
+        },
+        {
+          "path": "composite_preview_from_layers.png",
+          "description": "Composite preview of all layers."
+        },
+        {
+          "path": "source_flat_original.png",
+          "description": "Source flat original image."
+        },
+        {
+          "path": "03_underwear_base_layer.png",
+          "description": "Visible neutral strapless bandeau and briefs."
+        },
+        {
+          "path": "01_skin_visible_layer.png",
+          "description": "Visible skin/body layer."
+        },
+        {
+          "path": "02_face_details_overlay_optional.png",
+          "description": "Optional facial detail overlay."
+        },
+        {
+          "path": "masks/mask_full_character.png",
+          "description": "Mask: mask_full_character.png"
+        },
+        {
+          "path": "masks/mask_hair_visible.png",
+          "description": "Mask: mask_hair_visible.png"
+        },
+        {
+          "path": "masks/mask_face_details.png",
+          "description": "Mask: mask_face_details.png"
+        },
+        {
+          "path": "masks/mask_underwear.png",
+          "description": "Mask: mask_underwear.png"
+        },
+        {
+          "path": "masks/mask_skin_tintable_no_face_details.png",
+          "description": "Mask: mask_skin_tintable_no_face_details.png"
+        },
+        {
+          "path": "masks/mask_skin_visible.png",
+          "description": "Mask: mask_skin_visible.png"
+        }
+      ]
+    },
+    {
+      "folder": "woman_04",
+      "label": "Character woman_04",
+      "canvas_size": [
+        1024,
+        1536
+      ],
+      "files": [
+        {
+          "path": "transparent_preview_checkerboard.png",
+          "description": "Transparent checkerboard preview."
+        },
+        {
+          "path": "00_full_character_transparent.png",
+          "description": "Flattened visible character with background removed."
+        },
+        {
+          "path": "04_hair_visible_layer.png",
+          "description": "Visible hair layer."
+        },
+        {
+          "path": "lbd_full_character.png",
+          "description": "Character wearing a Little Black Dress (LBD)."
+        },
+        {
+          "path": "composite_preview_from_layers.png",
+          "description": "Composite preview of all layers."
+        },
+        {
+          "path": "source_flat_original.png",
+          "description": "Source flat original image."
+        },
+        {
+          "path": "03_underwear_base_layer.png",
+          "description": "Visible neutral strapless bandeau and briefs."
+        },
+        {
+          "path": "01_skin_visible_layer.png",
+          "description": "Visible skin/body layer."
+        },
+        {
+          "path": "02_face_details_overlay_optional.png",
+          "description": "Optional facial detail overlay."
+        },
+        {
+          "path": "masks/mask_full_character.png",
+          "description": "Mask: mask_full_character.png"
+        },
+        {
+          "path": "masks/mask_hair_visible.png",
+          "description": "Mask: mask_hair_visible.png"
+        },
+        {
+          "path": "masks/mask_face_details.png",
+          "description": "Mask: mask_face_details.png"
+        },
+        {
+          "path": "masks/mask_underwear.png",
+          "description": "Mask: mask_underwear.png"
+        },
+        {
+          "path": "masks/mask_skin_tintable_no_face_details.png",
+          "description": "Mask: mask_skin_tintable_no_face_details.png"
+        },
+        {
+          "path": "masks/mask_skin_visible.png",
+          "description": "Mask: mask_skin_visible.png"
+        }
+      ]
+    },
+    {
+      "folder": "woman_05",
+      "label": "Character woman_05",
+      "canvas_size": [
+        1024,
+        1536
+      ],
+      "files": [
+        {
+          "path": "transparent_preview_checkerboard.png",
+          "description": "Transparent checkerboard preview."
+        },
+        {
+          "path": "00_full_character_transparent.png",
+          "description": "Flattened visible character with background removed."
+        },
+        {
+          "path": "04_hair_visible_layer.png",
+          "description": "Visible hair layer."
+        },
+        {
+          "path": "lbd_full_character.png",
+          "description": "Character wearing a Little Black Dress (LBD)."
+        },
+        {
+          "path": "composite_preview_from_layers.png",
+          "description": "Composite preview of all layers."
+        },
+        {
+          "path": "source_flat_original.png",
+          "description": "Source flat original image."
+        },
+        {
+          "path": "03_underwear_base_layer.png",
+          "description": "Visible neutral strapless bandeau and briefs."
+        },
+        {
+          "path": "01_skin_visible_layer.png",
+          "description": "Visible skin/body layer."
+        },
+        {
+          "path": "02_face_details_overlay_optional.png",
+          "description": "Optional facial detail overlay."
+        },
+        {
+          "path": "masks/mask_full_character.png",
+          "description": "Mask: mask_full_character.png"
+        },
+        {
+          "path": "masks/mask_hair_visible.png",
+          "description": "Mask: mask_hair_visible.png"
+        },
+        {
+          "path": "masks/mask_face_details.png",
+          "description": "Mask: mask_face_details.png"
+        },
+        {
+          "path": "masks/mask_underwear.png",
+          "description": "Mask: mask_underwear.png"
+        },
+        {
+          "path": "masks/mask_skin_tintable_no_face_details.png",
+          "description": "Mask: mask_skin_tintable_no_face_details.png"
+        },
+        {
+          "path": "masks/mask_skin_visible.png",
+          "description": "Mask: mask_skin_visible.png"
+        }
+      ]
+    },
+    {
+      "folder": "woman_06",
+      "label": "Character woman_06",
+      "canvas_size": [
+        1024,
+        1536
+      ],
+      "files": [
+        {
+          "path": "transparent_preview_checkerboard.png",
+          "description": "Transparent checkerboard preview."
+        },
+        {
+          "path": "00_full_character_transparent.png",
+          "description": "Flattened visible character with background removed."
+        },
+        {
+          "path": "04_hair_visible_layer.png",
+          "description": "Visible hair layer."
+        },
+        {
+          "path": "lbd_full_character.png",
+          "description": "Character wearing a Little Black Dress (LBD)."
+        },
+        {
+          "path": "composite_preview_from_layers.png",
+          "description": "Composite preview of all layers."
+        },
+        {
+          "path": "source_flat_original.png",
+          "description": "Source flat original image."
+        },
+        {
+          "path": "03_underwear_base_layer.png",
+          "description": "Visible neutral strapless bandeau and briefs."
+        },
+        {
+          "path": "01_skin_visible_layer.png",
+          "description": "Visible skin/body layer."
+        },
+        {
+          "path": "02_face_details_overlay_optional.png",
+          "description": "Optional facial detail overlay."
+        },
+        {
+          "path": "masks/mask_full_character.png",
+          "description": "Mask: mask_full_character.png"
+        },
+        {
+          "path": "masks/mask_hair_visible.png",
+          "description": "Mask: mask_hair_visible.png"
+        },
+        {
+          "path": "masks/mask_face_details.png",
+          "description": "Mask: mask_face_details.png"
+        },
+        {
+          "path": "masks/mask_underwear.png",
+          "description": "Mask: mask_underwear.png"
+        },
+        {
+          "path": "masks/mask_skin_tintable_no_face_details.png",
+          "description": "Mask: mask_skin_tintable_no_face_details.png"
+        },
+        {
+          "path": "masks/mask_skin_visible.png",
+          "description": "Mask: mask_skin_visible.png"
+        }
+      ]
+    },
+    {
+      "folder": "woman_07",
+      "label": "Character woman_07",
+      "canvas_size": [
+        1024,
+        1536
+      ],
+      "files": [
+        {
+          "path": "transparent_preview_checkerboard.png",
+          "description": "Transparent checkerboard preview."
+        },
+        {
+          "path": "00_full_character_transparent.png",
+          "description": "Flattened visible character with background removed."
+        },
+        {
+          "path": "04_hair_visible_layer.png",
+          "description": "Visible hair layer."
+        },
+        {
+          "path": "lbd_full_character.png",
+          "description": "Character wearing a Little Black Dress (LBD)."
+        },
+        {
+          "path": "composite_preview_from_layers.png",
+          "description": "Composite preview of all layers."
+        },
+        {
+          "path": "source_flat_original.png",
+          "description": "Source flat original image."
+        },
+        {
+          "path": "03_underwear_base_layer.png",
+          "description": "Visible neutral strapless bandeau and briefs."
+        },
+        {
+          "path": "01_skin_visible_layer.png",
+          "description": "Visible skin/body layer."
+        },
+        {
+          "path": "02_face_details_overlay_optional.png",
+          "description": "Optional facial detail overlay."
+        },
+        {
+          "path": "masks/mask_full_character.png",
+          "description": "Mask: mask_full_character.png"
+        },
+        {
+          "path": "masks/mask_hair_visible.png",
+          "description": "Mask: mask_hair_visible.png"
+        },
+        {
+          "path": "masks/mask_face_details.png",
+          "description": "Mask: mask_face_details.png"
+        },
+        {
+          "path": "masks/mask_underwear.png",
+          "description": "Mask: mask_underwear.png"
+        },
+        {
+          "path": "masks/mask_skin_tintable_no_face_details.png",
+          "description": "Mask: mask_skin_tintable_no_face_details.png"
+        },
+        {
+          "path": "masks/mask_skin_visible.png",
+          "description": "Mask: mask_skin_visible.png"
+        }
+      ]
+    }
+  ]
+}

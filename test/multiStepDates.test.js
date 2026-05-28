@@ -110,3 +110,43 @@ test('home style profile affects home dates without creating gift preferences', 
     assert.equal(furniture.relationshipBonus, undefined);
   }
 });
+
+test('multi-phase date choices accumulate state and automatically resolve at end', () => {
+  const state = cloneState();
+  state.matches.elena = { met: true, relationship: 10, chemistry: 10, dateCount: 0, storyTier: 0 };
+  
+  const initDate = gameReducer(state, {
+    type: 'GO_ON_DATE',
+    payload: { npcId: 'elena', locationKey: 'library', dateType: 'library_date' },
+  });
+  
+  assert.equal(initDate.activeDateEvent.currentPhaseIndex, 0);
+  assert.equal(initDate.activeDateEvent.vibe, 30);
+  
+  const phase1 = gameReducer(initDate, {
+    type: 'CHOOSE_DATE_PHASE_OPTION',
+    payload: { optionIndex: 0 } // "Match their quiet pace..." -> connection 12
+  });
+  
+  assert.equal(phase1.activeDateEvent.currentPhaseIndex, 1);
+  assert.equal(phase1.activeDateEvent.vibe, 42); // 30 + 12
+  
+  const phase2 = gameReducer(phase1, {
+    type: 'CHOOSE_DATE_PHASE_OPTION',
+    payload: { optionIndex: 0 } // "Piece together the reader's story..." -> checks intelligence 30
+  });
+  
+  assert.equal(phase2.activeDateEvent.currentPhaseIndex, 2);
+  // Without high intelligence, it falls to fail -> base 14 + fail 2 = 16. 42 + 16 = 58
+  assert.equal(phase2.activeDateEvent.vibe, 58);
+  
+  const phase3 = gameReducer(phase2, {
+    type: 'CHOOSE_DATE_PHASE_OPTION',
+    payload: { optionIndex: 0 } // "Help carry the box..." -> connection 12, memory
+  });
+  
+  // Resolves automatically
+  assert.equal(phase3.activeDateEvent, null);
+  assert.strictEqual(phase3.gamePhase, 'date_recap');
+  assert.ok(phase3.relationshipMemory.elena.rememberedChoices.includes('helped_library_volunteers'));
+});

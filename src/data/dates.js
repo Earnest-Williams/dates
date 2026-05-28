@@ -167,14 +167,14 @@ export const DATE_TEMPLATES = {
         makeChoice({ text: 'Charm the door host without making your date invisible.', connection: 8, chemistry: 5, checkStat: 'charisma', threshold: 35, success: { connection: 7 }, fail: { connection: -2, mood: -2 } }),
         makeChoice({ text: 'Name-drop loudly until someone notices.', connection: -12, mood: -5, conflict: 'status_performance', repairScene: 'humble_booth_apology' }),
       ] },
-      { id: 'shared_activity', title: 'Shared Activity: Dance Floor Choice', prompt: 'The DJ shifts from loud bass to a slower remix.', choices: [
-        makeChoice({ text: 'Let them choose between dancing and retreating.', connection: 12, chemistry: 5, discovery: 'consent_to_spotlight', memory: 'dance_floor_choice' }),
-        makeChoice({ text: 'Dance badly but joyfully.', connection: 9, mood: 7, chemistry: 3, preferredArchetypes: ['SOCIALITE', 'ARTIST'] }),
+      { id: 'shared_activity', title: 'Shared Activity: Dance Floor Choice', prompt: 'The DJ shifts to a heavy, throbbing bassline. The crowd presses you tightly together.', choices: [
+        makeChoice({ text: 'Pull them flush against you, letting the music dictate the rhythm between you.', connection: 12, chemistry: 15, tone: { heat: 8, implication: 9, emotionalRisk: 6, publicRisk: 7 }, discovery: 'consent_to_spotlight', memory: 'dance_floor_choice' }),
+        makeChoice({ text: 'Lean in close enough to breathe against their neck, asking if they want to leave yet.', connection: 14, chemistry: 12, tone: { heat: 9, implication: 10, emotionalRisk: 7, publicRisk: 5 }, preferredArchetypes: ['SOCIALITE', 'ARTIST'] }),
         makeChoice({ text: 'Pull them into the crowd after they hesitate.', connection: -18, relationship: -6, conflict: 'ignored_social_boundary', repairScene: 'boundary_repair_scene' }),
       ] },
-      { id: 'closing_moment', title: 'Closing Moment: After-Air', prompt: 'Outside, the street is cooler and honest.', choices: [
-        makeChoice({ text: 'Ask what nightlife lets them be that daylight does not.', connection: 12, relationship: 5, discovery: 'after_midnight_self', memory: 'streetlight_confession' }),
-        makeChoice({ text: 'Share a calm ride plan and water break.', connection: 8, mood: 4, energy: 3, memory: 'safe_night_exit' }),
+      { id: 'closing_moment', title: 'Closing Moment: After-Air', prompt: 'Outside, the street is quiet. The adrenaline from the club turns into raw tension.', choices: [
+        makeChoice({ text: 'Push them gently into the shadows of an alleyway for a breathless kiss.', connection: 15, chemistry: 18, tone: { heat: 9, implication: 8, emotionalRisk: 7, publicRisk: 8 }, discovery: 'after_midnight_self', memory: 'streetlight_confession' }),
+        makeChoice({ text: 'Tell them you want to take them home. Right now.', connection: 12, chemistry: 14, tone: { heat: 8, implication: 10, emotionalRisk: 8, publicRisk: 2 }, memory: 'safe_night_exit' }),
         makeChoice({ text: 'Keep chasing the next party when they are tired.', connection: -15, energy: -8, conflict: 'missed_tired_signal', repairScene: 'restful_followup_date' }),
       ] },
     ] },
@@ -269,14 +269,14 @@ export const DATE_TEMPLATES = {
         makeChoice({ text: 'Set out books, tea, or music as options without pressure.', connection: 9, relationship: 3, preferredArchetypes: ['SCHOLAR', 'ARTIST'] }),
         makeChoice({ text: 'Keep apologizing that the night is not exciting.', connection: -7, mood: -4, conflict: 'devalued_quiet_time', repairScene: 'reclaim_quiet_evening_repair' }),
       ] },
-      { id: 'shared_activity', title: 'Shared Activity: Parallel Comfort', prompt: 'You can share space without forcing constant conversation.', choices: [
-        makeChoice({ text: 'Read, sketch, or rest side by side, checking in gently.', connection: 14, relationship: 5, discovery: 'parallel_presence_comfort', memory: 'parallel_comfort_evening' }),
-        makeChoice({ text: 'Ask one deeper question, then give room for silence.', connection: 11, chemistry: 3, discovery: 'slow_burn_openness' }),
+      { id: 'shared_activity', title: 'Shared Activity: Parallel Comfort', prompt: 'The quiet forces a heavy, magnetic tension into the room.', choices: [
+        makeChoice({ text: 'Shift closer until your thighs brush, letting the silence pull you together.', connection: 14, relationship: 5, chemistry: 10, tone: { heat: 6, implication: 8, emotionalRisk: 7, publicRisk: 0 }, discovery: 'parallel_presence_comfort', memory: 'parallel_comfort_evening' }),
+        makeChoice({ text: 'Watch them read until they catch you looking, then hold their gaze.', connection: 11, chemistry: 12, tone: { heat: 7, implication: 9, emotionalRisk: 8, publicRisk: 0 }, discovery: 'slow_burn_openness' }),
         makeChoice({ text: 'Fill every silence with nervous jokes.', connection: -8, mood: -3, conflict: 'crowded_the_silence', repairScene: 'comfortable_silence_repair' }),
       ] },
-      { id: 'closing_moment', title: 'Closing Moment: Doorway Softness', prompt: 'The goodbye is quiet enough to be remembered.', choices: [
-        makeChoice({ text: 'Tell them exactly what felt peaceful about being together.', connection: 12, relationship: 5, memory: 'peaceful_doorway_goodbye' }),
-        makeChoice({ text: 'Offer another quiet evening after a stressful day.', connection: 8, callback: 'stressful_day_quiet_evening_callback' }),
+      { id: 'closing_moment', title: 'Closing Moment: Doorway Softness', prompt: 'The goodbye lingers at the door, neither of you wanting to pull away.', choices: [
+        makeChoice({ text: 'Press them gently against the doorframe, whispering that you hate saying goodnight.', connection: 12, relationship: 8, chemistry: 12, tone: { heat: 8, implication: 9, emotionalRisk: 8, publicRisk: 0 }, memory: 'peaceful_doorway_goodbye' }),
+        makeChoice({ text: 'Offer to let them stay the night, no pressure, just presence.', connection: 15, relationship: 10, chemistry: 8, tone: { heat: 6, implication: 7, emotionalRisk: 9, publicRisk: 0 }, callback: 'stressful_day_quiet_evening_callback' }),
         makeChoice({ text: 'Ask whether next time can be more useful to you.', connection: -12, relationship: -5, conflict: 'made_comfort_transactional', repairScene: 'nontransactional_care_repair' }),
       ] },
     ] },

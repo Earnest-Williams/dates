@@ -1,5 +1,5 @@
 const SAVE_KEY = 'dates-save-v1';
-const SAVE_VERSION = 1;
+const SAVE_VERSION = 2;
 
 const getStorage = () => {
   try {
@@ -56,8 +56,46 @@ export const runSaveMigration = (payload) => {
     return { ok: false, reason: 'Invalid save payload.' };
   }
 
+  let migratedState = { ...payload.gameState };
+  let migrated = false;
+
+  if (payload.version === 1) {
+    // Migrate v1 to v2
+    migratedState.features = {
+      organicEncounters: false,
+      compatibilityRevealUx: false,
+      instantMatchRebalance: false,
+      relationshipJournal: false,
+      reputationSpillover: false,
+      dailyPlannerUx: false,
+      marketRiskControls: false,
+      adultToneTags: false,
+    };
+    
+    // Also ensure matches have extended properties for any existing NPCs
+    if (migratedState.matches) {
+      for (const npcId of Object.keys(migratedState.matches)) {
+        const match = migratedState.matches[npcId];
+        migratedState.matches[npcId] = {
+          ...match,
+          activeConflictId: match.activeConflictId ?? null,
+          pendingRepairScene: match.pendingRepairScene ?? null,
+          repairHistory: match.repairHistory ?? [],
+          lastDateQuality: match.lastDateQuality ?? null,
+          compatibilityScore: match.compatibilityScore ?? null,
+          relationshipStage: match.relationshipStage ?? 'matched',
+          exclusivityExpectation: match.exclusivityExpectation ?? 'unknown',
+          publicKnowledge: match.publicKnowledge ?? 0,
+        };
+      }
+    }
+
+    payload.version = 2;
+    migrated = true;
+  }
+
   if (payload.version === SAVE_VERSION) {
-    return { ok: true, gameState: payload.gameState, migrated: false };
+    return { ok: true, gameState: migratedState, migrated };
   }
 
   return {

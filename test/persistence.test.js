@@ -39,7 +39,7 @@ test('unsupported save version fails gracefully', () => {
 
 test('payload version is set', () => {
   const payload = createSavePayload({});
-  assert.equal(payload.version, 1);
+  assert.equal(payload.version, 2);
   assert.equal(typeof payload.savedAt, 'string');
 });
 

@@ -3,6 +3,7 @@ import { useGameStore } from '../../state/store';
 import { ITEMS } from '../../state/ItemDatabase';
 import { HOUSING_TIERS } from '../../data/housing';
 import { NPCS } from '../../data/npcs';
+import { getNpcHomeStyleReaction } from '../../data/furniture';
 
 const FurnitureManager = () => {
   const gameState = useGameStore(state => state.gameState);
@@ -166,6 +167,33 @@ const FurnitureManager = () => {
             )}
           </div>
         </div>
+
+        {housingTier > 0 && (
+          <div className="home-identity-card" style={{ marginTop: '1rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px' }}>
+            <h3 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Home Identity & NPC Impressions</h3>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', marginBottom: '1rem' }}>
+              Your placed furniture creates a specific vibe. When you invite someone over, their reaction affects your starting connection.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '0.5rem' }}>
+              {NPCS.filter(n => gameState.matches && gameState.matches[n.id] && gameState.matches[n.id].met).map(npc => {
+                const reaction = getNpcHomeStyleReaction(npc.id, placedItems);
+                let color = 'var(--text-secondary)';
+                if (reaction.fit === 'comfortable') color = '#34d399';
+                if (reaction.fit === 'curious') color = '#fbbf24';
+                if (reaction.fit === 'clashing') color = '#f87171';
+                
+                return (
+                  <div key={npc.id} style={{ background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: '4px', borderLeft: `3px solid ${color}` }}>
+                    <div style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>{npc.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: color }}>
+                      {reaction.fit.charAt(0).toUpperCase() + reaction.fit.slice(1)}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -2,9 +2,12 @@
 
 Welcome to the official Game Design Document ("Bible") for the Dating-Centered Life Simulation. This document details the core mechanics, system rules, databases, and structural architecture of the project.
 
+## 1. Project Philosophy: The Relationship-Memory-First Engine
+Unlike traditional visual novel life sims, Brockleighshire strictly rejects "gift-giving" as a primary loop. Relationships advance through shared experiences, authored choices, context, and conflict repair. Furniture and items affect personal stats and lifestyle, but they are not affection currencies.
+
 ---
 
-## 1. Project Architecture & State Loop
+## 2. Project Architecture & State Loop
 
 The game operates on a reactive tick system (10-minute increments) where actions advance time, decay needs, process rent/utility billing cycles, and recalculate relationships. All core systems are decoupled into pure data and simulation modules, coordinated by a modular, reducer-driven Zustand store (`useGameStore`).
 

@@ -116,4 +116,8 @@ export const useGameStore = create((set, get) => ({
   switchTrack: (trackId) => get().dispatch({ type: 'SWITCH_TRACK', payload: { trackId } }),
   useAbility: (abilityId) => get().dispatch({ type: 'USE_ABILITY', payload: { abilityId } }),
   doRoutine: (routineId) => actions.doRoutine(get().gameState, get().dispatch, routineId),
+  closeDateRecap: () => get().dispatch({ type: 'CLOSE_DATE_RECAP' }),
+  attemptRepair: (npcId, repairActionId) => get().dispatch({ type: 'ATTEMPT_REPAIR', payload: { npcId, repairActionId } }),
+  startOrganicEncounter: (encounter) => get().dispatch({ type: 'START_ORGANIC_ENCOUNTER', payload: { encounter } }),
+  resolveOrganicEncounter: (choiceIndex) => get().dispatch({ type: 'RESOLVE_ORGANIC_ENCOUNTER', payload: { choiceIndex } }),
 }));

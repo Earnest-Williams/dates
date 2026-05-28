@@ -10,6 +10,7 @@ import {
   calculateTravelStats, 
   computeSettlementMetrics 
 } from '../data/geography';
+import { getNpcEncounters } from '../data/townTexture';
 import './MapUI.css';
 
 const MapUI = ({ onClose, onTalkNpc }) => {
@@ -21,7 +22,8 @@ const MapUI = ({ onClose, onTalkNpc }) => {
     enrollCourseWithLoan, 
     studyCourse,
     performAction,
-    workOnProject
+    workOnProject,
+    startOrganicEncounter
   } = useGameStore();
 
   const { activeLocation, stats, properties, matches, education, placedFurniture } = gameState;
@@ -180,19 +182,8 @@ const MapUI = ({ onClose, onTalkNpc }) => {
     localStorage.setItem('brockleighshire_pins', JSON.stringify(updated));
   };
 
-  // Determine which NPCs are active at the selected settlement
-  const getNpcsAtSettlement = (settlementKey) => {
-    const npcLocationMap = {
-      elena: 'Brockleigh',
-      marcus: 'Brockleigh',
-      sophia: 'Stagborough',
-      brad: 'Stagborough',
-      chloe: 'Bramblewick'
-    };
-    return NPCS.filter(npc => npcLocationMap[npc.id] === settlementKey);
-  };
-
-  const activeNpcs = getNpcsAtSettlement(selectedLocKey);
+  // Determine which NPCs are active at the selected settlement and venue
+  const activeEncounters = activeLocation === selectedLocKey ? getNpcEncounters(gameState.time, activeTab === 'info' ? 'park' : activeTab) : [];
 
   const isPlayerHomeHere = selectedLocKey === currentHomeSettlement;
 
@@ -671,22 +662,29 @@ const MapUI = ({ onClose, onTalkNpc }) => {
 
                     <div className="npc-list-location" style={{ marginTop: '1.25rem' }}>
                       <h6 className="interaction-title">Characters Active Here</h6>
-                      {activeNpcs.map(npc => {
+                      {activeEncounters.map((encounter, idx) => {
+                        const npc = NPCS.find(n => n.id === encounter.npcId);
+                        if (!npc) return null;
                         const isMatched = matches[npc.id];
                         return (
-                          <div key={npc.id} className="location-npc-card">
+                          <div key={`${npc.id}-${idx}`} className="location-npc-card">
                             <div className="npc-info-mini">
                               <span className="npc-name">{npc.name}</span>
-                              <span className="npc-archetype-mini">{npc.description}</span>
+                              <span className="npc-archetype-mini">{encounter.reveals ? `Reveals: ${encounter.reveals.replace(/_/g, ' ')}` : npc.description}</span>
                             </div>
-                            <button className="btn-mini btn-talk" onClick={() => onTalkNpc(npc.id)}>
-                              {isMatched ? "Chat" : "Introduce"}
+                            <button className="btn-mini btn-talk" onClick={() => startOrganicEncounter({ ...encounter, location: activeTab === 'info' ? 'park' : activeTab })}>
+                              Encounter
                             </button>
+                            {isMatched && (
+                              <button className="btn-mini btn-talk" onClick={() => onTalkNpc(npc.id)}>
+                                Talk
+                              </button>
+                            )}
                           </div>
                         );
                       })}
-                      {activeNpcs.length === 0 && (
-                        <p className="no-npcs-msg" style={{ margin: '0.5rem 0' }}>No major characters are active in this village today.</p>
+                      {activeEncounters.length === 0 && (
+                        <p className="no-npcs-msg" style={{ margin: '0.5rem 0' }}>No characters are currently active here at this time.</p>
                       )}
                     </div>
                   </div>

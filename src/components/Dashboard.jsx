@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGameStore } from '../state/store';
 import { abilities } from '../data/abilities';
 import DashboardHeader from './dashboard/DashboardHeader';
@@ -7,9 +7,15 @@ import StatsPanel from './dashboard/StatsPanel';
 import HousingPanel from './dashboard/HousingPanel';
 import FurnitureManager from './dashboard/FurnitureManager';
 import DailyRoutinePanel from './dashboard/DailyRoutinePanel';
+import RelationshipsPanel from './dashboard/RelationshipsPanel';
+import PromisesPanel from './dashboard/PromisesPanel';
+import OpportunitiesPanel from './dashboard/OpportunitiesPanel';
+import MoneyRiskPanel from './dashboard/MoneyRiskPanel';
 import './Dashboard.css';
 
 const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) => {
+  const [activeTab, setActiveTab] = useState('life');
+
   const { 
     gameState, 
     performAction, 
@@ -19,7 +25,6 @@ const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) =
     useAbility,
     doRoutine
   } = useGameStore();
-
 
   const { healthLow, healthCritical, moodDepressed, moodHigh, energy, hunger } = gameState.needs;
   const { money } = gameState.stats;
@@ -69,69 +74,73 @@ const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) =
         </div>
       )}
 
+      <div className="dashboard-tabs">
+        <button className={`tab-btn ${activeTab === 'life' ? 'active' : ''}`} onClick={() => setActiveTab('life')}>Life</button>
+        <button className={`tab-btn ${activeTab === 'social' ? 'active' : ''}`} onClick={() => setActiveTab('social')}>Social</button>
+        <button className={`tab-btn ${activeTab === 'planning' ? 'active' : ''}`} onClick={() => setActiveTab('planning')}>Planning</button>
+      </div>
+
       <div className="bento-grid">
-        <NeedsPanel />
-        <StatsPanel />
-        <HousingPanel />
+        {activeTab === 'life' && (
+          <>
+            <NeedsPanel />
+            <DailyRoutinePanel gameState={gameState} doRoutine={doRoutine} />
+            <FurnitureManager />
+          </>
+        )}
 
-        <FurnitureManager />
-        <DailyRoutinePanel gameState={gameState} doRoutine={doRoutine} />
+        {activeTab === 'social' && (
+          <>
+            <RelationshipsPanel />
+            <PromisesPanel />
+            <OpportunitiesPanel onOpenMap={onOpenMap} />
+          </>
+        )}
 
-        {/* Active Perks & Traits */}
-        <div className="bento-card perks-panel perks">
-          <h2 className="section-title">Active Perks & Traits</h2>
-          <div className="perks-grid">
-            {activeTraits?.map(trait => (
-              <span key={trait} className="perk-badge trait">{trait.toUpperCase()}</span>
-            ))}
-            {gameState.stats.fitness >= 50 && <span className="perk-badge stat-perk">Marathoner</span>}
-            {gameState.stats.intelligence >= 50 && <span className="perk-badge stat-perk">Fast Learner</span>}
-            {gameState.stats.charisma >= 50 && <span className="perk-badge stat-perk">Charmer</span>}
-            {gameState.stats.style >= 50 && <span className="perk-badge stat-perk">Trendsetter</span>}
-            {gameState.stats.corporate >= 50 && <span className="perk-badge stat-perk">Shark</span>}
-            {gameState.stats.programming >= 50 && <span className="perk-badge stat-perk">Hacker</span>}
-            {gameState.stats.marketing >= 50 && <span className="perk-badge stat-perk">Influencer</span>}
-            {gameState.stats.finance >= 50 && <span className="perk-badge stat-perk">Wolf</span>}
-            {gameState.stats.negotiation >= 50 && <span className="perk-badge stat-perk">Closer</span>}
-            {gameState.stats.culinary >= 50 && <span className="perk-badge stat-perk">Iron Stomach</span>}
-            {gameState.stats.creativity >= 50 && <span className="perk-badge stat-perk">Visionary</span>}
-            {gameState.stats.music >= 50 && <span className="perk-badge stat-perk">Virtuoso</span>}
-            {gameState.stats.gaming >= 50 && <span className="perk-badge stat-perk">Pro Gamer</span>}
-            {gameState.stats.confidence >= 50 && <span className="perk-badge stat-perk">Iron Will</span>}
-            {gameState.stats.socialIq >= 50 && <span className="perk-badge stat-perk">Social Butterfly</span>}
-            {gameState.stats.empathy >= 50 && <span className="perk-badge stat-perk">Empath</span>}
-            
-            {activeTraits?.length === 0 && Object.values(gameState.stats).every(v => v < 50) && (
-              <span style={{ opacity: 0.5, fontSize: '0.85rem' }}>No active perks yet. Reach 50 in a stat.</span>
-            )}
-          </div>
-        </div>
-
-        {/* Lineage */}
-        <div className="bento-card lineage">
-          <h2 className="section-title">Generational Lineage</h2>
-          {gameState.family.parentHistory?.length > 0 ? (
-            <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-              {gameState.family.parentHistory.map((history, idx) => (
-                <p key={idx} style={{ marginBottom: '0.5rem', paddingBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                  Gen {history.generation}: <strong>{history.parentName}</strong> & {history.spouseName || 'Spouse'} (Retired Day {history.dayReached})
-                </p>
-              ))}
+        {activeTab === 'planning' && (
+          <>
+            <MoneyRiskPanel />
+            <HousingPanel />
+            <StatsPanel />
+            <div className="bento-card perks-panel perks" style={{ gridColumn: 'span 2' }}>
+              <h2 className="section-title">Active Perks & Traits</h2>
+              <div className="perks-grid">
+                {activeTraits?.map(trait => (
+                  <span key={trait} className="perk-badge trait">{trait.toUpperCase()}</span>
+                ))}
+                {gameState.stats.fitness >= 50 && <span className="perk-badge stat-perk">Marathoner</span>}
+                {gameState.stats.intelligence >= 50 && <span className="perk-badge stat-perk">Fast Learner</span>}
+                {gameState.stats.charisma >= 50 && <span className="perk-badge stat-perk">Charmer</span>}
+                {gameState.stats.style >= 50 && <span className="perk-badge stat-perk">Trendsetter</span>}
+                {gameState.stats.corporate >= 50 && <span className="perk-badge stat-perk">Shark</span>}
+                {gameState.stats.programming >= 50 && <span className="perk-badge stat-perk">Hacker</span>}
+                {gameState.stats.marketing >= 50 && <span className="perk-badge stat-perk">Influencer</span>}
+                {gameState.stats.finance >= 50 && <span className="perk-badge stat-perk">Wolf</span>}
+                {gameState.stats.negotiation >= 50 && <span className="perk-badge stat-perk">Closer</span>}
+                {gameState.stats.culinary >= 50 && <span className="perk-badge stat-perk">Iron Stomach</span>}
+                {gameState.stats.creativity >= 50 && <span className="perk-badge stat-perk">Visionary</span>}
+                {gameState.stats.music >= 50 && <span className="perk-badge stat-perk">Virtuoso</span>}
+                {gameState.stats.gaming >= 50 && <span className="perk-badge stat-perk">Pro Gamer</span>}
+                {gameState.stats.confidence >= 50 && <span className="perk-badge stat-perk">Iron Will</span>}
+                {gameState.stats.socialIq >= 50 && <span className="perk-badge stat-perk">Social Butterfly</span>}
+                {gameState.stats.empathy >= 50 && <span className="perk-badge stat-perk">Empath</span>}
+                
+                {activeTraits?.length === 0 && Object.values(gameState.stats).every(v => v < 50) && (
+                  <span style={{ opacity: 0.5, fontSize: '0.85rem' }}>No active perks yet. Reach 50 in a stat.</span>
+                )}
+              </div>
             </div>
-          ) : (
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>You are the first generation.</p>
-          )}
-        </div>
 
-        {/* Logs */}
-        <div className="bento-card logs">
-          <h2 className="section-title">Activity Log</h2>
-          <div className="logs-panel">
-            {gameState.logs.map((log, index) => (
-              <div key={index} className="log-entry">{log}</div>
-            ))}
-          </div>
-        </div>
+            <div className="bento-card logs" style={{ gridColumn: 'span 2' }}>
+              <h2 className="section-title">Activity Log</h2>
+              <div className="logs-panel">
+                {gameState.logs.map((log, index) => (
+                  <div key={index} className="log-entry">{log}</div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Floating Action Dock */}

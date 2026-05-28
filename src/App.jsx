@@ -7,6 +7,8 @@ import DialogueUI from './components/DialogueUI';
 import MarriageCeremony from './components/MarriageCeremony';
 import ChildhoodRaising from './components/ChildhoodRaising';
 import DateEventUI from './components/DateEventUI';
+import DateRecap from './components/DateRecap';
+import OrganicEncounterUI from './components/OrganicEncounterUI';
 import WorkEventUI from './components/WorkEventUI';
 import NpcAlertUI from './components/NpcAlertUI';
 import SimstagramApp from './components/SimstagramApp';
@@ -44,6 +46,22 @@ function AppContent() {
     return (
       <div className="app-background">
         <DateEventUI />
+      </div>
+    );
+  }
+
+  if (gamePhase === 'date_recap') {
+    return (
+      <div className="app-background">
+        <DateRecap />
+      </div>
+    );
+  }
+
+  if (gamePhase === 'encounter') {
+    return (
+      <div className="app-background">
+        <OrganicEncounterUI />
       </div>
     );
   }

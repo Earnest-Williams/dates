@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useGameStore } from '../state/store';
 import { NPCS } from '../state/NpcDatabase';
 import InvestmentApp from './InvestmentApp';
+import PaperDoll from './PaperDoll';
 import './SwipeApp.css';
 
 const PREFERENCE_OPTIONS = [
@@ -189,10 +190,14 @@ const SwipeApp = ({ onClose, onTalkNpc }) => {
                 </div>
               ) : activeNpc ? (
                 <div className="swipe-card animate-fade-in">
-                  <div className="swipe-portrait">
-                    <div className="avatar-placeholder">
-                      {activeNpc.name.charAt(0)}
-                    </div>
+                  <div className="swipe-portrait" style={{ overflow: 'hidden' }}>
+                    {activeNpc.paperDoll ? (
+                      <PaperDoll config={activeNpc.paperDoll} />
+                    ) : (
+                      <div className="avatar-placeholder">
+                        {activeNpc.name.charAt(0)}
+                      </div>
+                    )}
                     <div className="swipe-portrait-overlay">
                       <h4>{activeNpc.name}, 24</h4>
                       {isPremium && <span className="premium-revealed-badge">🔥 Match Boost Active</span>}
@@ -276,7 +281,13 @@ const SwipeApp = ({ onClose, onTalkNpc }) => {
                 <div className="admirers-list-grid">
                   {secretAdmirers.map(npc => (
                     <div key={npc.id} className="admirer-card glass-panel">
-                      <div className="admirer-avatar">{npc.name.charAt(0)}</div>
+                      <div className="admirer-avatar">
+                        {npc.paperDoll ? (
+                          <PaperDoll config={npc.paperDoll} />
+                        ) : (
+                          npc.name.charAt(0)
+                        )}
+                      </div>
                       <div className="admirer-info">
                         <h5>{npc.name}</h5>
                         <span>Likes your profile!</span>
@@ -380,7 +391,13 @@ const SwipeApp = ({ onClose, onTalkNpc }) => {
                   className="match-inbox-item animate-fade-in"
                   onClick={() => onTalkNpc(npc.id)}
                 >
-                  <div className="match-avatar">{npc.name.charAt(0)}</div>
+                  <div className="match-avatar">
+                    {npc.paperDoll ? (
+                      <PaperDoll config={npc.paperDoll} />
+                    ) : (
+                      npc.name.charAt(0)
+                    )}
+                  </div>
                   <div className="match-info">
                     <span className="match-name">{npc.name}</span>
                     <span className="match-status">Relationship: {rel}/100</span>

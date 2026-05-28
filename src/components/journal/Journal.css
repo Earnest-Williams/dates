@@ -1,0 +1,77 @@
+.journal-container {
+  padding: 1.5rem;
+  background-color: #fcfcfc;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  font-family: 'Inter', sans-serif;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.journal-header {
+  border-bottom: 2px solid #eaeaea;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.journal-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: white;
+  border: 1px solid #eaeaea;
+  border-radius: 6px;
+}
+
+.journal-section h3 {
+  margin-top: 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.memory-list, .promise-list, .event-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.memory-item, .promise-item, .event-item {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.memory-item:last-child, .promise-item:last-child, .event-item:last-child {
+  border-bottom: none;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.badge.conflict {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.badge.repair {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.compatibility-hint {
+  font-style: italic;
+  color: #4b5563;
+}
+
+.next-step {
+  font-weight: 600;
+  color: #1d4ed8;
+  background-color: #dbeafe;
+  padding: 0.75rem;
+  border-radius: 4px;
+  text-align: center;
+}

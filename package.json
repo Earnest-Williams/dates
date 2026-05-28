@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "node --test",
-    "audit:actions": "node scripts/audit-actions.mjs"
+    "audit:actions": "node scripts/audit-actions.mjs",
+    "audit:content": "node scripts/audit-content.mjs"
   },
   "dependencies": {
     "react": "^19.2.6",

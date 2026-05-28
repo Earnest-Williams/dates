@@ -5,6 +5,7 @@ import { calculateStorageFee } from '../../sim/economy.js';
 import { NPCS } from '../../data/npcs.js';
 import { NPC_ALERTS, JEALOUSY_CONFRONTATION } from '../../data/npcAlerts.js';
 import { ASSETS } from '../../data/investments.js';
+import { applyMarketNews } from '../../sim/markets.js';
 
 export const simulateTicks = (state, ticks) => {
   const { time: newTime, daysCrossed } = incrementTime(state.time, ticks);
@@ -136,20 +137,10 @@ export const simulateTicks = (state, ticks) => {
       tempLogs.push(newsEvent.text);
     }
 
+    currentPrices = applyMarketNews(currentPrices, newsEvent);
+
     Object.keys(currentPrices).forEach(assetId => {
-      const asset = ASSETS[assetId];
-      if (!asset) return;
-
-      let pctChange = (Math.random() - 0.5) * 2 * asset.volatility;
-      if (newsEvent && newsEvent.assetId === assetId) {
-        pctChange = newsEvent.change + (Math.random() - 0.5) * 0.1;
-      }
-
-      let nextPrice = currentPrices[assetId] * (1 + pctChange);
-      nextPrice = Math.max(0.01, parseFloat(nextPrice.toFixed(2)));
-
-      currentPrices[assetId] = nextPrice;
-
+      const nextPrice = currentPrices[assetId];
       const history = currentHistories[assetId] || [];
       history.push(nextPrice);
       if (history.length > 10) history.shift();

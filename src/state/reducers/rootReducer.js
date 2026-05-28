@@ -168,6 +168,25 @@ export const initialState = {
     weeklyCounts: {},
   },
   logs: ["Welcome to Life Sim! Start by studying, working out, or looking for a date."],
+  features: {
+    organicEncounters: false,
+    compatibilityRevealUx: false,
+    instantMatchRebalance: false,
+    relationshipJournal: false,
+    reputationSpillover: false,
+    dailyPlannerUx: false,
+    marketRiskControls: false,
+    adultToneTags: false,
+  },
+  reputation: {
+    coworkers: 0,
+    friends: 0,
+    nightlife: 0,
+    creative: 0,
+    academic: 0,
+    exes: 0,
+  },
+  relationshipEvents: {}
 };
 
 const isDevelopment = import.meta.env?.MODE !== 'production';
@@ -196,6 +215,7 @@ export const gameReducer = (state, action) => {
     case 'SWIPE_NPC':
     case 'ANSWER_DIALOGUE':
     case 'GO_ON_DATE':
+    case 'CHOOSE_DATE_PHASE_OPTION':
     case 'RESOLVE_DATE_EVENT':
     case 'RESOLVE_STORY_EVENT':
     case 'PROPOSE_MARRIAGE':
@@ -208,7 +228,12 @@ export const gameReducer = (state, action) => {
     case 'CANCEL_PREMIUM':
     case 'UPDATE_SWIPE_PREFERENCES':
     case 'INSTANT_MATCH':
+    case 'DISCOVER_NPC_AT_LOCATION':
+    case 'START_ORGANIC_ENCOUNTER':
+    case 'RESOLVE_ORGANIC_ENCOUNTER':
     case 'RESOLVE_NPC_ALERT':
+    case 'CLOSE_DATE_RECAP':
+    case 'ATTEMPT_REPAIR':
       return socialReducer(state, action);
 
     case 'PERFORM_ACTION':

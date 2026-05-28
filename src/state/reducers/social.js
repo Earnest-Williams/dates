@@ -12,6 +12,9 @@ import {
   getCompatibilityBand,
   inferPlayerCompatibilityTraits,
 } from '../../sim/compatibility.js';
+import { scoreDatePhaseChoice } from '../../sim/dateScoring.js';
+import { applyDateDiminishingReturns } from '../../sim/dateDiminishingReturns.js';
+import { appendRelationshipEvent } from '../../sim/relationshipEvents.js';
 
 const createEmptyMemory = () => ({
   rememberedChoices: [],
@@ -41,12 +44,9 @@ const updateRelationshipMemory = (state, npcId, updates = {}) => {
         ? addUnique(currentMemory.rememberedChoices, updates.rememberedChoice)
         : currentMemory.rememberedChoices,
     sharedActivities: updates.sharedActivities
-      ? updates.sharedActivities.reduce(
-        (items, value) => addUnique(items, value),
-        currentMemory.sharedActivities
-      )
+      ? [...currentMemory.sharedActivities, ...updates.sharedActivities]
       : updates.sharedActivity
-        ? addUnique(currentMemory.sharedActivities, updates.sharedActivity)
+        ? [...currentMemory.sharedActivities, updates.sharedActivity]
         : currentMemory.sharedActivities,
     promises: {
       ...currentMemory.promises,
@@ -235,7 +235,7 @@ export const socialReducer = (state, action) => {
         memoryUpdates.comfortKnown = choice.checkStat ? 'attentive_support' : 'easy_conversation';
       }
 
-      return {
+      let nextStateAfterEvent = {
         ...nextState,
         relationshipMemory: updateRelationshipMemory(nextState, npcId, memoryUpdates),
         matches: {
@@ -252,6 +252,15 @@ export const socialReducer = (state, action) => {
         },
         logs: finalLogs
       };
+      
+      return appendRelationshipEvent(nextStateAfterEvent, npcId, {
+        source: 'dialogue',
+        type: relChange > 0 ? 'positive' : 'negative',
+        relationshipDelta: relChange,
+        chemistryDelta: chemChange,
+        memoryKey: memoryUpdates.rememberedChoice,
+        summary: logText
+      });
     }
 
     case 'GO_ON_DATE': {
@@ -324,6 +333,69 @@ export const socialReducer = (state, action) => {
       };
     }
 
+    case 'CHOOSE_DATE_PHASE_OPTION': {
+      if (!state.activeDateEvent) return state;
+      const { optionIndex } = action.payload;
+      const { npcId, dateType, locationKey, currentPhaseIndex } = state.activeDateEvent;
+      const dateTemplate = getDateTemplate(dateType, locationKey);
+      const phases = dateTemplate.phases || [];
+      const currentPhase = phases[currentPhaseIndex];
+      if (!currentPhase) return state;
+      const choice = currentPhase.choices[optionIndex];
+      if (!choice) return state;
+
+      const scored = scoreDatePhaseChoice(state, state.activeDateEvent, choice);
+
+      const nextPhaseIndex = currentPhaseIndex + 1;
+      const nextVibe = Math.min(100, Math.max(0, state.activeDateEvent.vibe + scored.connectionChange));
+      const nextConnection = Math.min(100, Math.max(0, state.activeDateEvent.connectionScore + scored.connectionChange));
+
+      const memoryUpdates = {
+        rememberedChoices: [],
+        sharedActivities: [],
+        promises: {},
+        importantMoments: [],
+        comfortKnowns: [],
+      };
+      if (scored.memory) memoryUpdates.rememberedChoices.push(scored.memory);
+      if (scored.discovery) memoryUpdates.comfortKnowns.push(scored.discovery);
+      if (scored.callback) memoryUpdates.promises[scored.callback] = 'pending';
+      if (scored.repairScene) memoryUpdates.promises[scored.repairScene] = 'pending';
+      if (scored.conflict) memoryUpdates.importantMoments.push(scored.conflict);
+
+      const updatedMemory = updateRelationshipMemory(state, npcId, memoryUpdates);
+
+      const nextDateEvent = {
+        ...state.activeDateEvent,
+        vibe: nextVibe,
+        connectionScore: nextConnection,
+        currentPhaseIndex: nextPhaseIndex,
+        memoryContext: updatedMemory[npcId],
+        dateOutcome: {
+          ...(state.activeDateEvent.dateOutcome || {}),
+          relationship: (state.activeDateEvent.dateOutcome?.relationship || 0) + (choice.relationship || 0),
+          chemistry: (state.activeDateEvent.dateOutcome?.chemistry || 0) + scored.chemistryChange,
+          mood: (state.activeDateEvent.dateOutcome?.mood || 0) + scored.moodChange,
+          energy: (state.activeDateEvent.dateOutcome?.energy || 0) + scored.energyChange,
+          repairScene: choice.repairScene || state.activeDateEvent.dateOutcome?.repairScene,
+          conflict: choice.conflict || state.activeDateEvent.dateOutcome?.conflict,
+        }
+      };
+
+      if (nextPhaseIndex >= phases.length) {
+        return socialReducer(
+          { ...state, activeDateEvent: nextDateEvent, relationshipMemory: updatedMemory },
+          { type: 'RESOLVE_DATE_EVENT', payload: { finalVibe: nextVibe, logText: `Completed ${dateTemplate.title}`, dateOutcome: nextDateEvent.dateOutcome } }
+        );
+      }
+
+      return {
+        ...state,
+        activeDateEvent: nextDateEvent,
+        relationshipMemory: updatedMemory
+      };
+    }
+
     case 'RESOLVE_DATE_EVENT': {
       const { finalVibe, logText, dateOutcome = {} } = action.payload;
       if (!state.activeDateEvent) return state;
@@ -370,6 +442,10 @@ export const socialReducer = (state, action) => {
         chemChange -= 3;
       }
 
+      const diminished = applyDateDiminishingReturns(relGain, chemChange, npcId, dateType, state.relationshipMemory);
+      relGain = diminished.relGain;
+      chemChange = diminished.chemChange;
+
       const newChem = Math.min(100, Math.max(0, (currentMatch.chemistry || 10) + chemChange));
 
       // Chemistry multiplier
@@ -393,10 +469,23 @@ export const socialReducer = (state, action) => {
       const logMsg = `Date Over: ${logText}${repairText} (Rel: ${newRel}/100, Chem: ${newChem}/100, Mood ${moodIncrease >= 0 ? '+' : ''}${moodIncrease})`;
       const compatibilityLog = `You noticed ${npc.name}'s deeper patterns over time. (${compatibilityBand} long-term fit)`;
 
-      return {
+      let stateToReturn = {
         ...nextState,
-        gamePhase: 'living',
+        gamePhase: 'date_recap',
         activeDateEvent: null,
+        lastDateRecap: {
+          npcId,
+          npcName: npc.name,
+          qualityScore,
+          logText,
+          relationshipChange: finalRelGain,
+          chemistryChange: chemChange,
+          memoriesGained: dateOutcome.memories || [],
+          promisesCreated: dateOutcome.callbacks || [],
+          conflictRisk: dateOutcome.conflict,
+          repairOpportunity: dateOutcome.repairScene,
+          compatibilityBand
+        },
         relationshipMemory: updateRelationshipMemory(nextState, npcId, {
           sharedActivities: [
             `date_${state.activeDateEvent.locationKey}`,
@@ -442,6 +531,20 @@ export const socialReducer = (state, action) => {
         },
         logs: [compatibilityLog, logMsg, ...nextState.logs].slice(0, 20)
       };
+      
+      let eventType = qualityScore >= 50 ? 'positive' : 'negative';
+      if (dateOutcome.conflict) eventType = 'conflict';
+      else if (dateOutcome.repairScene) eventType = 'repair';
+
+      return appendRelationshipEvent(stateToReturn, npcId, {
+        source: 'date',
+        type: eventType,
+        relationshipDelta: finalRelGain,
+        chemistryDelta: chemChange,
+        conflictId: dateOutcome.conflict || null,
+        repairScene: dateOutcome.repairScene || null,
+        summary: `Date at ${dateType}: Vibe ${qualityScore}`
+      });
     }
 
     case 'RESOLVE_STORY_EVENT': {
@@ -904,22 +1007,159 @@ export const socialReducer = (state, action) => {
         logs: [`Updated dating preferences.`, ...state.logs].slice(0, 20)
       };
     }
-
-    case 'INSTANT_MATCH': {
-      const { npcId } = action.payload;
+    case 'DISCOVER_NPC_AT_LOCATION': {
+      const { npcId, locationKey } = action.payload;
       const npc = NPCS.find(n => n.id === npcId);
       if (!npc) return state;
 
-      const newMatches = {
-        ...state.matches,
-        [npcId]: { met: true, relationship: 15, dateCount: 0 }
-      };
+      let currentMatch = state.matches[npcId];
+      if (currentMatch && currentMatch.met) {
+        return state; // Already met
+      }
 
       return {
         ...state,
-        matches: newMatches,
-        logs: [`✨ Gold Instant Match! You matched with ${npc.name} via Secret Admirers.`, ...state.logs].slice(0, 20)
+        matches: {
+          ...state.matches,
+          [npcId]: {
+            ...currentMatch,
+            met: true,
+            discoveredVia: 'organic',
+            relationship: 5,
+            chemistry: 5,
+            dateCount: 0,
+            storyTier: 0,
+            relationshipStage: 'acquaintance',
+          }
+        },
+        logs: [`You met ${npc.name} at the ${locationKey}!`, ...state.logs].slice(0, 20)
       };
+    }
+
+    case 'START_ORGANIC_ENCOUNTER': {
+      const { encounter } = action.payload; // from townTexture.js
+      return {
+        ...state,
+        gamePhase: 'encounter',
+        activeEncounterEvent: {
+          ...encounter
+        }
+      };
+    }
+
+    case 'RESOLVE_ORGANIC_ENCOUNTER': {
+      const { choiceIndex } = action.payload;
+      const encounter = state.activeEncounterEvent;
+      if (!encounter) return state;
+      const choice = encounter.choices ? encounter.choices[choiceIndex] : { text: 'Continued the encounter', relationship: 1, chemistry: 0, mood: 0 };
+      const npcId = encounter.npcId;
+
+      let nextState = simulateTicks(state, 2); // Takes 20 minutes
+
+      let relGain = choice.relationship || 0;
+      let chemChange = choice.chemistry || 0;
+      let moodChange = choice.mood || 0;
+
+      const currentMatch = nextState.matches[npcId] || { met: true, relationship: 5, chemistry: 5, dateCount: 0, storyTier: 0, relationshipStage: 'acquaintance' };
+      const newRel = applyRelationshipCap(currentMatch.relationship, relGain, currentMatch.storyTier, nextState.stats);
+      const newChem = Math.min(100, Math.max(0, (currentMatch.chemistry || 5) + chemChange));
+      const newMood = Math.min(100, Math.max(0, (nextState.needs.mood || 100) + moodChange));
+
+      const memoryUpdates = {};
+      if (choice.discovery) memoryUpdates.comfortKnowns = [choice.discovery];
+      if (choice.memory) memoryUpdates.rememberedChoices = [choice.memory];
+      if (choice.callback) memoryUpdates.promises = { [choice.callback]: 'pending' };
+
+      const updatedMemory = updateRelationshipMemory(nextState, npcId, memoryUpdates);
+
+      let stateToReturn = {
+        ...nextState,
+        gamePhase: 'living',
+        activeEncounterEvent: null,
+        matches: {
+          ...nextState.matches,
+          [npcId]: {
+            ...currentMatch,
+            relationship: newRel,
+            chemistry: newChem
+          }
+        },
+        relationshipMemory: updatedMemory,
+        needs: {
+          ...nextState.needs,
+          mood: newMood
+        },
+        logs: [`Encounter finished: ${choice.text}`, ...nextState.logs].slice(0, 20)
+      };
+
+      return appendRelationshipEvent(stateToReturn, npcId, {
+        source: 'organic_encounter',
+        type: choice.relationship > 0 ? 'positive' : 'info',
+        relationshipDelta: relGain,
+        chemistryDelta: chemChange,
+        summary: `Encounter at ${encounter.location}: ${choice.text}`
+      });
+    }
+
+
+    case 'INSTANT_MATCH': {
+      const { npcId } = action.payload;
+      const npc = NPCS.find((n) => n.id === npcId);
+      if (!npc) return state;
+
+      if (!state.features?.instantMatchRebalance) {
+        // Legacy behavior
+        const memoryContext = createEmptyMemory();
+        memoryContext.comfortKnowns.push('preferred_chat_hours');
+        return {
+          ...state,
+          matches: {
+            ...state.matches,
+            [npcId]: {
+              met: true,
+              relationship: 35,
+              chemistry: 20,
+              dateCount: 1,
+              storyTier: 1,
+            },
+          },
+          relationshipMemory: {
+            ...state.relationshipMemory,
+            [npcId]: memoryContext,
+          },
+          logs: [`You matched with ${npc.name} instantly! (Premium)`, ...state.logs].slice(0, 20),
+        };
+      }
+
+      // New Rebalanced Behavior
+      let currentMatch = state.matches[npcId];
+      if (currentMatch && currentMatch.met) return state;
+
+      let stateToReturn = {
+        ...state,
+        matches: {
+          ...state.matches,
+          [npcId]: {
+            ...currentMatch,
+            met: true,
+            discoveredVia: 'instant_match',
+            relationship: 10,
+            chemistry: 10,
+            dateCount: 0,
+            storyTier: 0,
+            relationshipStage: 'matched',
+          },
+        },
+        logs: [`You matched with ${npc.name} instantly! (Premium)`, ...state.logs].slice(0, 20),
+      };
+      
+      return appendRelationshipEvent(stateToReturn, npcId, {
+        source: 'instant_match',
+        type: 'info',
+        relationshipDelta: 10,
+        chemistryDelta: 10,
+        summary: 'Matched instantly via Premium.'
+      });
     }
 
     case 'RESOLVE_NPC_ALERT': {
@@ -969,6 +1209,56 @@ export const socialReducer = (state, action) => {
           }
         },
         logs: [logMsg, ...state.logs].slice(0, 20)
+      };
+    }
+
+    case 'CLOSE_DATE_RECAP': {
+      return {
+        ...state,
+        gamePhase: 'living',
+        lastDateRecap: null
+      };
+    }
+
+    case 'ATTEMPT_REPAIR': {
+      const { npcId, repairActionId } = action.payload;
+      const currentMatch = state.matches[npcId];
+      if (!currentMatch) return state;
+
+      let nextState = simulateTicks(state, 2); // Taking time to repair
+      
+      const success = Math.random() > 0.3; // Placeholder logic for now
+      
+      let newRel = currentMatch.relationship;
+      let newChem = currentMatch.chemistry;
+      let logMsg = "";
+      let newConflictId = currentMatch.activeConflictId;
+      let newRepairScene = currentMatch.pendingRepairScene;
+
+      if (success) {
+        newRel = applyRelationshipCap(currentMatch.relationship, 10, currentMatch.storyTier, nextState.stats);
+        newChem = Math.min(100, currentMatch.chemistry + 5);
+        logMsg = `Successfully repaired relationship with ${npcId} using ${repairActionId}.`;
+        newConflictId = null;
+        newRepairScene = null;
+      } else {
+        newRel = Math.max(0, currentMatch.relationship - 5);
+        logMsg = `Repair attempt failed with ${npcId}. Needs more time or a different approach.`;
+      }
+
+      return {
+        ...nextState,
+        matches: {
+          ...nextState.matches,
+          [npcId]: {
+            ...currentMatch,
+            relationship: newRel,
+            chemistry: newChem,
+            activeConflictId: newConflictId,
+            pendingRepairScene: newRepairScene
+          }
+        },
+        logs: [logMsg, ...nextState.logs].slice(0, 20)
       };
     }
 

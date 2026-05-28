@@ -355,6 +355,7 @@
   justify-content: center;
   font-weight: bold;
   font-size: 1.1rem;
+  overflow: hidden;
 }
 
 .admirer-info {
@@ -570,6 +571,7 @@
   justify-content: center;
   font-weight: bold;
   font-size: 0.85rem;
+  overflow: hidden;
 }
 
 .match-info {

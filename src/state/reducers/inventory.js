@@ -1,6 +1,7 @@
 import { ITEMS } from '../../data/items.js';
 import { HOUSING_TIERS } from '../../data/housing.js';
 import { ASSETS } from '../../data/investments.js';
+import { calculateTransactionFriction } from '../../sim/markets.js';
 
 export const inventoryReducer = (state, action) => {
   switch (action.type) {
@@ -161,7 +162,7 @@ export const inventoryReducer = (state, action) => {
     case 'BUY_ASSET': {
       const { assetId, quantity } = action.payload;
       const price = state.assetPrices[assetId];
-      const cost = price * quantity;
+      const cost = calculateTransactionFriction(assetId, quantity, price, 'buy');
 
       if (state.stats.money < cost) {
         return {
@@ -200,7 +201,7 @@ export const inventoryReducer = (state, action) => {
       }
 
       const price = state.assetPrices[assetId];
-      const revenue = price * quantity;
+      const revenue = calculateTransactionFriction(assetId, quantity, price, 'sell');
       const costBasis = current.avgPrice * quantity;
       const profit = revenue - costBasis;
       const newQty = current.quantity - quantity;
