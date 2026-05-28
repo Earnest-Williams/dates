@@ -22,11 +22,8 @@ export const swipeNpc = (state, dispatch, npcId, direction) => {
   return true;
 };
 
-export const giveGift = (state, dispatch, npcId, itemKey) => {
-  if ((state.inventory[itemKey] || 0) <= 0) return false;
-  
-  dispatch({ type: 'GIVE_GIFT', payload: { npcId, itemKey } });
-  return true;
+export const giveGift = () => {
+  return false;
 };
 
 export const answerDialogue = (state, dispatch, npcId, optionIndex) => {

@@ -10,7 +10,7 @@ You begin your journey in **Generation 1** as **Alex**, renting a basic Studio A
 
 1. **Managing Needs**: Keeping your core needs (Energy, Hunger, Hygiene, Health, and Mood) stable.
 2. **Improving Stats**: Studying, working out, working at OmniCorp, and practicing charm to level up your attributes.
-3. **Dating & Socializing**: Swiping on the dating app to match with NPCs, chatting with them, giving gifts, and going on romantic dates.
+3. **Dating & Socializing**: Swiping on the dating app to match with NPCs, chatting with them, building relationship memory, and going on romantic dates.
 4. **Customizing Your Home**: Upgrading your apartment tier to place furniture and appliances that grant powerful passive bonuses.
 5. **Generational Legacy**: Proposing marriage, celebrating a wedding, raising a child through 5 developmental stages, and retiring to play as your child with inherited stats, cash, and vehicles.
 
@@ -44,10 +44,11 @@ You begin your journey in **Generation 1** as **Alex**, renting a basic Studio A
   * **Used Sedan**: 20 mins.
   * **Luxury Sports Car**: 20 mins (required to bypass bouncers at the Neon Beats Nightclub unless you have 50+ Style).
 
-### 4. Dating, Matching, & Gift Giving
+### 4. Dating, Matching, & Relationship Memory
 * **Swipe App**: Swipe on NPCs like **Elena** (Scholar), **Brad** (Gym Rat), **Sophia** (Socialite), **Marcus** (Executive), and **Chloe** (Artist). Matching chance depends on your Style, Charm, and how well you meet their archetype stat requirements.
-* **Socializing**: Chat with matches, check dialogues, and give custom gifts (e.g. roses, chocolates, books, supplements, designer watches). NPC-archetype matches yield $1.5\times$ relationship gains.
-* **Dates**: Meet NPCs at locations. Going to their preferred venue (e.g., library for Elena, gym for Brad) gives massive relationship and mood boosts.
+* **Socializing**: Build relationships through conversations, shared routines, dates, remembered choices, emotional support, and long-term compatibility. Items may appear in specific story moments, but relationships are not advanced through repeatable gift-giving.
+* **Relationship Memory Rule**: `dates` does not use a typical visual-novel gift-giving system. Relationship progress must come primarily from conversations, shared activities, compatibility, remembered choices, dates, routines, conflict/repair, and long-term follow-through. Items may appear as contextual story props, but not as repeatable affection-optimization gifts.
+* **Dates**: Meet NPCs at locations. Shared time, compatibility, conversation tone, and remembered follow-through shape relationship and mood outcomes.
 
 ### 5. Marriage & Generational Legacy Shift
 * **Proposal**: Reaching 80+ relationship points and renting at least a 1-Bedroom Flat unlocks the proposal option.
@@ -90,7 +91,7 @@ src/
 │   │   ├── action.js      # Self-care actions, sleep, travel, tv, hospital
 │   │   ├── inventory.js   # Items, furniture placement, housing upgrades
 │   │   ├── rootReducer.js # Root state layout & reducer router
-│   │   ├── social.js      # Swipe matching, gifts, dialogue, dating, legacy
+│   │   ├── social.js      # Swipe matching, relationship memory, dialogue, dating, legacy
 │   │   └── time.js        # Time simulation, rent, bills, collapses
 │   ├── store.js             # Zustand store, actions, dispatch bridge
 │   ├── ItemDatabase.js    # Data connector for items

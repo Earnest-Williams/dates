@@ -89,6 +89,7 @@ export const initialState = {
     vehicles: [], // list of vehicleKeys
   },
   matches: {}, // Format: { [npcId]: { met: boolean, relationship: number, chemistry: number, dateCount: number } }
+  relationshipMemory: {}, // Format: { [npcId]: remembered choices, shared activities, promises, moments, comfort, last day }
   compatibility: {
     playerTraits: {
       ambition: 'balanced',
@@ -191,7 +192,6 @@ export const gameReducer = (state, action) => {
 
     case 'CHANGE_RELATIONSHIP':
     case 'SWIPE_NPC':
-    case 'GIVE_GIFT':
     case 'ANSWER_DIALOGUE':
     case 'GO_ON_DATE':
     case 'RESOLVE_DATE_EVENT':

@@ -34,7 +34,7 @@ src/
 │   │   ├── action.js      # Self-care actions, sleep, travel, tv, hospital
 │   │   ├── inventory.js   # Items, furniture placement, housing upgrades
 │   │   ├── rootReducer.js # Root state layout & reducer router
-│   │   ├── social.js      # Swipe matching, gifts, dialogue, dating, legacy
+│   │   ├── social.js      # Swipe matching, relationship memory, dialogue, dating, legacy
 │   │   └── time.js        # Time simulation, rent, bills, collapses
 │   ├── store.js             # Zustand store, actions, dispatch bridge
 │   ├── ItemDatabase.js    # Data connector for items
@@ -56,14 +56,13 @@ All state changes flow through `gameReducer(state, action)` in [rootReducer.js](
 - `WATCH_TV`: Restores mood at the cost of energy (requires smart TV).
 - `VISIT_HOSPITAL`: Recovers health for cash at the hospital.
 - `TRAVEL`: Relocates player to a map venue, advancing time based on active vehicle speed.
-- `BUY_ITEM`: Purchases an appliance, gift, vehicle, or personal upgrade.
+- `BUY_ITEM`: Purchases an appliance, vehicle, furniture item, consumable, or personal upgrade.
 - `PLACE_FURNITURE` / `STORE_FURNITURE`: Manages active home slots or storage units.
 - `TAKE_SUPPLEMENTS`: Consumes supplements to gain health and energy.
 - `UPGRADE_HOUSING`: Moves into a higher tier apartment.
 - `SWIPE_NPC`: Swipes right or left on the dating app. Success rate uses style, charm, and preference matches.
-- `GIVE_GIFT`: Gives a gift to an NPC, boosting relationship points (enhanced if matched with their archetype likes).
 - `ANSWER_DIALOGUE`: Answers introduction prompts, checking stats for positive relationships and mood boosts.
-- `GO_ON_DATE`: Take a matched NPC out to a venue. Enhances relationships, especially if matched with archetype preferences.
+- `GO_ON_DATE`: Take a matched NPC out to a venue. Enhances relationships through shared time, date tone, compatibility, and remembered context.
 - `PROPOSE_MARRIAGE`: Proposes marriage to a matched NPC (requires 80+ relationship and Tier 2+ housing).
 - `COMPLETE_WEDDING`: Complete wedding phase with a wedding style, naming the heir.
 - `SELECT_PARENTING_CHOICE`: Choose child-rearing path at developmental milestones.
@@ -180,7 +179,7 @@ Travel speed and energy costs depend on the vehicle currently active in the play
 - **Peak Fitness Gym**: Train Fitness stat (⚡ -20 Energy). Pin located at `top: 38%, left: 38%`.
 - **Grand Library**: Train Education stat (⚡ -15 Energy). Pin located at `top: 62%, left: 65%`.
 - **OmniCorp Headquarters**: Work shifts to earn cash (⚡ -35 Energy). Pin located at `top: 20%, left: 79%`.
-- **Avenue Shopping Mall**: Purchase gifts, appliances, and vehicles. Pin located at `top: 42%, left: 47%`.
+- **Avenue Shopping Mall**: Purchase appliances, furniture, vehicles, consumables, and personal upgrades. Pin located at `top: 42%, left: 47%`. Mall items are not a generic shortcut for romance progression.
 - **Greenwood Park**: Serenely walks with nature (⚡ -3 Energy). Pin located at `top: 55%, left: 11%`. Meeting point for Chloe.
 - **Neon Beats Nightclub**: Party and socialize. Pin located at `top: 80%, left: 46%`. *Gated: Requires 50+ Style OR a Sports Car.*
 
@@ -340,21 +339,23 @@ Expand dates into scene-style multi-step events:
 
 **Design intent:** Dates should feel story-driven; failed dates should still create memorable narrative value.
 
-### E. Gift Memory & Preference Discovery
-Per-NPC gift preference layers:
-- Loved
-- Liked
-- Neutral
-- Disliked
+### E. Relationship Memory & Meaningful Follow-Through
+`dates` does not use a typical visual-novel gift-giving system. Relationship progress must come primarily from conversations, shared activities, compatibility, remembered choices, dates, routines, conflict/repair, and long-term follow-through. Items may appear as contextual story props, but not as repeatable affection-optimization gifts.
 
-Additional gift systems:
-- Dialogue hints that expose preferences through play
-- Remembered gifts and callbacks in future dialogue
-- Diminishing returns on repeated gifts
-- Milestone gift bonuses
-- Unique story-event gifts
+Relationship memory tracks:
+- Remembered choices and topics an NPC cares about.
+- Shared activities, routines, and date locations.
+- Promises, pending follow-through, and repaired conflicts.
+- Important moments that future dialogue, cohabitation scenes, proposal readiness, legacy reactions, and long-term tone can reference.
+- Known comfort styles such as quiet support, practical help, or direct reassurance.
 
-**Design intent:** Gifting becomes personal learning, not one-time optimization.
+Contextual item rule:
+- Items must be tied to specific authored scenes.
+- Items must not be repeatable affection currency.
+- Items must not be categorized into universal preference tables.
+- Items must not be purchasable as a generic relationship shortcut.
+
+**Design intent:** Romance progression rewards attention, continuity, compatibility, and follow-through rather than shopping optimization.
 
 ### F. Town Identity & Location Social Texture
 Locations should behave like recurring places, not static menus:
@@ -418,7 +419,7 @@ To make implementation sequencing clearer, this pass adds explicit ordering guid
 
 1. **Routine-first slice**: ship daily planner + low-pressure activities + weekly soft-goal nudges first.
 2. **Narrative backbone slice**: convert all romanceable NPC routes into chaptered progression states.
-3. **Expression slice**: expand date scenes, gifting memory, and home/social identity reactions.
+3. **Expression slice**: expand date scenes, relationship-memory callbacks, and home/social identity reactions.
 4. **World depth slice**: add location schedules/events, reputation spillover, and expanded NPC roster.
 
 **Pass 1 completion signal:** A designer can map every deliverable to one of the four slices above and schedule content production with minimal ambiguity.
@@ -430,7 +431,7 @@ This pass defines content quality checks to prevent shallow implementations:
 - **Romance chapter check**: each romanceable NPC has at least one unique scene in each chapter stage (first impression through long-term content).
 - **Compatibility divergence check**: at least two high-initial-match NPC routes can branch to lower long-term outcomes for different hidden-trait reasons.
 - **Date tone check**: each major venue supports at least one positive, one awkward/funny, and one failed outcome path that still advances narrative context.
-- **Gift memory check**: NPC dialogue must reference at least one prior meaningful gift in a later interaction window.
+- **Relationship memory check**: NPC dialogue must reference at least one prior remembered choice, shared activity, promise, conflict/repair moment, or meaningful follow-through in a later interaction window.
 - **Town identity check**: the same location visited on weekday vs weekend produces different social possibilities.
 - **Social spillover check**: at least one relationship event changes reactions from a third-party social circle member.
 - **Home expression check**: at least one NPC response changes based on room style tags/comfort profile.

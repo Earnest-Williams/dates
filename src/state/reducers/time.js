@@ -4,6 +4,7 @@ import { decayNeeds } from '../../sim/needs.js';
 import { calculateStorageFee } from '../../sim/economy.js';
 import { NPCS } from '../../data/npcs.js';
 import { NPC_ALERTS, JEALOUSY_CONFRONTATION } from '../../data/npcAlerts.js';
+import { ASSETS } from '../../data/investments.js';
 
 export const simulateTicks = (state, ticks) => {
   const { time: newTime, daysCrossed } = incrementTime(state.time, ticks);

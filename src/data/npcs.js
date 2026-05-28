@@ -4,35 +4,30 @@ export const ARCHETYPES = {
     primaryStat: "intelligence",
     secondaryStat: "corporate",
     tertiaryStat: "charisma",
-    giftLikes: ["Books", "Telescope"],
   },
   GYM_RAT: {
     name: "Gym Rat",
     primaryStat: "fitness",
     secondaryStat: "hygiene",
     tertiaryStat: "charisma",
-    giftLikes: ["Supplements", "Smart Watch"],
   },
   SOCIALITE: {
     name: "Socialite",
     primaryStat: "style",
     secondaryStat: "charisma",
     tertiaryStat: "money",
-    giftLikes: ["Perfume", "Luxury Watch", "Flowers"],
   },
   EXECUTIVE: {
     name: "Executive",
     primaryStat: "corporate",
     secondaryStat: "style",
     tertiaryStat: "intelligence",
-    giftLikes: ["Luxury Watch", "Espresso Machine"],
   },
   ARTIST: {
     name: "Artist",
     primaryStat: "charisma",
     secondaryStat: "style",
     tertiaryStat: "intelligence",
-    giftLikes: ["Paint Set", "Flowers"],
   }
 };
 
