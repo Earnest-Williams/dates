@@ -36,7 +36,7 @@ export const answerDialogue = (state, dispatch, npcId, optionIndex) => {
   return true;
 };
 
-export const goOnDate = (state, dispatch, npcId, locationKey) => {
+export const goOnDate = (state, dispatch, npcId, locationKey, dateType = null) => {
   const location = LOCATIONS[locationKey];
   const npc = NPCS.find(n => n.id === npcId);
   if (!location || !npc) return false;
@@ -51,12 +51,12 @@ export const goOnDate = (state, dispatch, npcId, locationKey) => {
     if (!ownsSportsCar && !hasStyle) return false;
   }
 
-  dispatch({ type: 'GO_ON_DATE', payload: { npcId, locationKey } });
+  dispatch({ type: 'GO_ON_DATE', payload: { npcId, locationKey, dateType } });
   return true;
 };
 
-export const resolveDateEvent = (state, dispatch, finalVibe, logText) => {
-  dispatch({ type: 'RESOLVE_DATE_EVENT', payload: { finalVibe, logText } });
+export const resolveDateEvent = (state, dispatch, finalVibe, logText, dateOutcome = {}) => {
+  dispatch({ type: 'RESOLVE_DATE_EVENT', payload: { finalVibe, logText, dateOutcome } });
 };
 
 export const resolveStoryEvent = (state, dispatch, npcId, success) => {

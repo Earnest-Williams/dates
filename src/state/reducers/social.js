@@ -1,5 +1,7 @@
 import { NPCS } from '../../data/npcs.js';
 import { LOCATIONS } from '../../data/locations.js';
+import { getDateTemplate } from '../../data/dates.js';
+import { getNpcHomeStyleReaction } from '../../data/furniture.js';
 import { calculateMatchProbability } from '../../sim/matching.js';
 import { calculateTravelStats } from '../../data/geography.js';
 import { simulateTicks } from './time.js';
@@ -33,12 +35,19 @@ const updateRelationshipMemory = (state, npcId, updates = {}) => {
     ...(state.relationshipMemory?.[npcId] || {})
   };
   const nextMemory = {
-    rememberedChoices: updates.rememberedChoice
-      ? addUnique(currentMemory.rememberedChoices, updates.rememberedChoice)
-      : currentMemory.rememberedChoices,
-    sharedActivities: updates.sharedActivity
-      ? addUnique(currentMemory.sharedActivities, updates.sharedActivity)
-      : currentMemory.sharedActivities,
+    rememberedChoices: updates.rememberedChoices
+      ? updates.rememberedChoices.reduce((items, v) => addUnique(items, v), currentMemory.rememberedChoices)
+      : updates.rememberedChoice
+        ? addUnique(currentMemory.rememberedChoices, updates.rememberedChoice)
+        : currentMemory.rememberedChoices,
+    sharedActivities: updates.sharedActivities
+      ? updates.sharedActivities.reduce(
+        (items, value) => addUnique(items, value),
+        currentMemory.sharedActivities
+      )
+      : updates.sharedActivity
+        ? addUnique(currentMemory.sharedActivities, updates.sharedActivity)
+        : currentMemory.sharedActivities,
     promises: {
       ...currentMemory.promises,
       ...(updates.promises || {})
@@ -46,9 +55,11 @@ const updateRelationshipMemory = (state, npcId, updates = {}) => {
     importantMoments: updates.importantMoment
       ? addUnique(currentMemory.importantMoments, updates.importantMoment)
       : currentMemory.importantMoments,
-    comfortKnown: updates.comfortKnown
-      ? addUnique(currentMemory.comfortKnown, updates.comfortKnown)
-      : currentMemory.comfortKnown,
+    comfortKnown: updates.comfortKnowns
+      ? updates.comfortKnowns.reduce((items, v) => addUnique(items, v), currentMemory.comfortKnown)
+      : updates.comfortKnown
+        ? addUnique(currentMemory.comfortKnown, updates.comfortKnown)
+        : currentMemory.comfortKnown,
     lastMeaningfulInteractionDay: updates.lastMeaningfulInteractionDay
       ?? currentMemory.lastMeaningfulInteractionDay
   };
@@ -65,6 +76,19 @@ const countRelationshipMemorySignals = (memory = createEmptyMemory()) => {
     + Object.keys(memory.promises || {}).length
     + (memory.importantMoments?.length || 0)
     + (memory.comfortKnown?.length || 0);
+};
+
+
+const clamp = (value, min = 0, max = 100) => Math.max(min, Math.min(max, value));
+
+
+const summarizeHomeStyle = (state, npcId) => {
+  const reaction = getNpcHomeStyleReaction(npcId, state.placedFurniture || []);
+  return {
+    reaction,
+    connectionBonus: reaction.fit === 'comfortable' ? 8 : reaction.fit === 'curious' ? 3 : 0,
+    logText: reaction.text,
+  };
 };
 
 const applyRelationshipCap = (currentRel, delta, storyTier = 0, stats = {}) => {
@@ -198,7 +222,7 @@ export const socialReducer = (state, action) => {
         moodIncrease = Math.min(10, Math.max(1, Math.floor(relChange * 0.5)));
       }
       const currentMood = nextState.needs.mood !== undefined ? nextState.needs.mood : 100;
-      const newMood = Math.min(100, currentMood + moodIncrease);
+      const newMood = clamp(currentMood + moodIncrease);
 
       const logMsg = `[${npc.name}] ${logText} (Rel: ${newRel}/100, Chem: ${newChem}/100${moodIncrease ? `, +${moodIncrease} Mood` : ''})`;
       const finalLogs = [logMsg, ...nextState.logs].slice(0, 20);
@@ -231,8 +255,9 @@ export const socialReducer = (state, action) => {
     }
 
     case 'GO_ON_DATE': {
-      const { npcId, locationKey } = action.payload;
-      const location = LOCATIONS[locationKey];
+      const { npcId, locationKey, dateType } = action.payload;
+      const dateTemplate = getDateTemplate(dateType, locationKey);
+      const location = LOCATIONS[locationKey || dateTemplate.venueKey];
       const npc = NPCS.find(n => n.id === npcId);
 
       const destinationSettlement = {
@@ -243,7 +268,7 @@ export const socialReducer = (state, action) => {
         gym: 'Stagborough',
         park: 'Bramblewick',
         home: 'Endleigh'
-      }[locationKey] || 'Brockleigh';
+      }[locationKey || dateTemplate.venueKey] || 'Brockleigh';
 
       const travelStats = calculateTravelStats(state.activeLocation, destinationSettlement, state.properties.vehicles);
       
@@ -277,8 +302,12 @@ export const socialReducer = (state, action) => {
         activeLocation: destinationSettlement,
         activeDateEvent: { 
           npcId, 
-          locationKey, 
+          locationKey: locationKey || dateTemplate.venueKey,
+          dateType: dateTemplate.id,
           currentPhaseIndex: 0,
+          connectionScore: dateTemplate.venueKey === 'home'
+            ? 30 + summarizeHomeStyle(state, npcId).connectionBonus
+            : 30,
           vibe: 30,
           memoryContext: state.relationshipMemory?.[npcId] || createEmptyMemory()
         },
@@ -287,14 +316,18 @@ export const socialReducer = (state, action) => {
           ...nextState.needs,
           energy: finalEnergy
         },
-        logs: [logMsg, ...nextState.logs].slice(0, 20)
+        logs: [
+          ...(dateTemplate.venueKey === 'home' ? [summarizeHomeStyle(state, npcId).logText] : []),
+          logMsg,
+          ...nextState.logs
+        ].slice(0, 20)
       };
     }
 
     case 'RESOLVE_DATE_EVENT': {
-      const { finalVibe, logText } = action.payload;
+      const { finalVibe, logText, dateOutcome = {} } = action.payload;
       if (!state.activeDateEvent) return state;
-      const { npcId } = state.activeDateEvent;
+      const { npcId, dateType, connectionScore = finalVibe } = state.activeDateEvent;
       const npc = NPCS.find(n => n.id === npcId);
       if (!npc) return state;
       const npcCompatibility = state.compatibility?.npcTraits?.[npcId] || generateCompatibilityTraits(npcId);
@@ -310,13 +343,15 @@ export const socialReducer = (state, action) => {
       let relGain;
       let chemChange;
       
-      if (finalVibe >= 80) {
+      const qualityScore = finalVibe;
+
+      if (qualityScore >= 80) {
         relGain = 20;
         chemChange = 15;
-      } else if (finalVibe >= 50) {
+      } else if (qualityScore >= 50) {
         relGain = 10;
         chemChange = 5;
-      } else if (finalVibe >= 30) {
+      } else if (qualityScore >= 30) {
         relGain = 5;
         chemChange = 0;
       } else {
@@ -324,10 +359,13 @@ export const socialReducer = (state, action) => {
         chemChange = -10;
       }
 
-      if (compatibilityBand === 'strong' && finalVibe < 50) {
+      relGain += dateOutcome.relationship || 0;
+      chemChange += dateOutcome.chemistry || 0;
+
+      if (compatibilityBand === 'strong' && qualityScore < 50) {
         relGain += 4;
         chemChange += 4;
-      } else if (compatibilityBand === 'fragile' && finalVibe >= 80) {
+      } else if (compatibilityBand === 'fragile' && qualityScore >= 80) {
         relGain -= 5;
         chemChange -= 3;
       }
@@ -343,11 +381,16 @@ export const socialReducer = (state, action) => {
 
       const newRel = applyRelationshipCap(currentMatch.relationship, finalRelGain, currentMatch.storyTier, nextState.stats);
       
-      let moodIncrease = finalVibe >= 50 ? Math.floor(finalVibe / 5) : 0;
+      let moodIncrease = qualityScore >= 50 ? Math.floor(qualityScore / 5) : 0;
+      moodIncrease += dateOutcome.mood || 0;
       const currentMood = nextState.needs.mood !== undefined ? nextState.needs.mood : 100;
-      const newMood = Math.min(100, currentMood + moodIncrease);
+      const newMood = clamp(currentMood + moodIncrease);
+      const newEnergy = clamp((nextState.needs.energy ?? 100) + (dateOutcome.energy || 0));
 
-      const logMsg = `Date Over: ${logText} (Rel: ${newRel}/100, Chem: ${newChem}/100, +${moodIncrease} Mood)`;
+      const repairText = dateOutcome.repairScene
+        ? ` A repair opportunity opened: ${dateOutcome.repairScene}.`
+        : '';
+      const logMsg = `Date Over: ${logText}${repairText} (Rel: ${newRel}/100, Chem: ${newChem}/100, Mood ${moodIncrease >= 0 ? '+' : ''}${moodIncrease})`;
       const compatibilityLog = `You noticed ${npc.name}'s deeper patterns over time. (${compatibilityBand} long-term fit)`;
 
       return {
@@ -355,8 +398,22 @@ export const socialReducer = (state, action) => {
         gamePhase: 'living',
         activeDateEvent: null,
         relationshipMemory: updateRelationshipMemory(nextState, npcId, {
-          sharedActivity: `date_${state.activeDateEvent.locationKey}`,
-          importantMoment: finalVibe >= 80 ? 'memorable_date' : null,
+          sharedActivities: [
+            `date_${state.activeDateEvent.locationKey}`,
+            ...(dateType ? [`date_${dateType}`] : [])
+          ],
+          rememberedChoices: dateOutcome.memories || [],
+          importantMoment: qualityScore >= 80 || finalVibe >= 80
+            ? 'memorable_date'
+            : dateOutcome.repairScene || dateOutcome.conflict || null,
+          comfortKnowns: [
+            ...(dateOutcome.discoveries || []),
+            ...(qualityScore >= 30 ? ['learned_from_mediocre_date'] : [])
+          ],
+          promises: {
+            ...Object.fromEntries((dateOutcome.callbacks || []).map((cb) => [cb, 'pending'])),
+            ...(dateOutcome.repairScene ? { [dateOutcome.repairScene]: 'pending' } : {})
+          },
           lastMeaningfulInteractionDay: nextState.time.day
         }),
         matches: {
@@ -366,7 +423,9 @@ export const socialReducer = (state, action) => {
             relationship: newRel,
             chemistry: newChem,
             dateCount: (currentMatch.dateCount || 0) + 1,
-            compatibilityScore
+            compatibilityScore,
+            lastDateQuality: qualityScore,
+            pendingRepairScene: dateOutcome.repairScene || currentMatch.pendingRepairScene
           }
         },
         compatibility: {
@@ -378,7 +437,8 @@ export const socialReducer = (state, action) => {
         },
         needs: {
           ...nextState.needs,
-          mood: newMood
+          mood: newMood,
+          energy: newEnergy
         },
         logs: [compatibilityLog, logMsg, ...nextState.logs].slice(0, 20)
       };
@@ -470,6 +530,17 @@ export const socialReducer = (state, action) => {
         living: {
           ...state.living,
           roommateId: npcId,
+          homeLog: [
+            `${npc.name} moved in and started sharing home routines.`,
+            ...(state.living.homeLog || [])
+          ].slice(0, 10),
+          availableHomeActivities: [
+            ...new Set([
+              ...(state.living.availableHomeActivities || []),
+              'decompress_after_work',
+              'decorate_together'
+            ])
+          ]
         },
         matches: {
           ...state.matches,
@@ -514,6 +585,20 @@ export const socialReducer = (state, action) => {
           ...state.family,
           spouseId: npcId,
           spouseName: npc.name,
+        },
+        living: {
+          ...state.living,
+          homeLog: [
+            `${npc.name} began planning married life in your shared home.`,
+            ...(state.living.homeLog || [])
+          ].slice(0, 10),
+          availableHomeActivities: [
+            ...new Set([
+              ...(state.living.availableHomeActivities || []),
+              'host_dinner',
+              'help_with_personal_project'
+            ])
+          ]
         },
         logs: [logMsg, ...state.logs].slice(0, 20)
       };

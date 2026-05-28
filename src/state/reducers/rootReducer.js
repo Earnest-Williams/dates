@@ -81,6 +81,8 @@ export const initialState = {
     billsAmount: 50,
     roommateId: null,
     hasHealthInsurance: false,
+    homeLog: [],
+    availableHomeActivities: ['cook_together', 'quiet_reading_evening'],
   },
   placedFurniture: ['twin_bed', 'hot_plate'],
   storage: [],
