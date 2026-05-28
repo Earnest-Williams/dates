@@ -22,9 +22,6 @@ export const checkEviction = (state, dispatch) => {
   dispatch({ type: 'CHECK_EVICTION' });
 };
 
-export const changeRelationship = (state, dispatch, npcId, delta) => {
-  dispatch({ type: 'CHANGE_RELATIONSHIP', payload: { npcId, delta } });
-};
 
 export const addLog = (state, dispatch, message) => {
   dispatch({ type: 'ADD_LOG', payload: { message } });
