@@ -2,14 +2,12 @@ import { useState } from 'react';
 import { useGameStore } from '../state/store';
 import { LOCATIONS } from '../data/locations';
 import { NPCS } from '../data/npcs';
-import { ITEMS } from '../state/ItemDatabase';
 import './DialogueUI.css';
 
 const DialogueUI = ({ npcId, onClose }) => {
   const { 
     gameState, 
     answerDialogue, 
-    giveGift, 
     goOnDate, 
     resolveStoryEvent,
     proposeMarriage,
@@ -17,7 +15,7 @@ const DialogueUI = ({ npcId, onClose }) => {
     swipeNpc
   } = useGameStore();
 
-  const { matches, inventory, stats } = gameState;
+  const { matches, relationshipMemory, stats } = gameState;
   const npc = NPCS.find(n => n.id === npcId);
   const matchedData = matches[npcId];
 
@@ -28,6 +26,11 @@ const DialogueUI = ({ npcId, onClose }) => {
         ? `Hey honey! It's so good to see you. How was your day?` 
         : `Hey sweetheart! I'm so excited for our wedding. What's on your mind?`;
     }
+    const memory = gameState.relationshipMemory?.[npcId];
+    const lastActivity = memory?.sharedActivities?.at(-1);
+    if (lastActivity) {
+      return `I was thinking about ${lastActivity.replace('date_', 'our ')}. I like that you remember what matters to us.`;
+    }
     const rel = matchedData.relationship;
     if (rel >= 80) return `Hey love! I was just thinking about you. What should we do today?`;
     if (rel >= 50) return `Hey! I've been looking forward to seeing you. What's up?`;
@@ -37,7 +40,6 @@ const DialogueUI = ({ npcId, onClose }) => {
 
   const [dialogueText, setDialogueText] = useState(getGreeting());
   const [showChoices, setShowChoices] = useState(!matchedData);
-  const [giftMode, setGiftMode] = useState(false);
   const [dateMode, setDateMode] = useState(false);
   const [storyMode, setStoryMode] = useState(false);
 
@@ -74,12 +76,6 @@ const DialogueUI = ({ npcId, onClose }) => {
     setStoryMode(false);
   };
 
-  const handleGift = (itemKey) => {
-    giveGift(npcId, itemKey);
-    setDialogueText(`Thanks for the ${ITEMS[itemKey].name}! You know me so well.`);
-    setGiftMode(false);
-  };
-
   const handleDate = (locKey) => {
     const success = goOnDate(npcId, locKey);
     if (success) {
@@ -109,9 +105,12 @@ const DialogueUI = ({ npcId, onClose }) => {
     setDialogueText(`I would love to move in with you! Let's do this.`);
   };
 
-  const availableGifts = Object.entries(inventory).filter(([key, qty]) => {
-    return qty > 0 && ITEMS[key] && ITEMS[key].type === 'gift';
-  });
+  const npcMemory = relationshipMemory?.[npcId];
+  const memoryCount = (npcMemory?.rememberedChoices?.length || 0)
+    + (npcMemory?.sharedActivities?.length || 0)
+    + (npcMemory?.importantMoments?.length || 0)
+    + Object.keys(npcMemory?.promises || {}).length
+    + (npcMemory?.comfortKnown?.length || 0);
 
   const getRelationshipTier = (relationship) => {
     if (gameState.family.spouseId === npcId) {
@@ -162,6 +161,12 @@ const DialogueUI = ({ npcId, onClose }) => {
               </div>
             </div>
           )}
+
+          {matchedData && (
+            <div className="relationship-meter">
+              <span>Memory: {memoryCount} meaningful moments</span>
+            </div>
+          )}
         </div>
       </header>
 
@@ -192,7 +197,7 @@ const DialogueUI = ({ npcId, onClose }) => {
           </div>
         )}
 
-        {!showChoices && !giftMode && !dateMode && !storyMode && (
+        {!showChoices && !dateMode && !storyMode && (
           <div className="dialogue-action-bar">
             {matchedData ? (
               <>
@@ -204,9 +209,6 @@ const DialogueUI = ({ npcId, onClose }) => {
                   <>
                     <button className="btn-primary" onClick={() => setDialogueText("Let's talk about our hobbies... " + npc.description)}>
                       💬 Chat
-                    </button>
-                    <button className="btn-primary" onClick={() => setGiftMode(true)}>
-                      🎁 Give Gift
                     </button>
                     <button className="btn-primary" onClick={() => setDateMode(true)}>
                       🥂 Ask on Date
@@ -228,21 +230,6 @@ const DialogueUI = ({ npcId, onClose }) => {
               <button className="btn-primary" onClick={onClose}>End Conversation</button>
             )}
             {matchedData && <button className="btn-secondary" onClick={onClose}>Goodbye</button>}
-          </div>
-        )}
-
-        {giftMode && (
-          <div className="selection-overlay">
-            <h5>Select a Gift</h5>
-            <div className="selection-grid">
-              {availableGifts.map(([key, qty]) => (
-                <button key={key} className="btn-mini btn-select-item" onClick={() => handleGift(key)}>
-                  {ITEMS[key].name} ({qty})
-                </button>
-              ))}
-              {availableGifts.length === 0 && <p className="error-text">No gifts in inventory.</p>}
-            </div>
-            <button className="btn-mini btn-cancel" onClick={() => setGiftMode(false)}>Cancel</button>
           </div>
         )}
 

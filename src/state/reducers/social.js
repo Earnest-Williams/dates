@@ -1,10 +1,8 @@
 import { NPCS } from '../../data/npcs.js';
-import { ITEMS } from '../../data/items.js';
 import { LOCATIONS } from '../../data/locations.js';
 import { calculateMatchProbability } from '../../sim/matching.js';
 import { calculateTravelStats } from '../../data/geography.js';
 import { simulateTicks } from './time.js';
-import { DATE_EVENTS } from '../../data/dates.js';
 import { calculateTraits } from '../../data/traits.js';
 import {
   calculateCompatibilityScore,
@@ -12,6 +10,62 @@ import {
   getCompatibilityBand,
   inferPlayerCompatibilityTraits,
 } from '../../sim/compatibility.js';
+
+const createEmptyMemory = () => ({
+  rememberedChoices: [],
+  sharedActivities: [],
+  promises: {},
+  importantMoments: [],
+  comfortKnown: [],
+  lastMeaningfulInteractionDay: null
+});
+
+const addUnique = (items, value) => {
+  if (!value) return items || [];
+  const currentItems = items || [];
+  if (currentItems.includes(value)) return currentItems;
+  return [...currentItems, value];
+};
+
+const updateRelationshipMemory = (state, npcId, updates = {}) => {
+  const currentMemory = {
+    ...createEmptyMemory(),
+    ...(state.relationshipMemory?.[npcId] || {})
+  };
+  const nextMemory = {
+    rememberedChoices: updates.rememberedChoice
+      ? addUnique(currentMemory.rememberedChoices, updates.rememberedChoice)
+      : currentMemory.rememberedChoices,
+    sharedActivities: updates.sharedActivity
+      ? addUnique(currentMemory.sharedActivities, updates.sharedActivity)
+      : currentMemory.sharedActivities,
+    promises: {
+      ...currentMemory.promises,
+      ...(updates.promises || {})
+    },
+    importantMoments: updates.importantMoment
+      ? addUnique(currentMemory.importantMoments, updates.importantMoment)
+      : currentMemory.importantMoments,
+    comfortKnown: updates.comfortKnown
+      ? addUnique(currentMemory.comfortKnown, updates.comfortKnown)
+      : currentMemory.comfortKnown,
+    lastMeaningfulInteractionDay: updates.lastMeaningfulInteractionDay
+      ?? currentMemory.lastMeaningfulInteractionDay
+  };
+
+  return {
+    ...(state.relationshipMemory || {}),
+    [npcId]: nextMemory
+  };
+};
+
+const countRelationshipMemorySignals = (memory = createEmptyMemory()) => {
+  return (memory.rememberedChoices?.length || 0)
+    + (memory.sharedActivities?.length || 0)
+    + Object.keys(memory.promises || {}).length
+    + (memory.importantMoments?.length || 0)
+    + (memory.comfortKnown?.length || 0);
+};
 
 const applyRelationshipCap = (currentRel, delta, storyTier = 0, stats = {}) => {
   let finalDelta = delta;
@@ -108,42 +162,6 @@ export const socialReducer = (state, action) => {
       };
     }
 
-    case 'GIVE_GIFT': {
-      const { npcId, itemKey } = action.payload;
-      const item = ITEMS[itemKey];
-      const npc = NPCS.find(n => n.id === npcId);
-
-      const updatedInventory = { ...state.inventory };
-      updatedInventory[itemKey] -= 1;
-      if (updatedInventory[itemKey] === 0) delete updatedInventory[itemKey];
-
-      let gain = item.effect.relationship;
-      const isBonus = item.effect.bonusArchetypes.includes(npc.archetype);
-      if (isBonus) {
-        gain = Math.floor(gain * 1.5);
-      }
-
-      const currentMatch = state.matches[npcId] || { met: true, relationship: 10, chemistry: 10, dateCount: 0, storyTier: 0 };
-      const chemGain = isBonus ? 10 : 5;
-      const newChem = Math.min(100, (currentMatch.chemistry || 10) + chemGain);
-      const newRel = applyRelationshipCap(currentMatch.relationship, gain, currentMatch.storyTier, state.stats);
-      const logMsg = `Gave ${item.name} to ${npc.name}. Rel: ${newRel}/100 (+${gain}), Chem: ${newChem}/100 (+${chemGain})`;
-
-      return {
-        ...state,
-        inventory: updatedInventory,
-        matches: {
-          ...state.matches,
-          [npcId]: {
-            ...currentMatch,
-            relationship: newRel,
-            chemistry: newChem
-          }
-        },
-        logs: [logMsg, ...state.logs].slice(0, 20)
-      };
-    }
-
     case 'ANSWER_DIALOGUE': {
       const { npcId, optionIndex } = action.payload;
       const npc = NPCS.find(n => n.id === npcId);
@@ -183,8 +201,17 @@ export const socialReducer = (state, action) => {
       const logMsg = `[${npc.name}] ${logText} (Rel: ${newRel}/100, Chem: ${newChem}/100${moodIncrease ? `, +${moodIncrease} Mood` : ''})`;
       const finalLogs = [logMsg, ...nextState.logs].slice(0, 20);
 
+      const memoryUpdates = {
+        rememberedChoice: choice.memoryKey || `dialogue_${npcId}_${optionIndex}`,
+        lastMeaningfulInteractionDay: nextState.time.day
+      };
+      if (relChange > 0) {
+        memoryUpdates.comfortKnown = choice.checkStat ? 'attentive_support' : 'easy_conversation';
+      }
+
       return {
         ...nextState,
+        relationshipMemory: updateRelationshipMemory(nextState, npcId, memoryUpdates),
         matches: {
           ...nextState.matches,
           [npcId]: {
@@ -250,7 +277,8 @@ export const socialReducer = (state, action) => {
           npcId, 
           locationKey, 
           currentPhaseIndex: 0,
-          vibe: 30
+          vibe: 30,
+          memoryContext: state.relationshipMemory?.[npcId] || createEmptyMemory()
         },
         stats: newStats,
         needs: {
@@ -277,8 +305,8 @@ export const socialReducer = (state, action) => {
       const currentMatch = nextState.matches[npcId] || { met: true, relationship: 10, chemistry: 10, dateCount: 0, storyTier: 0 };
       
       // Calculate gains based on Vibe
-      let relGain = 0;
-      let chemChange = 0;
+      let relGain;
+      let chemChange;
       
       if (finalVibe >= 80) {
         relGain = 20;
@@ -324,6 +352,11 @@ export const socialReducer = (state, action) => {
         ...nextState,
         gamePhase: 'living',
         activeDateEvent: null,
+        relationshipMemory: updateRelationshipMemory(nextState, npcId, {
+          sharedActivity: `date_${state.activeDateEvent.locationKey}`,
+          importantMoment: finalVibe >= 80 ? 'memorable_date' : null,
+          lastMeaningfulInteractionDay: nextState.time.day
+        }),
         matches: {
           ...nextState.matches,
           [npcId]: {
@@ -378,6 +411,11 @@ export const socialReducer = (state, action) => {
         return {
           ...nextState,
           needs: finalNeeds,
+          relationshipMemory: updateRelationshipMemory(nextState, npcId, {
+            importantMoment: `story_tier_${nextTier}`,
+            promises: isFirstNight ? { long_term_commitment: 'kept' } : {},
+            lastMeaningfulInteractionDay: nextState.time.day
+          }),
           matches: {
             ...nextState.matches,
             [npcId]: {
@@ -422,6 +460,11 @@ export const socialReducer = (state, action) => {
       const logMsg = `🏠 ${npc.name.toUpperCase()} moved in with you! (${fitLabel} cohab fit)`;
       return {
         ...state,
+        relationshipMemory: updateRelationshipMemory(state, npcId, {
+          importantMoment: 'cohabitation_step',
+          promises: { share_home_routine: 'pending' },
+          lastMeaningfulInteractionDay: state.time.day
+        }),
         living: {
           ...state.living,
           roommateId: npcId,
@@ -447,7 +490,9 @@ export const socialReducer = (state, action) => {
       const score = matchData.compatibilityScore !== undefined
         ? matchData.compatibilityScore
         : calculateCompatibilityScore(playerCompatibility, npcCompatibility);
-      const readiness = (matchData.relationship || 0) + (score * 0.4);
+      const memory = state.relationshipMemory?.[npcId] || createEmptyMemory();
+      const memoryReadiness = Math.min(10, countRelationshipMemorySignals(memory) * 2);
+      const readiness = (matchData.relationship || 0) + (score * 0.4) + memoryReadiness;
       if (readiness < 85) {
         return {
           ...state,
@@ -458,6 +503,11 @@ export const socialReducer = (state, action) => {
       return {
         ...state,
         gamePhase: 'marriage',
+        relationshipMemory: updateRelationshipMemory(state, npcId, {
+          importantMoment: 'proposal_accepted',
+          promises: { marriage_commitment: 'pending' },
+          lastMeaningfulInteractionDay: state.time.day
+        }),
         family: {
           ...state.family,
           spouseId: npcId,
