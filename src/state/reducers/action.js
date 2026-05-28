@@ -312,9 +312,9 @@ export const actionReducer = (state, action) => {
       const updatedNeeds = { ...nextState.needs };
 
       Object.entries(routine.effects || {}).forEach(([key, value]) => {
-        if (updatedNeeds[key] !== undefined) {
+        if (typeof updatedNeeds[key] === 'number') {
           updatedNeeds[key] = Math.min(100, Math.max(0, updatedNeeds[key] + value));
-        } else if (updatedStats[key] !== undefined) {
+        } else if (typeof updatedStats[key] === 'number') {
           updatedStats[key] = Math.min(100, Math.max(0, updatedStats[key] + value));
         }
       });

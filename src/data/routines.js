@@ -76,23 +76,28 @@ const HOME_SETTLEMENTS = {
 };
 
 export const isRoutineAvailable = (routine, state) => {
-  const timeBucket = getRoutineTimeBucket(state.time.hour);
-  const atHome = state.activeLocation === (HOME_SETTLEMENTS[state.stats.housingTier] || 'Endleigh');
+  const hour = state?.time?.hour ?? 0;
+  const timeBucket = getRoutineTimeBucket(hour);
+  const housingTier = state?.stats?.housingTier ?? 0;
+  const atHome = state?.activeLocation === (HOME_SETTLEMENTS[housingTier] || 'Endleigh');
 
   const timeOk = (routine.allowedTimes || []).includes(timeBucket);
-  const energyOk = state.needs.energy >= (routine.energyCost || 0);
+  const energy = state?.needs?.energy ?? 0;
+  const energyOk = energy >= (routine.energyCost || 0);
   const locationOk =
     routine.location === 'any' ||
     (routine.location === 'home' ? atHome : !atHome);
 
-  const needsOk = !(routine.id === 'cook_simple_meal' && state.needs.hunger < 30);
+  const hunger = state?.needs?.hunger ?? 0;
+  const needsOk = !(routine.id === 'cook_simple_meal' && hunger < 30);
   const relationshipOk =
-    routine.id !== 'call_family_friend' || Object.keys(state.matches || {}).length > 0;
+    routine.id !== 'call_family_friend' || Object.keys(state?.matches || {}).length > 0;
 
   const reqs = routine.furnitureReqs || [];
+  const placedFurniture = state?.placedFurniture || [];
   const furnitureOk = routine.anyFurniture
-    ? reqs.some((id) => state.placedFurniture.includes(id))
-    : reqs.every((id) => state.placedFurniture.includes(id));
+    ? reqs.some((id) => placedFurniture.includes(id))
+    : reqs.every((id) => placedFurniture.includes(id));
 
   return timeOk && energyOk && locationOk && needsOk && relationshipOk && furnitureOk;
 };

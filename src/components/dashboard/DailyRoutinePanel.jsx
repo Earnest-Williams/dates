@@ -8,9 +8,9 @@ const DailyRoutinePanel = ({ gameState, doRoutine }) => {
       <h2 className="section-title">Daily Routine</h2>
       <div className="routine-list">
         {filtered.map((routine) => (
-          <button key={routine.id} className="routine-btn" onClick={() => doRoutine(routine.id)}>
+          <button key={routine.id} className="routine-btn" onClick={() => doRoutine?.(routine.id)}>
             <div><strong>{routine.label}</strong></div>
-            <small>{routine.durationTicks * 10} mins • {routine.tags.join(' • ')}</small>
+            <small>{routine.durationTicks * 10} mins • {(routine.tags || []).join(' • ')}</small>
           </button>
         ))}
         {filtered.length === 0 && (
