@@ -25,6 +25,30 @@ test('unknown actions are no-op', () => {
   assert.deepEqual(next, state);
 });
 
+test('intro starts the first generation in the Endleigh starter setup', () => {
+  const state = cloneState();
+
+  assert.equal(state.gamePhase, 'intro');
+  assert.equal(state.family.age, 18);
+  assert.equal(state.stats.money, 2500);
+  assert.equal(state.activeLocation, 'Endleigh');
+  assert.equal(state.living.rentWaivedUntilDay, 365);
+
+  const next = gameReducer(state, { type: 'COMPLETE_INTRO' });
+  assert.equal(next.gamePhase, 'living');
+});
+
+test('prepaid starter rent prevents weekly rent charges during first year', () => {
+  const state = cloneState();
+  state.time.day = 7;
+  state.stats.money = 2500;
+
+  const next = gameReducer(state, { type: 'PROCESS_WEEKLY_BILLS' });
+  assert.ok(next.stats.money > state.stats.money);
+  assert.equal(next.stats.housingTier, 1);
+  assert.match(next.logs[0], /Rent is prepaid/);
+});
+
 test('routine action advances time and applies need/stat changes', () => {
   const state = cloneState();
   state.activeLocation = 'Bramblewick';

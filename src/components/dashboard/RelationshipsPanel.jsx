@@ -14,10 +14,10 @@ const RelationshipsPanel = () => {
   const matches = useGameStore(state => state.gameState.matches) || {};
   const [repairNpcId, setRepairNpcId] = useState(null);
   
-  const metNpcs = Object.entries(matches).filter(([_, data]) => data.met);
+  const metNpcs = Object.entries(matches).filter(([, data]) => data.met);
 
   return (
-    <div className="bento-card social" style={{ gridColumn: 'span 2' }}>
+    <div className="bento-card social relationships-panel">
       <h2 className="section-title">Relationships</h2>
       
       {metNpcs.length === 0 ? (

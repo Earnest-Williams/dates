@@ -6,7 +6,7 @@ import { socialMediaReducer } from './socialMedia.js';
 import { careerReducer } from './career.js';
 
 export const initialState = {
-  gamePhase: 'living', // 'living', 'marriage', 'parenting'
+  gamePhase: 'intro', // 'intro', 'living', 'marriage', 'parenting'
   family: {
     spouseId: null,
     spouseName: '',
@@ -15,6 +15,7 @@ export const initialState = {
     generation: 1,
     parentHistory: [],
     playerName: 'Alex',
+    age: 18,
   },
   parentingGame: {
     currentStep: 0,
@@ -63,7 +64,7 @@ export const initialState = {
     housingTier: 1,
     credentials: [], // RPG Expansion: stores earned certificates
     equippedItem: null,
-    money: 500,
+    money: 2500,
     debt: 0,
     taxOwed: 0,
   },
@@ -71,7 +72,7 @@ export const initialState = {
   activeAbilities: [],
   needs: {
     energy: 100,
-    hunger: 20,
+    hunger: 0,
     hygiene: 100,
     health: 100,
     mood: 100,
@@ -79,6 +80,9 @@ export const initialState = {
   living: {
     utilitiesActive: true,
     billsAmount: 50,
+    rentWaivedUntilDay: 365,
+    rentWaivedHousingTier: 1,
+    starterHomeNote: 'Tiny Endleigh flat above a fried chicken shop',
     roommateId: null,
     hasHealthInsurance: false,
     homeLog: [],
@@ -167,7 +171,10 @@ export const initialState = {
     completedToday: [],
     weeklyCounts: {},
   },
-  logs: ["Welcome to Life Sim! Start by studying, working out, or looking for a date."],
+  logs: [
+    "Mom stocked the fridge before she left. Dad reminded you the first year of rent is already handled.",
+    "You are 18, newly done with high school, and alone in a tiny Endleigh flat above a fried chicken shop.",
+  ],
   features: {
     organicEncounters: false,
     compatibilityRevealUx: false,
@@ -193,6 +200,16 @@ const isDevelopment = import.meta.env?.MODE !== 'production';
 
 export const gameReducer = (state, action) => {
   switch (action.type) {
+    case 'COMPLETE_INTRO':
+      return {
+        ...state,
+        gamePhase: 'living',
+        logs: [
+          'Day one begins. You have no job, no partner, and one prepaid year to make a place for yourself.',
+          ...state.logs,
+        ].slice(0, 20),
+      };
+
     case 'ADVANCE_TIME':
     case 'DECAY_NEEDS':
     case 'PROCESS_WEEKLY_BILLS':

@@ -139,6 +139,23 @@ button {
   transform: translateY(0);
 }
 
+.btn-secondary {
+  color: var(--text-primary);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 1rem;
+  border: var(--glass-border);
+  background: rgba(255, 255, 255, 0.06);
+  transition: transform var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.1);
+}
+
 /* Typography Classes */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 600;

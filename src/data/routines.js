@@ -70,7 +70,7 @@ export const getRoutineTimeBucket = (hour) => {
 
 const HOME_SETTLEMENTS = {
   0: 'Endleigh',
-  1: 'Bramblewick',
+  1: 'Endleigh',
   2: 'Stagborough',
   3: 'Brockleigh',
 };

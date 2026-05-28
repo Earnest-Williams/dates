@@ -5,11 +5,14 @@ import { ITEMS } from '../../state/ItemDatabase';
 
 const HousingPanel = () => {
   const stats = useGameStore(state => state.gameState.stats);
+  const living = useGameStore(state => state.gameState.living);
+  const day = useGameStore(state => state.gameState.time.day);
   const placedFurniture = useGameStore(state => state.gameState.placedFurniture) || [];
   const upgradeHousing = useGameStore(state => state.upgradeHousing);
 
   const { housingTier, money } = stats;
   const currentHousing = HOUSING_TIERS[housingTier];
+  const rentWaived = living.rentWaivedUntilDay >= day && living.rentWaivedHousingTier === housingTier;
   
   const occupiedSlots = placedFurniture.reduce((sum, id) => sum + (ITEMS[id]?.slots || 0), 0);
   const placedBed = placedFurniture.find(id => ITEMS[id]?.category === 'bed');
@@ -21,7 +24,11 @@ const HousingPanel = () => {
       <h2 className="section-title">Housing: {currentHousing.name}</h2>
       <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
         <p>{currentHousing.desc}</p>
-        {housingTier > 0 && <p style={{ marginTop: '0.5rem', color: '#f87171' }}>Rent: ${currentHousing.rent}/week</p>}
+        {housingTier > 0 && (
+          <p style={{ marginTop: '0.5rem', color: rentWaived ? '#4ade80' : '#f87171' }}>
+            Rent: {rentWaived ? `paid through Day ${living.rentWaivedUntilDay}` : `$${currentHousing.rent}/week`}
+          </p>
+        )}
         <p>Bed: {bedName} (x{sleepMultiplier.toFixed(2)} Energy)</p>
         <p>Capacity: {occupiedSlots} / {currentHousing.slots} Slots</p>
         

@@ -13,6 +13,7 @@ import WorkEventUI from './components/WorkEventUI';
 import NpcAlertUI from './components/NpcAlertUI';
 import SimstagramApp from './components/SimstagramApp';
 import CareerApp from './components/CareerApp';
+import Intro from './components/Intro';
 
 function AppContent() {
   const gamePhase = useGameStore(state => state.gameState.gamePhase);
@@ -24,6 +25,14 @@ function AppContent() {
     setActiveNpcId(npcId);
     setActiveView('dialogue');
   };
+
+  if (gamePhase === 'intro') {
+    return (
+      <div className="app-background">
+        <Intro />
+      </div>
+    );
+  }
 
   // If in a special legacy phase, override normal navigation
   if (gamePhase === 'marriage') {

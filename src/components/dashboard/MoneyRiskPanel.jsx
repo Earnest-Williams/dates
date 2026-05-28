@@ -4,27 +4,28 @@ import { HOUSING_TIERS } from '../../data/housing';
 import { CAREER_TRACKS } from '../../data/projects';
 
 const MoneyRiskPanel = () => {
-  const { stats, career } = useGameStore(state => state.gameState);
+  const { stats, career, living, time } = useGameStore(state => state.gameState);
   
   const { money, housingTier } = stats;
   const currentHousing = HOUSING_TIERS[housingTier];
-  const rent = housingTier > 0 ? currentHousing.rent : 0;
+  const rentWaived = living?.rentWaivedUntilDay >= time.day && living?.rentWaivedHousingTier === housingTier;
+  const rent = housingTier > 0 && !rentWaived ? currentHousing.rent : 0;
   
   const activeCareer = career?.currentPath ? CAREER_TRACKS[career.currentPath] : null;
   const currentLevel = activeCareer ? activeCareer.levels[career.currentLevel] : null;
   const income = currentLevel ? currentLevel.salary : 0;
 
   return (
-    <div className="bento-card core">
+    <div className="bento-card money-risk">
       <h2 className="section-title">Money & Risk</h2>
       <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
         <p style={{ fontSize: '1.25rem', color: '#4ade80', fontWeight: 'bold', marginBottom: '0.5rem' }}>
           ${money}
         </p>
         
-        {rent > 0 && (
-          <p style={{ color: '#f87171', marginBottom: '0.5rem' }}>
-            <strong>Rent:</strong> -${rent} / week
+        {housingTier > 0 && (
+          <p style={{ color: rentWaived ? '#4ade80' : '#f87171', marginBottom: '0.5rem' }}>
+            <strong>Rent:</strong> {rentWaived ? `Paid through Day ${living.rentWaivedUntilDay}` : `-$${rent} / week`}
           </p>
         )}
         

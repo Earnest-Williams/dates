@@ -5,6 +5,7 @@ import * as actions from './actions/index.js';
 import { getSaveMetadata, loadGameState, saveGameState } from './persistence.js';
 
 const AUTOSAVE_ACTIONS = new Set([
+  'COMPLETE_INTRO',
   'ADVANCE_TIME',
   'PERFORM_ACTION',
   'SLEEP',
@@ -56,6 +57,7 @@ export const useGameStore = create((set, get) => ({
 
   getSaveMetadata: () => getSaveMetadata(),
 
+  completeIntro: () => get().dispatch({ type: 'COMPLETE_INTRO' }),
   advanceTime: (ticks) => actions.advanceTime(get().gameState, get().dispatch, ticks),
   applyNeedsDecay: (ticks) => actions.applyNeedsDecay(get().gameState, get().dispatch, ticks),
   processWeeklyBills: () => actions.processWeeklyBills(get().gameState, get().dispatch),

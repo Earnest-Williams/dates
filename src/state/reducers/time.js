@@ -4,7 +4,6 @@ import { decayNeeds } from '../../sim/needs.js';
 import { calculateStorageFee } from '../../sim/economy.js';
 import { NPCS } from '../../data/npcs.js';
 import { NPC_ALERTS, JEALOUSY_CONFRONTATION } from '../../data/npcAlerts.js';
-import { ASSETS } from '../../data/investments.js';
 import { applyMarketNews } from '../../sim/markets.js';
 
 export const simulateTicks = (state, ticks) => {
@@ -54,7 +53,12 @@ export const simulateTicks = (state, ticks) => {
       }
       
       if (rentCost > 0) {
-        if (currentMoney >= rentCost) {
+        const rentIsWaived = state.living.rentWaivedUntilDay >= dayNum
+          && state.living.rentWaivedHousingTier === currentHousingTier;
+
+        if (rentIsWaived) {
+          tempLogs.push(`[Day ${dayNum}] Rent is prepaid by your parents through Day ${state.living.rentWaivedUntilDay}.`);
+        } else if (currentMoney >= rentCost) {
           currentMoney -= rentCost;
           tempLogs.push(`[Day ${dayNum}] Paid weekly rent of $${rentCost}${state.living.roommateId ? ' (Split with roommate)' : ''}.`);
         } else {
@@ -349,7 +353,12 @@ export const timeReducer = (state, action) => {
       // Rent billing
       const rentCost = HOUSING_TIERS[currentHousingTier].rent;
       if (rentCost > 0) {
-        if (currentMoney >= rentCost) {
+        const rentIsWaived = state.living.rentWaivedUntilDay >= state.time.day
+          && state.living.rentWaivedHousingTier === currentHousingTier;
+
+        if (rentIsWaived) {
+          newLogs.unshift(`Rent is prepaid by your parents through Day ${state.living.rentWaivedUntilDay}.`);
+        } else if (currentMoney >= rentCost) {
           currentMoney -= rentCost;
           newLogs.unshift(`Paid rent bills of $${rentCost}.`);
         } else {
@@ -454,7 +463,9 @@ export const timeReducer = (state, action) => {
     case 'CHECK_EVICTION': {
       const currentHousingTier = state.stats.housingTier;
       const rentCost = HOUSING_TIERS[currentHousingTier].rent;
-      if (rentCost > 0 && state.stats.money < rentCost) {
+      const rentIsWaived = state.living.rentWaivedUntilDay >= state.time.day
+        && state.living.rentWaivedHousingTier === currentHousingTier;
+      if (rentCost > 0 && !rentIsWaived && state.stats.money < rentCost) {
         return {
           ...state,
           logs: [`[Eviction Warning] You cannot afford rent! Rent is $${rentCost}.`, ...state.logs].slice(0, 20)

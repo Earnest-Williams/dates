@@ -16,6 +16,12 @@ export const inventoryReducer = (state, action) => {
           money: Math.max(0, state.stats.money - moveInCost),
           housingTier: nextTier
         },
+        living: {
+          ...state.living,
+          rentWaivedUntilDay: nextTier === state.living.rentWaivedHousingTier
+            ? state.living.rentWaivedUntilDay
+            : 0,
+        },
         logs: [`Moved into a ${HOUSING_TIERS[nextTier].name}! (-$${moveInCost})`, ...state.logs].slice(0, 20)
       };
     }

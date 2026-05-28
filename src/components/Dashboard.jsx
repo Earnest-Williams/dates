@@ -48,7 +48,7 @@ const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) =
   const studyEnergyCost = 15;
   const workoutEnergyCost = 20;
 
-  const homeSettlements = { 0: 'Endleigh', 1: 'Bramblewick', 2: 'Stagborough', 3: 'Brockleigh' };
+  const homeSettlements = { 0: 'Endleigh', 1: 'Endleigh', 2: 'Stagborough', 3: 'Brockleigh' };
   const homeSettlement = homeSettlements[gameState.stats.housingTier] || 'Endleigh';
   const isAtHome = gameState.activeLocation === homeSettlement;
 
@@ -80,7 +80,7 @@ const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) =
         <button className={`tab-btn ${activeTab === 'planning' ? 'active' : ''}`} onClick={() => setActiveTab('planning')}>Planning</button>
       </div>
 
-      <div className="bento-grid">
+      <div className={`bento-grid ${activeTab}-grid`}>
         {activeTab === 'life' && (
           <>
             <NeedsPanel />
@@ -102,7 +102,7 @@ const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) =
             <MoneyRiskPanel />
             <HousingPanel />
             <StatsPanel />
-            <div className="bento-card perks-panel perks" style={{ gridColumn: 'span 2' }}>
+            <div className="bento-card perks-panel perks">
               <h2 className="section-title">Active Perks & Traits</h2>
               <div className="perks-grid">
                 {activeTraits?.map(trait => (
@@ -131,7 +131,7 @@ const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) =
               </div>
             </div>
 
-            <div className="bento-card logs" style={{ gridColumn: 'span 2' }}>
+            <div className="bento-card logs">
               <h2 className="section-title">Activity Log</h2>
               <div className="logs-panel">
                 {gameState.logs.map((log, index) => (

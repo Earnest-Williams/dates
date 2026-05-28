@@ -31,7 +31,7 @@ const MapUI = ({ onClose, onTalkNpc }) => {
   // Helper to check housing location
   const getHomeSettlement = (tier) => {
     if (tier === 0) return 'Endleigh';
-    if (tier === 1) return 'Bramblewick';
+    if (tier === 1) return 'Endleigh';
     if (tier === 2) return 'Stagborough';
     return 'Brockleigh'; // Tier 3
   };
@@ -1091,7 +1091,11 @@ const MapUI = ({ onClose, onTalkNpc }) => {
                       <h6>Residence Specs</h6>
                       <div className="preview-grid">
                         <span>Flat Type: {HOUSING_TIERS[stats.housingTier]?.name}</span>
-                        <span>Rent Rate: ${HOUSING_TIERS[stats.housingTier]?.rent}/week</span>
+                        <span>
+                          Rent Rate: {gameState.living.rentWaivedUntilDay >= gameState.time.day && gameState.living.rentWaivedHousingTier === stats.housingTier
+                            ? `Paid through Day ${gameState.living.rentWaivedUntilDay}`
+                            : `$${HOUSING_TIERS[stats.housingTier]?.rent}/week`}
+                        </span>
                         <span>Slots: {placedFurniture.length} / {HOUSING_TIERS[stats.housingTier]?.slots} Used</span>
                       </div>
                     </div>
