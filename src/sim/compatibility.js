@@ -38,7 +38,7 @@ export const generateCompatibilityTraits = (seed) => {
     emotionalOpenness: ['slow_burn', 'open_book', 'guarded'],
   };
 
-  const safeSeed = typeof seed === 'string' ? seed : String(seed || '');
+  const safeSeed = typeof seed === 'string' ? seed : (seed != null ? String(seed) : '');
   const suffix = [...safeSeed].reduce((total, char) => total + char.charCodeAt(0), 0);
   const traits = {};
 
