@@ -28,7 +28,7 @@ const DialogueUI = ({ npcId, onClose }) => {
     }
     const memory = gameState.relationshipMemory?.[npcId];
     const shared = memory?.sharedActivities;
-    const lastActivity = shared && shared.length > 0 ? shared[shared.length - 1] : null;
+    const lastActivity = shared?.[shared.length - 1];
     if (lastActivity) {
       return `I was thinking about ${lastActivity.replace('date_', 'our ')}. I like that you remember what matters to us.`;
     }
