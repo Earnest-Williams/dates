@@ -1,3 +1,8 @@
+// Item/economy catalog note: purchasable items support the player's stats,
+// needs, home, travel, or authored one-off scene props. Items must not grant
+// repeatable romance progress, define gift multipliers, or act as affection
+// currency for NPC routes.
+
 import { FURNITURE } from './furniture.js';
 import { VEHICLES } from './vehicles.js';
 

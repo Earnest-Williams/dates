@@ -1,6 +1,8 @@
 # Relationship Memory System
 
-`dates` does not use a typical visual-novel gift-giving system. Relationship progress must come primarily from conversations, shared activities, compatibility, remembered choices, dates, routines, conflict/repair, and long-term follow-through. Items may appear as contextual story props, but not as repeatable affection-optimization gifts.
+dates intentionally does not include a typical visual-novel gift-giving system. Relationship progress should come from shared time, meaningful choices, remembered context, compatibility, dates, routines, conflict/repair, and long-term follow-through. Items may appear as contextual story props, but they must not function as repeatable affection currency.
+
+dates does not use a typical visual-novel gift-giving system; it replaces repeatable item affection loops with memory-driven relationship play.
 
 ## State shape
 
