@@ -14,6 +14,15 @@ const AUTOSAVE_ACTIONS = new Set([
   'BEGIN_LEGACY',
 ]);
 
+const createSaveMetadata = (gameState) => ({
+  version: 1,
+  savedAt: new Date().toISOString(),
+  day: gameState.time?.day ?? null,
+  hour: gameState.time?.hour ?? null,
+  location: gameState.activeLocation ?? null,
+  playerName: gameState.family?.playerName ?? null,
+});
+
 export const useGameStore = create((set, get) => ({
   gameState: initialState,
   saveMetadata: null,
@@ -23,14 +32,7 @@ export const useGameStore = create((set, get) => ({
       const gameState = gameReducer(state.gameState, action);
       let saveMetadata = state.saveMetadata;
       if (AUTOSAVE_ACTIONS.has(action.type) && saveGameState(gameState)) {
-        saveMetadata = {
-          version: 1,
-          savedAt: new Date().toISOString(),
-          day: gameState.time?.day ?? null,
-          hour: gameState.time?.hour ?? null,
-          location: gameState.activeLocation ?? null,
-          playerName: gameState.family?.playerName ?? null,
-        };
+        saveMetadata = createSaveMetadata(gameState);
       }
       return { gameState, saveMetadata };
     });
@@ -40,16 +42,7 @@ export const useGameStore = create((set, get) => ({
     const gameState = get().gameState;
     const ok = saveGameState(gameState);
     if (ok) {
-      set({
-        saveMetadata: {
-          version: 1,
-          savedAt: new Date().toISOString(),
-          day: gameState.time?.day ?? null,
-          hour: gameState.time?.hour ?? null,
-          location: gameState.activeLocation ?? null,
-          playerName: gameState.family?.playerName ?? null,
-        },
-      });
+      set({ saveMetadata: createSaveMetadata(gameState) });
     }
     return ok;
   },
