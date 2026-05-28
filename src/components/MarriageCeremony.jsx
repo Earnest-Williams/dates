@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { useGame } from '../state/GameContext';
+import { useGameStore } from '../state/store';
 import './MarriageCeremony.css';
 
 const SUGGESTIONS = ['Jordan', 'Taylor', 'Alex', 'Morgan', 'Casey', 'Robin', 'Riley', 'Jamie'];
 
 const MarriageCeremony = () => {
-  const { gameState, completeWedding } = useGame();
+  const { gameState, completeWedding } = useGameStore();
   const { money } = gameState.stats;
   const spouseName = gameState.family.spouseName || 'your partner';
 

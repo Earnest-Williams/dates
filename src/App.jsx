@@ -1,15 +1,19 @@
 import { useState } from 'react';
-import { GameProvider, useGame } from './state/GameContext';
+import { useGameStore } from './state/store';
 import Dashboard from './components/Dashboard';
 import SwipeApp from './components/SwipeApp';
 import MapUI from './components/MapUI';
 import DialogueUI from './components/DialogueUI';
 import MarriageCeremony from './components/MarriageCeremony';
 import ChildhoodRaising from './components/ChildhoodRaising';
+import DateEventUI from './components/DateEventUI';
+import WorkEventUI from './components/WorkEventUI';
+import NpcAlertUI from './components/NpcAlertUI';
+import SimstagramApp from './components/SimstagramApp';
+import CareerApp from './components/CareerApp';
 
 function AppContent() {
-  const { gameState } = useGame();
-  const { gamePhase } = gameState;
+  const gamePhase = useGameStore(state => state.gameState.gamePhase);
 
   const [activeView, setActiveView] = useState('dashboard'); // 'dashboard', 'swipe', 'map', 'dialogue'
   const [activeNpcId, setActiveNpcId] = useState(null);
@@ -36,12 +40,38 @@ function AppContent() {
     );
   }
 
+  if (gamePhase === 'date') {
+    return (
+      <div className="app-background">
+        <DateEventUI />
+      </div>
+    );
+  }
+
+  if (gamePhase === 'work_event') {
+    return (
+      <div className="app-background">
+        <WorkEventUI />
+      </div>
+    );
+  }
+
+  if (gamePhase === 'npc_alert') {
+    return (
+      <div className="app-background">
+        <NpcAlertUI />
+      </div>
+    );
+  }
+
   return (
     <div className="app-background">
       {activeView === 'dashboard' && (
         <Dashboard 
           onOpenSwipe={() => setActiveView('swipe')} 
           onOpenMap={() => setActiveView('map')} 
+          onOpenSimstagram={() => setActiveView('simstagram')}
+          onOpenCareer={() => setActiveView('career')}
         />
       )}
 
@@ -65,15 +95,25 @@ function AppContent() {
           onClose={() => setActiveView('dashboard')} 
         />
       )}
+
+      {activeView === 'simstagram' && (
+        <div className="app-overlay-container animate-fade-in">
+          <SimstagramApp onClose={() => setActiveView('dashboard')} />
+        </div>
+      )}
+
+      {activeView === 'career' && (
+        <div className="app-overlay-container animate-fade-in">
+          <CareerApp onClose={() => setActiveView('dashboard')} />
+        </div>
+      )}
     </div>
   );
 }
 
 function App() {
   return (
-    <GameProvider>
-      <AppContent />
-    </GameProvider>
+    <AppContent />
   );
 }
 

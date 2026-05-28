@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useGame } from '../state/GameContext';
+import { useGameStore } from '../state/store';
 import { NPCS } from '../state/NpcDatabase';
+import InvestmentApp from './InvestmentApp';
 import './SwipeApp.css';
 
 const PREFERENCE_OPTIONS = [
@@ -19,28 +20,28 @@ const SEX_PREFERENCE_OPTIONS = [
 ];
 
 const SwipeApp = ({ onClose, onTalkNpc }) => {
-  const { 
-    gameState, 
-    swipeNpc, 
-    subscribePremium, 
-    cancelPremium, 
-    updateSwipePreferences, 
-    instantMatch 
-  } = useGame();
+  const swipeNpc = useGameStore(state => state.swipeNpc);
+  const subscribePremium = useGameStore(state => state.subscribePremium);
+  const cancelPremium = useGameStore(state => state.cancelPremium);
+  const updateSwipePreferences = useGameStore(state => state.updateSwipePreferences);
+  const instantMatch = useGameStore(state => state.instantMatch);
 
-  const { matches, swipePreferences, swipePremium, swipeStats } = gameState;
-  const { utilitiesActive } = gameState.living;
-  const { hygiene } = gameState.needs;
-  const { money } = gameState.stats;
+  const matches = useGameStore(state => state.gameState.matches);
+  const swipePreferences = useGameStore(state => state.gameState.swipePreferences);
+  const swipePremium = useGameStore(state => state.gameState.swipePremium);
+  const swipeStats = useGameStore(state => state.gameState.swipeStats);
+  const currentDay = useGameStore(state => state.gameState.time.day);
+  const utilitiesActive = useGameStore(state => state.gameState.living.utilitiesActive);
+  const hygiene = useGameStore(state => state.gameState.needs.hygiene);
+  const money = useGameStore(state => state.gameState.stats.money);
 
-  const [activeTab, setActiveTab] = useState('swipe'); // 'swipe', 'preferences', 'premium', 'admirers'
+  const [activeTab, setActiveTab] = useState('swipe'); // 'swipe', 'preferences', 'premium', 'admirers', 'invest'
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const preferredStat = swipePreferences?.preferredStat || '';
   const isPremium = swipePremium?.active || false;
 
   // Swiping limit calculations
-  const currentDay = gameState.time.day;
   const lastDay = swipeStats?.lastSwipedDay || 1;
   const swipeCount = currentDay !== lastDay ? 0 : (swipeStats?.dailySwipesCount || 0);
   const swipesLeft = Math.max(0, 5 - swipeCount);
@@ -157,9 +158,17 @@ const SwipeApp = ({ onClose, onTalkNpc }) => {
         <button className={`nav-tab-btn ${activeTab === 'premium' ? 'active' : ''}`} onClick={() => setActiveTab('premium')}>
           👑 Premium
         </button>
+        <button className={`nav-tab-btn ${activeTab === 'invest' ? 'active' : ''}`} onClick={() => setActiveTab('invest')}>
+          📈 Invest
+        </button>
       </nav>
 
-      <div className="swipe-app-grid">
+      {activeTab === 'invest' ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '1rem 0' }}>
+          <InvestmentApp onClose={onClose} />
+        </div>
+      ) : (
+        <div className="swipe-app-grid">
         {/* Main Interactive Screen */}
         <div className="swipe-card-section">
           {activeTab === 'swipe' && (
@@ -384,7 +393,8 @@ const SwipeApp = ({ onClose, onTalkNpc }) => {
             )}
           </div>
         </div>
-      </div>
+        </div>
+      )}
     </div>
   );
 };

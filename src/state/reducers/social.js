@@ -2,14 +2,32 @@ import { NPCS } from '../../data/npcs';
 import { ITEMS } from '../../data/items';
 import { LOCATIONS } from '../../data/locations';
 import { calculateMatchProbability } from '../../sim/matching';
+import { calculateTravelStats } from '../../data/geography';
 import { simulateTicks } from './time';
+import { DATE_EVENTS } from '../../data/dates';
+import { calculateTraits } from '../../data/traits';
+
+const applyRelationshipCap = (currentRel, delta, storyTier = 0, stats = {}) => {
+  let finalDelta = delta;
+  if (finalDelta > 0 && stats.charisma >= 50) {
+    finalDelta = Math.ceil(finalDelta * 1.2); // "Charmer" Perk: +20% relationship gains
+  }
+  const newRel = currentRel + finalDelta;
+  let cap = 25;
+  if (storyTier >= 1) cap = 50;
+  if (storyTier >= 2) cap = 75;
+  if (storyTier >= 3) cap = 100;
+  
+  if (currentRel >= cap && delta > 0) return currentRel;
+  return Math.max(0, Math.min(newRel, cap));
+};
 
 export const socialReducer = (state, action) => {
   switch (action.type) {
     case 'CHANGE_RELATIONSHIP': {
       const { npcId, delta } = action.payload;
-      const currentData = state.matches[npcId] || { met: true, relationship: 10, dateCount: 0 };
-      const newRel = Math.min(100, Math.max(0, currentData.relationship + delta));
+      const currentData = state.matches[npcId] || { met: true, relationship: 10, dateCount: 0, storyTier: 0 };
+      const newRel = applyRelationshipCap(currentData.relationship, delta, currentData.storyTier, state.stats);
       return {
         ...state,
         matches: {
@@ -70,7 +88,7 @@ export const socialReducer = (state, action) => {
       let logMsg;
       let updatedMatches = { ...state.matches };
       if (matched) {
-        updatedMatches[npcId] = { met: true, relationship: 10, dateCount: 0 };
+        updatedMatches[npcId] = { met: true, relationship: 10, chemistry: 10, dateCount: 0, storyTier: 0 };
         logMsg = `Matched with ${npc.name}! (Match chance: ${matchChance.toFixed(0)}%)`;
       } else {
         logMsg = `Swiped on ${npc.name} but no match. (Match chance: ${matchChance.toFixed(0)}%)`;
@@ -94,13 +112,16 @@ export const socialReducer = (state, action) => {
       if (updatedInventory[itemKey] === 0) delete updatedInventory[itemKey];
 
       let gain = item.effect.relationship;
-      if (item.effect.bonusArchetypes.includes(npc.archetype)) {
+      const isBonus = item.effect.bonusArchetypes.includes(npc.archetype);
+      if (isBonus) {
         gain = Math.floor(gain * 1.5);
       }
 
-      const currentMatch = state.matches[npcId] || { met: true, relationship: 10, dateCount: 0 };
-      const newRel = Math.min(100, currentMatch.relationship + gain);
-      const logMsg = `Gave ${item.name} to ${npc.name}. Relationship: ${newRel}/100 (+${gain})`;
+      const currentMatch = state.matches[npcId] || { met: true, relationship: 10, chemistry: 10, dateCount: 0, storyTier: 0 };
+      const chemGain = isBonus ? 10 : 5;
+      const newChem = Math.min(100, (currentMatch.chemistry || 10) + chemGain);
+      const newRel = applyRelationshipCap(currentMatch.relationship, gain, currentMatch.storyTier, state.stats);
+      const logMsg = `Gave ${item.name} to ${npc.name}. Rel: ${newRel}/100 (+${gain}), Chem: ${newChem}/100 (+${chemGain})`;
 
       return {
         ...state,
@@ -109,7 +130,8 @@ export const socialReducer = (state, action) => {
           ...state.matches,
           [npcId]: {
             ...currentMatch,
-            relationship: newRel
+            relationship: newRel,
+            chemistry: newChem
           }
         },
         logs: [logMsg, ...state.logs].slice(0, 20)
@@ -133,8 +155,17 @@ export const socialReducer = (state, action) => {
       // Advances 30 mins (3 ticks)
       let nextState = simulateTicks(state, 3);
 
-      const currentMatch = nextState.matches[npcId] || { met: true, relationship: 10, dateCount: 0 };
-      const newRel = Math.min(100, Math.max(0, currentMatch.relationship + relChange));
+      const currentMatch = nextState.matches[npcId] || { met: true, relationship: 10, chemistry: 10, dateCount: 0, storyTier: 0 };
+      
+      let chemChange = 0;
+      if (relChange > 0) {
+        chemChange = choice.checkStat ? 10 : 5;
+      } else if (relChange < 0) {
+        chemChange = -5;
+      }
+      
+      const newChem = Math.min(100, Math.max(0, (currentMatch.chemistry || 10) + chemChange));
+      const newRel = applyRelationshipCap(currentMatch.relationship, relChange, currentMatch.storyTier, nextState.stats);
 
       let moodIncrease = 0;
       if (relChange > 0) {
@@ -143,7 +174,7 @@ export const socialReducer = (state, action) => {
       const currentMood = nextState.needs.mood !== undefined ? nextState.needs.mood : 100;
       const newMood = Math.min(100, currentMood + moodIncrease);
 
-      const logMsg = `[${npc.name}] ${logText} (Relationship: ${newRel}/100${moodIncrease ? `, +${moodIncrease} Mood` : ''})`;
+      const logMsg = `[${npc.name}] ${logText} (Rel: ${newRel}/100, Chem: ${newChem}/100${moodIncrease ? `, +${moodIncrease} Mood` : ''})`;
       const finalLogs = [logMsg, ...nextState.logs].slice(0, 20);
 
       return {
@@ -152,7 +183,8 @@ export const socialReducer = (state, action) => {
           ...nextState.matches,
           [npcId]: {
             ...currentMatch,
-            relationship: newRel
+            relationship: newRel,
+            chemistry: newChem
           }
         },
         needs: {
@@ -168,67 +200,194 @@ export const socialReducer = (state, action) => {
       const location = LOCATIONS[locationKey];
       const npc = NPCS.find(n => n.id === npcId);
 
-      let timeIncrements = 6;
-      let fitnessBonus = 0;
-      const vehicles = state.properties.vehicles;
+      const destinationSettlement = {
+        library: 'Brockleigh',
+        office: 'Brockleigh',
+        mall: 'Brockleigh',
+        club: 'Stagborough',
+        gym: 'Stagborough',
+        park: 'Bramblewick',
+        home: 'Endleigh'
+      }[locationKey] || 'Brockleigh';
 
-      if (vehicles.includes('sports_car') || vehicles.includes('sedan')) {
-        timeIncrements = 2;
-      } else if (vehicles.includes('scooter')) {
-        timeIncrements = 3;
-      } else if (vehicles.includes('bicycle')) {
-        timeIncrements = 4;
-        fitnessBonus = 1;
+      const travelStats = calculateTravelStats(state.activeLocation, destinationSettlement, state.properties.vehicles);
+      
+      let travelTicks = 6;
+      let travelEnergy = 0;
+      let fitnessBonus = 0;
+      let vehicleUsedName = 'foot';
+
+      if (travelStats) {
+        travelTicks = travelStats.ticks;
+        travelEnergy = travelStats.energyCost;
+        fitnessBonus = travelStats.fitnessBonus;
+        vehicleUsedName = travelStats.vehicleUsed;
       }
 
-      // Travel ticks + 3 ticks date activity
-      let nextState = simulateTicks(state, timeIncrements + 3);
+      let nextState = simulateTicks(state, travelTicks);
 
       const newStats = { ...nextState.stats };
       if (fitnessBonus > 0) {
         newStats.fitness = Math.min(100, newStats.fitness + fitnessBonus);
       }
-
-      let relGain = 10;
-      const comments = npc.dialogue.dateLines || {};
-      const comment = comments[locationKey] || "It's nice to spend time with you.";
-
-      if (locationKey === 'gym' && npc.archetype === 'GYM_RAT') relGain += 15;
-      else if (locationKey === 'library' && npc.archetype === 'SCHOLAR') relGain += 15;
-      else if (locationKey === 'club' && npc.archetype === 'SOCIALITE') relGain += 15;
-      else if (locationKey === 'office' && npc.archetype === 'EXECUTIVE') relGain += 15;
-      else if (locationKey === 'park' && npc.archetype === 'ARTIST') relGain += 15;
-
-      const currentMatch = nextState.matches[npcId] || { met: true, relationship: 10, dateCount: 0 };
-      const newRel = Math.min(100, currentMatch.relationship + relGain);
-
-      const currentMood = nextState.needs.mood !== undefined ? nextState.needs.mood : 100;
-      const newMood = Math.min(100, currentMood + 15);
-
-      const totalCost = location.energyCost + 10;
+      
+      const totalCost = travelEnergy + 10;
       const finalEnergy = Math.max(0, nextState.needs.energy - totalCost);
 
-      const logMsg = `Date with ${npc.name} at ${location.name}: "${comment}" (+${relGain} Rel, +15 Mood, -${totalCost} Energy)`;
-      const finalLogs = [logMsg, ...nextState.logs].slice(0, 20);
+      const logMsg = `Arrived at ${destinationSettlement} (${location.name}) via ${vehicleUsedName} for a date with ${npc.name}. (Took ${travelTicks * 10} mins, -${travelEnergy} Travel Energy, -10 Date Energy)`;
 
       return {
         ...nextState,
-        activeLocation: locationKey,
+        gamePhase: 'date',
+        activeLocation: destinationSettlement,
+        activeDateEvent: { 
+          npcId, 
+          locationKey, 
+          currentPhaseIndex: 0,
+          vibe: 30
+        },
         stats: newStats,
+        needs: {
+          ...nextState.needs,
+          energy: finalEnergy
+        },
+        logs: [logMsg, ...nextState.logs].slice(0, 20)
+      };
+    }
+
+    case 'RESOLVE_DATE_EVENT': {
+      const { finalVibe, logText } = action.payload;
+      const { npcId } = state.activeDateEvent;
+      const npc = NPCS.find(n => n.id === npcId);
+
+      let nextState = simulateTicks(state, 3); // Time spent on date
+
+      const currentMatch = nextState.matches[npcId] || { met: true, relationship: 10, chemistry: 10, dateCount: 0, storyTier: 0 };
+      
+      // Calculate gains based on Vibe
+      let relGain = 0;
+      let chemChange = 0;
+      
+      if (finalVibe >= 80) {
+        relGain = 20;
+        chemChange = 15;
+      } else if (finalVibe >= 50) {
+        relGain = 10;
+        chemChange = 5;
+      } else if (finalVibe >= 30) {
+        relGain = 5;
+        chemChange = 0;
+      } else {
+        relGain = -10;
+        chemChange = -10;
+      }
+
+      const newChem = Math.min(100, Math.max(0, (currentMatch.chemistry || 10) + chemChange));
+
+      // Chemistry multiplier
+      let finalRelGain = relGain;
+      if (relGain > 0) {
+        if (newChem >= 70) finalRelGain = Math.floor(relGain * 1.5);
+        else if (newChem < 30) finalRelGain = Math.floor(relGain * 0.5);
+      }
+
+      const newRel = applyRelationshipCap(currentMatch.relationship, finalRelGain, currentMatch.storyTier, nextState.stats);
+      
+      let moodIncrease = finalVibe >= 50 ? Math.floor(finalVibe / 5) : 0;
+      const currentMood = nextState.needs.mood !== undefined ? nextState.needs.mood : 100;
+      const newMood = Math.min(100, currentMood + moodIncrease);
+
+      const logMsg = `Date Over: ${logText} (Rel: ${newRel}/100, Chem: ${newChem}/100, +${moodIncrease} Mood)`;
+
+      return {
+        ...nextState,
+        gamePhase: 'living',
+        activeDateEvent: null,
         matches: {
           ...nextState.matches,
           [npcId]: {
             ...currentMatch,
             relationship: newRel,
+            chemistry: newChem,
             dateCount: (currentMatch.dateCount || 0) + 1
           }
         },
         needs: {
           ...nextState.needs,
-          energy: finalEnergy,
           mood: newMood
         },
-        logs: finalLogs
+        logs: [logMsg, ...nextState.logs].slice(0, 20)
+      };
+    }
+
+    case 'RESOLVE_STORY_EVENT': {
+      const { npcId, success } = action.payload;
+      const npc = NPCS.find(n => n.id === npcId);
+      const currentMatch = state.matches[npcId];
+      if (!currentMatch) return state;
+
+      const storyTier = currentMatch.storyTier || 0;
+      
+      let nextState = simulateTicks(state, 4); // Takes time to do story event
+
+      if (success) {
+        // Unlock next tier and boost relationship
+        const nextTier = storyTier + 1;
+        const newRel = applyRelationshipCap(currentMatch.relationship, 20, nextTier, nextState.stats);
+        
+        const isFirstNight = storyTier === 3; // 100 relationship milestone
+
+        let finalNeeds = { ...nextState.needs };
+        let logMsg = `You successfully completed ${npc.name}'s story event! Relationship Cap increased to ${nextTier * 25 + 25}.`;
+
+        if (isFirstNight) {
+          finalNeeds.mood = 100;
+          finalNeeds.energy = 100;
+          logMsg = `You experienced an unforgettable First Night with ${npc.name}. You feel a lasting Afterglow! (+100 Mood, +100 Energy)`;
+        }
+        
+        return {
+          ...nextState,
+          needs: finalNeeds,
+          matches: {
+            ...nextState.matches,
+            [npcId]: {
+              ...currentMatch,
+              relationship: newRel,
+              storyTier: nextTier,
+              afterglow: isFirstNight ? true : currentMatch.afterglow
+            }
+          },
+          logs: [logMsg, ...nextState.logs].slice(0, 20)
+        };
+      } else {
+        // Fail: no tier unlock, just small relationship penalty
+        const newRel = applyRelationshipCap(currentMatch.relationship, -5, storyTier, nextState.stats);
+        return {
+          ...nextState,
+          matches: {
+            ...nextState.matches,
+            [npcId]: {
+              ...currentMatch,
+              relationship: newRel
+            }
+          },
+          logs: [`You failed ${npc.name}'s story event. Try again tomorrow.`, ...nextState.logs].slice(0, 20)
+        };
+      }
+    }
+
+    case 'ASK_TO_MOVE_IN': {
+      const { npcId } = action.payload;
+      const npc = NPCS.find(n => n.id === npcId);
+      const logMsg = `🏠 ${npc.name.toUpperCase()} moved in with you! They will now split rent and utility costs.`;
+      return {
+        ...state,
+        living: {
+          ...state.living,
+          roommateId: npcId,
+        },
+        logs: [logMsg, ...state.logs].slice(0, 20)
       };
     }
 
@@ -323,6 +482,7 @@ export const socialReducer = (state, action) => {
         },
         parentingGame: {
           currentStep: 0,
+          stress: 0,
           heirStats: initialHeirStats,
         },
         logs: [parentLog, ...state.logs].slice(0, 20)
@@ -330,7 +490,7 @@ export const socialReducer = (state, action) => {
     }
 
     case 'SELECT_PARENTING_CHOICE': {
-      const { cost, statGains } = action.payload;
+      const { cost, statGains, stressIncrease } = action.payload;
       const newMoney = Math.max(0, state.stats.money - cost);
       
       const newHeirStats = { ...state.parentingGame.heirStats };
@@ -339,6 +499,8 @@ export const socialReducer = (state, action) => {
           newHeirStats[statKey] = Math.min(100, newHeirStats[statKey] + value);
         }
       });
+
+      const newStress = Math.min(100, (state.parentingGame.stress || 0) + (stressIncrease || 20));
 
       return {
         ...state,
@@ -350,8 +512,28 @@ export const socialReducer = (state, action) => {
           ...state.parentingGame,
           currentStep: state.parentingGame.currentStep + 1,
           heirStats: newHeirStats,
+          stress: newStress
         },
-        logs: [`Parenting: Made choice for child's development.`, ...state.logs].slice(0, 20)
+        logs: [`Parenting: Made choice for child's development. Child Stress is now ${newStress}%.`, ...state.logs].slice(0, 20)
+      };
+    }
+
+    case 'REDUCE_CHILD_STRESS': {
+      const { energyCost, stressReduction } = action.payload;
+      const newEnergy = Math.max(0, state.needs.energy - energyCost);
+      const newStress = Math.max(0, state.parentingGame.stress - stressReduction);
+
+      return {
+        ...state,
+        needs: {
+          ...state.needs,
+          energy: newEnergy
+        },
+        parentingGame: {
+          ...state.parentingGame,
+          stress: newStress
+        },
+        logs: [`Spent time with child to reduce stress. Stress is now ${newStress}%.`, ...state.logs].slice(0, 20)
       };
     }
 
@@ -393,7 +575,9 @@ export const socialReducer = (state, action) => {
 
       const newStorage = [...state.storage, ...state.placedFurniture];
 
-      const welcomeLog = `[Generation ${state.family.generation + 1}] Welcome to your new life as ${childName.toUpperCase()}! You inherited $${inheritedCash} (50% of parent's money) and all their vehicles. You start with legacy stat bonuses! Ready to live your own life?`;
+      const newTraits = calculateTraits(childStats, state.parentingGame.stress || 0);
+
+      const welcomeLog = `[Generation ${state.family.generation + 1}] Welcome to your new life as ${childName.toUpperCase()}! You inherited $${inheritedCash} and traits: ${newTraits.join(', ') || 'None'}.`;
 
       return {
         ...state,
@@ -404,6 +588,7 @@ export const socialReducer = (state, action) => {
           minute: 0,
         },
         stats: childStats,
+        activeTraits: newTraits,
         needs: {
           energy: 100,
           hunger: 20,
@@ -430,7 +615,7 @@ export const socialReducer = (state, action) => {
           dailySwipesCount: 0,
           lastSwipedDay: 1,
         },
-        activeLocation: 'home',
+        activeLocation: 'Endleigh',
         family: {
           spouseId: null,
           spouseName: '',
@@ -525,6 +710,56 @@ export const socialReducer = (state, action) => {
         ...state,
         matches: newMatches,
         logs: [`✨ Gold Instant Match! You matched with ${npc.name} via Secret Admirers.`, ...state.logs].slice(0, 20)
+      };
+    }
+
+    case 'RESOLVE_NPC_ALERT': {
+      const { optionIndex } = action.payload;
+      const event = state.activeNpcAlert;
+      const npcId = event.npcId;
+      const choice = event.choices[optionIndex];
+
+      let success = true;
+      if (choice.checkStat) {
+        success = state.stats[choice.checkStat] >= choice.threshold;
+      }
+
+      const relGain = success ? (choice.successRelation || 0) : (choice.failRelation || 0);
+      const chemGain = success ? (choice.successChemistry || 0) : (choice.failChemistry || 0);
+      const moneyCost = choice.moneyCost || 0;
+      const energyCost = choice.energyCost || 0;
+      const logText = success ? choice.successText : choice.failText;
+
+      const currentMatch = state.matches[npcId] || { met: true, relationship: 10, chemistry: 10, dateCount: 0 };
+      const newRel = Math.min(100, Math.max(0, currentMatch.relationship + relGain));
+      const newChem = Math.min(100, Math.max(0, (currentMatch.chemistry || 10) + chemGain));
+      
+      const newStats = {
+        ...state.stats,
+        money: Math.max(0, state.stats.money - moneyCost)
+      };
+      const newEnergy = Math.max(0, state.needs.energy - energyCost);
+
+      const logMsg = `Alert Resolved: ${logText} (Rel: ${newRel}/100, Chem: ${newChem}/100)`;
+
+      return {
+        ...state,
+        gamePhase: 'living',
+        activeNpcAlert: null,
+        stats: newStats,
+        needs: {
+          ...state.needs,
+          energy: newEnergy
+        },
+        matches: {
+          ...state.matches,
+          [npcId]: {
+            ...currentMatch,
+            relationship: newRel,
+            chemistry: newChem
+          }
+        },
+        logs: [logMsg, ...state.logs].slice(0, 20)
       };
     }
 

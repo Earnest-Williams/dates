@@ -2,7 +2,11 @@ import { HOUSING_TIERS } from '../../data/housing';
 import { LOCATIONS } from '../../data/locations';
 import { getSleepMultiplier } from '../../sim/needs';
 import { getGroceriesCost } from '../../sim/economy';
+import { calculateTravelStats, SETTLEMENTS } from '../../data/geography';
 import { simulateTicks } from './time';
+import { WORK_EVENTS, getCurrentCareer } from '../../data/careers';
+import { courses } from '../../data/education';
+import { abilities } from '../../data/abilities';
 
 export const actionReducer = (state, action) => {
   switch (action.type) {
@@ -17,11 +21,16 @@ export const actionReducer = (state, action) => {
       const healthPenalty = currentHealth < 50;
       const moodHigh = currentMood >= 70;
       const hasBookshelf = state.placedFurniture.includes('bookshelf');
+      const isBurnedOut = state.activeTraits?.includes('burned_out');
 
       // 2. Process gains / modifiers (bookshelf, high mood, low health)
       const finalStatChanges = { ...statChanges };
       Object.keys(finalStatChanges).forEach(key => {
         let change = finalStatChanges[key];
+        
+        if (isBurnedOut && change > 0 && key !== 'mood' && key !== 'health') {
+           change = change * 0.5;
+        }
         
         // Health penalty on fitness
         if (key === 'fitness' && healthPenalty && change > 0) {
@@ -90,7 +99,7 @@ export const actionReducer = (state, action) => {
       const logMsg = `Finished: ${actionName} (${parts})`;
       const finalLogs = [logMsg, ...nextState.logs].slice(0, 20);
 
-      return {
+      let newState = {
         ...nextState,
         stats: updatedStats,
         needs: {
@@ -101,6 +110,50 @@ export const actionReducer = (state, action) => {
           health: finalHealth
         },
         logs: finalLogs
+      };
+
+      // 3. Random Work Event trigger (20% chance if working)
+      if (actionName.toLowerCase().includes('work') && Math.random() < 0.20) {
+        const randomEvent = WORK_EVENTS[Math.floor(Math.random() * WORK_EVENTS.length)];
+        newState.gamePhase = 'work_event';
+        newState.activeWorkEvent = randomEvent;
+        newState.logs = [`An unexpected situation arose at work!`, ...newState.logs].slice(0, 20);
+      }
+
+      return newState;
+    }
+
+    case 'RESOLVE_WORK_EVENT': {
+      const { optionIndex } = action.payload;
+      const event = state.activeWorkEvent;
+      const choice = event.choices[optionIndex];
+
+      const success = state.stats[choice.checkStat] >= choice.threshold;
+      let relGain = success ? choice.successRelation : choice.failRelation;
+      const logText = success ? choice.successText : choice.failText;
+
+      const bonusMoney = success ? choice.bonusMoney : 0;
+      const finalEnergy = Math.max(0, state.needs.energy - choice.energyCost);
+      let finalMood = Math.max(0, Math.min(100, state.needs.mood + choice.moodCost));
+      let finalMoney = state.stats.money + bonusMoney;
+
+      const moneyStr = bonusMoney > 0 ? ` (+$${bonusMoney})` : '';
+      const logMsg = `Work event: ${logText}${moneyStr}`;
+
+      return {
+        ...state,
+        gamePhase: 'living',
+        activeWorkEvent: null,
+        stats: {
+          ...state.stats,
+          money: finalMoney
+        },
+        needs: {
+          ...state.needs,
+          energy: finalEnergy,
+          mood: finalMood
+        },
+        logs: [logMsg, ...state.logs].slice(0, 20)
       };
     }
 
@@ -205,18 +258,45 @@ export const actionReducer = (state, action) => {
     }
 
     case 'PAY_BILLS': {
-      const cost = state.living.billsAmount;
+      const currentHousingTier = state.stats.housingTier;
+      const rentCost = HOUSING_TIERS[currentHousingTier].rent;
+      const billsCost = state.living.billsAmount;
+
+      const totalOwed = rentCost + billsCost;
+      if (state.stats.money >= totalOwed) {
+        return {
+          ...state,
+          stats: {
+            ...state.stats,
+            money: state.stats.money - totalOwed
+          },
+          living: {
+            ...state.living,
+            utilitiesActive: true
+          },
+          logs: [`Paid $${totalOwed} to restore utilities and catch up on rent.`, ...state.logs].slice(0, 20)
+        };
+      }
       return {
         ...state,
-        stats: {
-          ...state.stats,
-          money: Math.max(0, state.stats.money - cost)
-        },
+        logs: [`⚠️ Not enough money to pay bills ($${totalOwed} needed).`, ...state.logs].slice(0, 20)
+      };
+    }
+
+    case 'TOGGLE_HEALTH_INSURANCE': {
+      const currentState = state.living.hasHealthInsurance;
+      const newStatus = !currentState;
+      const logMsg = newStatus 
+        ? `Subscribed to Health Insurance. You will be billed $150/month.` 
+        : `Cancelled Health Insurance. You are no longer protected from medical debt.`;
+        
+      return {
+        ...state,
         living: {
           ...state.living,
-          utilitiesActive: true
+          hasHealthInsurance: newStatus
         },
-        logs: [`Paid outstanding utility bills of $${cost}. Power and internet restored!`, ...state.logs].slice(0, 20)
+        logs: [logMsg, ...state.logs].slice(0, 20)
       };
     }
 
@@ -257,33 +337,34 @@ export const actionReducer = (state, action) => {
 
     case 'TRAVEL': {
       const { locationKey } = action.payload;
-      const location = LOCATIONS[locationKey];
-      let timeIncrements = 6;
+      const travelStats = calculateTravelStats(state.activeLocation, locationKey, state.properties.vehicles);
+      
+      let ticks = 6;
+      let energyCost = 10;
       let fitnessBonus = 0;
-      const vehicles = state.properties.vehicles;
+      let vehicleUsed = 'foot';
+      let distance = 0;
+      let pathChain = '';
 
-      if (vehicles.includes('sports_car') || vehicles.includes('sedan')) {
-        timeIncrements = 2;
-      } else if (vehicles.includes('scooter')) {
-        timeIncrements = 3;
-      } else if (vehicles.includes('bicycle')) {
-        timeIncrements = 4;
-        fitnessBonus = 1;
+      if (travelStats) {
+        ticks = travelStats.ticks;
+        energyCost = travelStats.energyCost;
+        fitnessBonus = travelStats.fitnessBonus;
+        vehicleUsed = travelStats.vehicleUsed;
+        distance = travelStats.distance;
+        pathChain = travelStats.path.join(" ➔ ");
       }
 
-      let nextState = simulateTicks(state, timeIncrements);
+      let nextState = simulateTicks(state, ticks);
 
       const newStats = { ...nextState.stats };
       if (fitnessBonus > 0) {
         newStats.fitness = Math.min(100, newStats.fitness + fitnessBonus);
       }
 
-      const vehicleUsed = vehicles.includes('sports_car') ? 'Sports Car' : 
-                          vehicles.includes('sedan') ? 'Sedan' : 
-                          vehicles.includes('scooter') ? 'Electric Scooter' : 
-                          vehicles.includes('bicycle') ? 'Bicycle' : 'foot';
-
-      const logMsg = `Traveled to ${location.name} via ${vehicleUsed}. (Took ${timeIncrements * 10} mins, -${location.energyCost} Energy)`;
+      const destName = SETTLEMENTS[locationKey]?.name || locationKey;
+      const routeMsg = pathChain ? ` (Route: ${pathChain}, ${distance.toFixed(1)} km)` : ` (${distance.toFixed(1)} km)`;
+      const logMsg = `Traveled to ${destName} via ${vehicleUsed}.${routeMsg} (Took ${ticks * 10} mins, -${energyCost} Energy)`;
       const finalLogs = [logMsg, ...nextState.logs].slice(0, 20);
 
       return {
@@ -292,9 +373,175 @@ export const actionReducer = (state, action) => {
         stats: newStats,
         needs: {
           ...nextState.needs,
-          energy: Math.max(0, nextState.needs.energy - location.energyCost)
+          energy: Math.max(0, nextState.needs.energy - energyCost)
         },
         logs: finalLogs
+      };
+    }
+
+    case 'ENROLL_COURSE': {
+      const { courseId, useLoan } = action.payload;
+      const course = courses[courseId];
+      if (!course) return state;
+
+      let newMoney = state.stats.money;
+      let newLoans = state.education.studentLoans || 0;
+
+      if (!useLoan && state.stats.money < course.cost) {
+        return {
+          ...state,
+          logs: [`Not enough money to enroll in ${course.name}. Consider taking a student loan.`, ...state.logs].slice(0, 20)
+        };
+      }
+
+      if (useLoan) {
+        newLoans += course.cost;
+      } else {
+        newMoney -= course.cost;
+      }
+
+      // Check requirements
+      if (course.requirements && course.requirements.stats) {
+        for (const [stat, reqVal] of Object.entries(course.requirements.stats)) {
+          if ((state.stats[stat] || 0) < reqVal) {
+             return {
+               ...state,
+               logs: [`Missing requirement: ${stat} >= ${reqVal} for ${course.name}`, ...state.logs].slice(0, 20)
+             };
+          }
+        }
+      }
+
+      return {
+        ...state,
+        stats: {
+          ...state.stats,
+          money: newMoney
+        },
+        education: {
+          ...state.education,
+          activeCourse: courseId,
+          courseProgress: 0,
+          studentLoans: newLoans
+        },
+        logs: [`Enrolled in ${course.name} ${useLoan ? '(Paid with Student Loan)' : 'for $' + course.cost}!`, ...state.logs].slice(0, 20)
+      };
+    }
+
+    case 'STUDY_COURSE': {
+      if (!state.education || !state.education.activeCourse) return state;
+      
+      const course = courses[state.education.activeCourse];
+      if (!course) return state;
+
+      // Study session takes 20 ticks (approx 3 hours)
+      const sessionTicks = 20;
+      let nextState = simulateTicks(state, sessionTicks);
+
+      nextState.needs.energy = Math.max(0, nextState.needs.energy - 25);
+      nextState.needs.mood = Math.max(0, nextState.needs.mood - 10);
+
+      const newProgress = state.education.courseProgress + sessionTicks;
+      
+      if (newProgress >= course.durationTicks) {
+         // Final Exam Check!
+         let passed = true;
+         if (course.exam && course.exam.stats) {
+            for (const [stat, reqVal] of Object.entries(course.exam.stats)) {
+               if ((state.stats[stat] || 0) < reqVal) {
+                  passed = false;
+                  break;
+               }
+            }
+         }
+
+         if (passed) {
+           const newStats = { ...nextState.stats };
+           const newCredentials = [...(newStats.credentials || [])];
+           if (!newCredentials.includes(course.credentialEarned)) {
+               newCredentials.push(course.credentialEarned);
+           }
+           newStats.credentials = newCredentials;
+
+           // Apply benefits
+           if (course.benefits && course.benefits.stats) {
+              for (const [stat, val] of Object.entries(course.benefits.stats)) {
+                 newStats[stat] = Math.min(100, (newStats[stat] || 0) + val);
+              }
+           }
+
+           return {
+             ...nextState,
+             stats: newStats,
+             education: {
+               ...state.education,
+               activeCourse: null,
+               courseProgress: 0
+             },
+             logs: [`Passed the final exam! Completed ${course.name}! Earned ${course.credentialEarned}.`, ...nextState.logs].slice(0, 20)
+           };
+         } else {
+           // Failed Exam
+           return {
+             ...nextState,
+             education: {
+               ...state.education,
+               courseProgress: Math.floor(course.durationTicks * 0.5) // Set back to 50%
+             },
+             logs: [`Failed the final exam for ${course.name}. Your stats weren't high enough. Keep studying!`, ...nextState.logs].slice(0, 20)
+           };
+         }
+      }
+
+      // Not complete yet
+      return {
+         ...nextState,
+         education: {
+           ...state.education,
+           courseProgress: newProgress
+         },
+         logs: [`Studied for ${course.name}. Progress: ${Math.floor((newProgress / course.durationTicks) * 100)}%`, ...nextState.logs].slice(0, 20)
+      };
+    }
+
+    case 'USE_ABILITY': {
+      const { abilityId } = action.payload;
+      const ability = abilities[abilityId];
+      if (!ability || state.needs.energy < ability.energyCost) return state;
+
+      let nextState = simulateTicks(state, 4); // Take ~1 hour
+      nextState.needs.energy = Math.max(0, nextState.needs.energy - ability.energyCost);
+      
+      let logMsg = `Used ability: ${ability.name}.`;
+      let isRiskTriggered = false;
+
+      if (ability.riskChance && Math.random() < ability.riskChance) {
+        isRiskTriggered = true;
+        logMsg = `Ability failed! ${ability.name} triggered a penalty.`;
+        if (ability.effectType === 'money') {
+           nextState.stats.money = Math.max(0, nextState.stats.money - ability.riskPenalty);
+           logMsg += ` Lost $${ability.riskPenalty}.`;
+        } else if (ability.effectType === 'simstagram_followers') {
+           nextState.simstagram.followers = Math.max(0, nextState.simstagram.followers + ability.riskPenalty);
+           logMsg += ` Lost ${Math.abs(ability.riskPenalty)} followers.`;
+        }
+      } else {
+        if (ability.effectType === 'money') {
+           nextState.stats.money += ability.effectValue;
+           logMsg += ` Gained $${ability.effectValue}.`;
+        } else if (ability.effectType === 'simstagram_followers') {
+           nextState.simstagram.followers += ability.effectValue;
+           logMsg += ` Gained ${ability.effectValue} followers.`;
+        } else if (ability.effectType === 'date_vibe' && nextState.activeDateEvent) {
+           logMsg += ` Date vibe boosted!`;
+           // Handled in UI layer or needs specialized date reducer interception,
+           // but for simple flat state changes we can apply it.
+        }
+      }
+
+      return {
+        ...nextState,
+        logs: [logMsg, ...nextState.logs].slice(0, 20)
       };
     }
 

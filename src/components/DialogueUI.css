@@ -45,78 +45,98 @@
 }
 
 .rel-bar-bg {
-  width: 100px;
-  height: 6px;
+  width: 100%;
+  height: 8px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: var(--radius-full);
   overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .rel-bar-fill {
   height: 100%;
-  background: var(--accent-pink);
+  background: var(--gradient-primary);
   border-radius: var(--radius-full);
-  transition: width 0.3s ease;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 10px rgba(236, 72, 153, 0.4);
 }
 
 .dialogue-body {
-  padding: 1.25rem;
-  background: rgba(0, 0, 0, 0.2);
+  padding: 1.5rem;
+  background: rgba(7, 10, 18, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
   min-height: 120px;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  position: relative;
+}
+
+/* Decorative tail representing speech bubble */
+.dialogue-body::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 20px;
+  border-width: 0 10px 10px 10px;
+  border-style: solid;
+  border-color: transparent transparent rgba(255, 255, 255, 0.06) transparent;
 }
 
 .dialogue-speaker {
-  font-weight: 600;
-  font-size: 0.85rem;
+  font-weight: 700;
+  font-size: 0.9rem;
   color: var(--accent-pink);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .dialogue-text {
-  font-size: 0.95rem;
+  font-size: 1rem;
   line-height: 1.5;
-  font-style: italic;
+  color: var(--text-primary);
 }
 
 .dialogue-controls {
-  margin-top: 0.5rem;
+  margin-top: 1rem;
   min-height: 50px;
 }
 
 .choices-list {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.65rem;
 }
 
 .choice-btn {
   text-align: left;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.9rem 1.25rem;
   border-radius: var(--radius-md) !important;
 }
 
 .dialogue-action-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
 .marriage-btn {
-  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%) !important;
-  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3) !important;
+  background: var(--gradient-gold) !important;
+  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.4) !important;
 }
 
 .selection-overlay {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  padding: 1rem;
+  background: rgba(11, 15, 25, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 1.25rem;
   border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  animation: fadeIn 0.15s ease forwards;
+  gap: 0.85rem;
+  animation: fadeIn 0.2s ease forwards;
 }
 
 .selection-overlay h5 {

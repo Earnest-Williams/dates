@@ -59,3 +59,26 @@ export const upgradeHousing = (state, dispatch) => {
   dispatch({ type: 'UPGRADE_HOUSING' });
   return true;
 };
+
+export const buyAsset = (state, dispatch, assetId, quantity) => {
+  const price = state.assetPrices[assetId];
+  if (!price) return false;
+  const cost = price * quantity;
+  if (state.stats.money < cost) return false;
+
+  dispatch({ type: 'BUY_ASSET', payload: { assetId, quantity } });
+  return true;
+};
+
+export const sellAsset = (state, dispatch, assetId, quantity) => {
+  const current = state.portfolio[assetId] || { quantity: 0, avgPrice: 0 };
+  if (current.quantity < quantity) return false;
+
+  dispatch({ type: 'SELL_ASSET', payload: { assetId, quantity } });
+  return true;
+};
+
+export const payTaxes = (state, dispatch) => {
+  dispatch({ type: 'PAY_TAXES' });
+  return true;
+};

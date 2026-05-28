@@ -1,6 +1,7 @@
 import { checkActionFeasibility } from '../selectors';
 import { getGroceriesCost } from '../../sim/economy';
 import { LOCATIONS } from '../../data/locations';
+import { calculateTravelStats, SETTLEMENTS } from '../../data/geography';
 
 export const performAction = (state, dispatch, actionName, timeIncrements, statChanges = {}, energyCost = 10, moneyChange = 0) => {
   const feasibility = checkActionFeasibility(state, actionName, energyCost, moneyChange < 0 ? -moneyChange : 0);
@@ -64,6 +65,11 @@ export const payBills = (state, dispatch) => {
   return true;
 };
 
+export const toggleHealthInsurance = (state, dispatch) => {
+  dispatch({ type: 'TOGGLE_HEALTH_INSURANCE' });
+  return true;
+};
+
 export const watchTv = (state, dispatch) => {
   const hasTv = (state.placedFurniture || []).includes('smart_tv');
   if (!hasTv || !state.living.utilitiesActive || state.needs.energy < 5) return false;
@@ -80,17 +86,18 @@ export const visitHospital = (state, dispatch) => {
 };
 
 export const travelToLocation = (state, dispatch, locationKey) => {
-  const location = LOCATIONS[locationKey];
-  if (!location) return false;
+  if (!SETTLEMENTS[locationKey]) return false;
 
-  if (location.gated) {
-    const ownsSportsCar = state.properties.vehicles.includes('sports_car');
-    const hasStyle = state.stats.style >= location.reqStyle;
-    if (!ownsSportsCar && !hasStyle) return false;
-  }
+  const travelStats = calculateTravelStats(state.activeLocation, locationKey, state.properties.vehicles);
+  if (!travelStats) return false;
 
-  if (state.needs.energy < location.energyCost) return false;
+  if (state.needs.energy < travelStats.energyCost) return false;
 
   dispatch({ type: 'TRAVEL', payload: { locationKey } });
+  return true;
+};
+
+export const resolveWorkEvent = (state, dispatch, optionIndex) => {
+  dispatch({ type: 'RESOLVE_WORK_EVENT', payload: { optionIndex } });
   return true;
 };

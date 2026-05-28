@@ -1,0 +1,304 @@
+.simstagram-app {
+  width: 100%;
+  max-width: 380px;
+  height: 680px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 32px; /* Curved phone corners */
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Simulated Phone Notch / Speaker bar at top */
+.simstagram-app::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90px;
+  height: 18px;
+  background: #070a12;
+  border-radius: var(--radius-full);
+  z-index: 10;
+}
+
+.simstagram-app .app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2.25rem 1.25rem 1rem 1.25rem; /* Space for top speaker */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(7, 10, 18, 0.3);
+}
+
+.simstagram-app .app-header h2 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: -0.5px;
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.simstagram-app .app-header button {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.simstagram-app .app-header button:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: white;
+  transform: scale(1.05);
+}
+
+/* Profile Details */
+.simstagram-app .profile-section {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: linear-gradient(180deg, rgba(7, 10, 18, 0.2) 0%, transparent 100%);
+}
+
+.simstagram-app .profile-section h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.simstagram-app .stats-row {
+  display: flex;
+  justify-content: space-around;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  margin: 0.25rem 0;
+}
+
+.simstagram-app .stats-row > div {
+  text-align: center;
+  flex: 1;
+}
+
+.simstagram-app .stats-row > div:not(:last-child) {
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.simstagram-app .stats-row .stat-value {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: white;
+}
+
+.simstagram-app .stats-row .stat-label {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.simstagram-app .buffs-list {
+  font-size: 0.75rem;
+  color: var(--accent-gold);
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.15);
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 500;
+}
+
+/* Divider Lines */
+.simstagram-app hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin: 0;
+}
+
+/* Sponsorship Tiers list */
+.simstagram-app .sponsorships {
+  padding: 1rem 1.25rem;
+}
+
+.simstagram-app .sponsorships h4 {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.simstagram-app .sponsorships ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.simstagram-app .sponsorships li {
+  font-size: 0.8rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  color: var(--accent-emerald);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+}
+
+/* Create Post actions grid */
+.simstagram-app .create-post {
+  padding: 1.25rem;
+  flex-grow: 0;
+}
+
+.simstagram-app .create-post h4 {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.75rem;
+}
+
+.simstagram-app .create-post-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+}
+
+.simstagram-app .btn-post-choice {
+  padding: 0.6rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.25rem;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.simstagram-app .btn-post-choice:hover:not(:disabled) {
+  background: rgba(236, 72, 153, 0.06);
+  border-color: var(--accent-pink);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.1);
+}
+
+.simstagram-app .btn-post-choice:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.simstagram-app .btn-post-choice .post-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.simstagram-app .btn-post-choice .post-cost {
+  font-size: 0.65rem;
+  color: var(--accent-rose);
+  font-weight: 500;
+}
+
+/* Feed Panel */
+.simstagram-app .feed {
+  padding: 1.25rem;
+  flex-grow: 1;
+  overflow-y: auto;
+  background: rgba(7, 10, 18, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.simstagram-app .feed h4 {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.simstagram-app .feed-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.simstagram-app .feed-item {
+  font-size: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  line-height: 1.35;
+  color: var(--text-secondary);
+}
+
+.simstagram-app .feed-item.viral {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.08) 0%, rgba(251, 191, 36, 0.04) 100%);
+  border-color: rgba(236, 72, 153, 0.2);
+  color: var(--text-primary);
+  box-shadow: 0 0 10px rgba(236, 72, 153, 0.05);
+}
+
+.simstagram-app .feed-item strong {
+  color: white;
+}
+
+.simstagram-app .feed-item .gain-tag {
+  font-weight: 700;
+  color: var(--accent-emerald);
+}
+
+.simstagram-app .feed-item.viral .gain-tag {
+  color: var(--accent-pink);
+  text-shadow: 0 0 5px rgba(236, 72, 153, 0.3);
+}
+
+.simstagram-app .feed-item .viral-label {
+  background: var(--gradient-primary);
+  color: white;
+  font-size: 0.55rem;
+  font-weight: 800;
+  padding: 0.05rem 0.3rem;
+  border-radius: 4px;
+  margin-left: 0.4rem;
+  display: inline-block;
+  vertical-align: middle;
+}

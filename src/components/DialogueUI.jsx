@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useGame } from '../state/GameContext';
+import { useGameStore } from '../state/store';
 import { LOCATIONS } from '../data/locations';
 import { NPCS } from '../data/npcs';
 import { ITEMS } from '../state/ItemDatabase';
@@ -11,38 +11,67 @@ const DialogueUI = ({ npcId, onClose }) => {
     answerDialogue, 
     giveGift, 
     goOnDate, 
+    resolveStoryEvent,
     proposeMarriage,
+    askToMoveIn,
     swipeNpc
-  } = useGame();
+  } = useGameStore();
 
   const { matches, inventory, stats } = gameState;
   const npc = NPCS.find(n => n.id === npcId);
   const matchedData = matches[npcId];
 
-  const [dialogueText, setDialogueText] = useState(
-    matchedData ? `Hey! Great to see you again. What's on your mind?` : npc.dialogue.intro
-  );
+  const getGreeting = () => {
+    if (!matchedData) return npc.dialogue.intro;
+    if (gameState.family.spouseId === npcId) {
+      return gameState.family.married 
+        ? `Hey honey! It's so good to see you. How was your day?` 
+        : `Hey sweetheart! I'm so excited for our wedding. What's on your mind?`;
+    }
+    const rel = matchedData.relationship;
+    if (rel >= 80) return `Hey love! I was just thinking about you. What should we do today?`;
+    if (rel >= 50) return `Hey! I've been looking forward to seeing you. What's up?`;
+    if (rel >= 20) return `Oh, hey! Great to see you again. What's on your mind?`;
+    return `Oh, hello. Did you need something?`;
+  };
+
+  const [dialogueText, setDialogueText] = useState(getGreeting());
   const [showChoices, setShowChoices] = useState(!matchedData);
   const [giftMode, setGiftMode] = useState(false);
   const [dateMode, setDateMode] = useState(false);
+  const [storyMode, setStoryMode] = useState(false);
 
   if (!npc) return null;
+
+  const currentTier = matchedData?.storyTier || 0;
+  const nextCap = (currentTier + 1) * 25;
+  const isCapped = matchedData && matchedData.relationship >= nextCap && nextCap <= 100;
+  const activeStoryEvent = isCapped ? npc.storyEvents[nextCap] : null;
 
   const handleChoice = (choiceIndex) => {
     const success = answerDialogue(npcId, choiceIndex);
     const choice = npc.dialogue.choices[choiceIndex];
     
     if (!matchedData) {
-      // Intro matching choice
       if (success) {
         setDialogueText(choice.successText + " (Matched!)");
-        // We need to auto swipe match if they pass the intro!
         swipeNpc(npcId, 'right');
       } else {
         setDialogueText(choice.failText + " (Didn't Match)");
       }
       setShowChoices(false);
     }
+  };
+
+  const handleStoryEvent = () => {
+    const success = stats[activeStoryEvent.statCheck] >= activeStoryEvent.threshold;
+    resolveStoryEvent(npcId, success);
+    if (success) {
+      setDialogueText(`[SUCCESS] ${activeStoryEvent.successText}`);
+    } else {
+      setDialogueText(`[FAILED] ${activeStoryEvent.failText} (Requires ${activeStoryEvent.statCheck} >= ${activeStoryEvent.threshold})`);
+    }
+    setStoryMode(false);
   };
 
   const handleGift = (itemKey) => {
@@ -71,112 +100,152 @@ const DialogueUI = ({ npcId, onClose }) => {
     }
   };
 
-  // Filter inventory for gift items only
+  const handleAskToMoveIn = () => {
+    if (gameState.stats.housingTier < 1) {
+      setDialogueText(`I'd love to, but your place is way too small. (Requires Housing Tier 2+)`);
+      return;
+    }
+    askToMoveIn(npcId);
+    setDialogueText(`I would love to move in with you! Let's do this.`);
+  };
+
   const availableGifts = Object.entries(inventory).filter(([key, qty]) => {
     return qty > 0 && ITEMS[key] && ITEMS[key].type === 'gift';
   });
 
+  const getRelationshipTier = (relationship) => {
+    if (gameState.family.spouseId === npcId) {
+      return gameState.family.married ? 'Spouse 💍' : 'Fiancé 💍';
+    }
+    if (relationship >= 80) return 'Partner ❤️';
+    if (relationship >= 50) return 'Dating 💕';
+    if (relationship >= 20) return 'Crush 💖';
+    return 'Stranger';
+  };
+
   return (
     <div className="glass-panel dialogue-container animate-fade-in">
-      {/* Header */}
       <header className="dialogue-header">
         <div className="npc-title-area">
           <div className="dialogue-avatar">{npc.name.charAt(0)}</div>
           <div>
             <h4>{npc.name}</h4>
-            <span style={{ fontSize: '0.80rem', color: 'var(--text-secondary)' }}>Status: {matchedData ? 'Connected' : 'Stranger'}</span>
+            <span style={{ fontSize: '0.80rem', color: 'var(--text-secondary)' }}>
+              Status: {matchedData ? getRelationshipTier(matchedData.relationship) : 'Stranger'}
+            </span>
           </div>
         </div>
-        <div className="relationship-meter">
-          <span>Rel: {matchedData ? `${matchedData.relationship}/100` : 'Not Met'}</span>
-          <div className="rel-bar-bg">
-            <div 
-              className="rel-bar-fill" 
-              style={{ width: `${matchedData ? matchedData.relationship : 0}%` }}
-            ></div>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '200px' }}>
+          <div className="relationship-meter">
+            <span>Rel: {matchedData ? `${matchedData.relationship}/${nextCap <= 100 ? nextCap : 100}` : 'Not Met'}</span>
+            <div className="rel-bar-bg">
+              <div 
+                className="rel-bar-fill" 
+                style={{ width: `${matchedData ? matchedData.relationship : 0}%` }}
+              ></div>
+            </div>
           </div>
+
+          {matchedData && (
+            <div className="relationship-meter">
+              <span>Chem: {matchedData.chemistry || 10}/100</span>
+              <div className="rel-bar-bg">
+                <div 
+                  className="rel-bar-fill" 
+                  style={{ 
+                    width: `${matchedData.chemistry || 10}%`,
+                    backgroundColor: 'var(--accent-pink)',
+                    boxShadow: '0 0 8px rgba(236, 72, 153, 0.4)'
+                  }}
+                ></div>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
-      {/* Main Dialogue Box */}
       <div className="dialogue-body glass-panel">
         <p className="dialogue-speaker">{npc.name}</p>
         <p className="dialogue-text">"{dialogueText}"</p>
       </div>
 
-      {/* Inputs / Choices / Controls */}
       <div className="dialogue-controls">
-        {/* Intro choices */}
         {showChoices && !matchedData && (
           <div className="choices-list">
             {npc.dialogue.choices.map((choice, idx) => (
-              <button 
-                key={idx} 
-                className="btn-primary choice-btn"
-                onClick={() => handleChoice(idx)}
-              >
-                {choice.text}
-              </button>
+               <button key={idx} className="btn-primary choice-btn" onClick={() => handleChoice(idx)}>
+                 {choice.text}
+               </button>
             ))}
           </div>
         )}
 
-        {/* Post-intro general controls */}
-        {!showChoices && !giftMode && !dateMode && (
+        {storyMode && activeStoryEvent && (
+          <div className="selection-overlay">
+            <h5>Story Event: {npc.name}'s Milestone</h5>
+            <p style={{ margin: '10px 0' }}>{activeStoryEvent.prompt}</p>
+            <button className="btn-primary" onClick={handleStoryEvent} style={{ marginBottom: '10px' }}>
+              Attempt Event (Uses {activeStoryEvent.statCheck})
+            </button>
+            <button className="btn-secondary" onClick={() => setStoryMode(false)}>Not right now</button>
+          </div>
+        )}
+
+        {!showChoices && !giftMode && !dateMode && !storyMode && (
           <div className="dialogue-action-bar">
             {matchedData ? (
               <>
-                <button className="btn-primary" onClick={() => setDialogueText("Let's talk about our hobbies... " + npc.description)}>
-                  💬 Chat
-                </button>
-                <button className="btn-primary" onClick={() => setGiftMode(true)}>
-                  🎁 Give Gift
-                </button>
-                <button className="btn-primary" onClick={() => setDateMode(true)}>
-                  🥂 Ask on Date
-                </button>
-                {matchedData.relationship >= 80 && (
+                {isCapped && activeStoryEvent ? (
+                  <button className="btn-primary" style={{ backgroundColor: '#f39c12' }} onClick={() => setStoryMode(true)}>
+                    ⭐ Play Story Event (Break Cap)
+                  </button>
+                ) : (
+                  <>
+                    <button className="btn-primary" onClick={() => setDialogueText("Let's talk about our hobbies... " + npc.description)}>
+                      💬 Chat
+                    </button>
+                    <button className="btn-primary" onClick={() => setGiftMode(true)}>
+                      🎁 Give Gift
+                    </button>
+                    <button className="btn-primary" onClick={() => setDateMode(true)}>
+                      🥂 Ask on Date
+                    </button>
+                  </>
+                )}
+                {matchedData.relationship >= 75 && currentTier >= 3 && !gameState.family.spouseId && gameState.living.roommateId !== npcId && (
+                  <button className="btn-primary" style={{ backgroundColor: '#9b59b6' }} onClick={handleAskToMoveIn}>
+                    🏠 Ask to Move In
+                  </button>
+                )}
+                {matchedData.relationship >= 75 && currentTier >= 3 && !gameState.family.spouseId && (
                   <button className="btn-primary marriage-btn" onClick={handlePropose}>
                     💍 Propose
                   </button>
                 )}
               </>
             ) : (
-              <button className="btn-primary" onClick={onClose}>
-                End Conversation
-              </button>
+              <button className="btn-primary" onClick={onClose}>End Conversation</button>
             )}
-            {matchedData && (
-              <button className="btn-secondary" onClick={onClose}>
-                Goodbye
-              </button>
-            )}
+            {matchedData && <button className="btn-secondary" onClick={onClose}>Goodbye</button>}
           </div>
         )}
 
-        {/* Gift Selection Panel */}
         {giftMode && (
           <div className="selection-overlay">
             <h5>Select a Gift</h5>
             <div className="selection-grid">
               {availableGifts.map(([key, qty]) => (
-                <button 
-                  key={key} 
-                  className="btn-mini btn-select-item"
-                  onClick={() => handleGift(key)}
-                >
+                <button key={key} className="btn-mini btn-select-item" onClick={() => handleGift(key)}>
                   {ITEMS[key].name} ({qty})
                 </button>
               ))}
-              {availableGifts.length === 0 && (
-                <p className="error-text">No gifts in inventory. Buy some at the Mall.</p>
-              )}
+              {availableGifts.length === 0 && <p className="error-text">No gifts in inventory.</p>}
             </div>
             <button className="btn-mini btn-cancel" onClick={() => setGiftMode(false)}>Cancel</button>
           </div>
         )}
 
-        {/* Date Selection Panel */}
         {dateMode && (
           <div className="selection-overlay">
             <h5>Select Date Location</h5>
@@ -185,12 +254,7 @@ const DialogueUI = ({ npcId, onClose }) => {
                 if (key === 'home' || key === 'mall') return null;
                 const isGated = loc.gated && !gameState.properties.vehicles.includes('sports_car') && stats.style < loc.reqStyle;
                 return (
-                  <button 
-                    key={key} 
-                    className="btn-mini btn-select-item"
-                    onClick={() => handleDate(key)}
-                    disabled={isGated}
-                  >
+                  <button key={key} className="btn-mini btn-select-item" onClick={() => handleDate(key)} disabled={isGated}>
                     {loc.name} {isGated && "🔒"}
                   </button>
                 );

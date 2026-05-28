@@ -36,5 +36,10 @@ export const calculateMatchProbability = (stats, npc, preferences = {}, isPremiu
     matchBonus += 20;
   }
 
+  // RPG Perks
+  if (stats.charisma >= 50) matchBonus += 10; // Charmer
+  if (stats.style >= 50) matchBonus += 10; // Fashionista
+  if (stats.socialIq >= 50) matchBonus += 10; // Socialite
+
   return Math.min(95, Math.max(5, baseChance + styleBonus + charismaBonus + confidenceBonus + socialIqBonus + marketingBonus + matchBonus));
 };

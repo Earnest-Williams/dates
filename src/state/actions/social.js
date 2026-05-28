@@ -58,9 +58,19 @@ export const goOnDate = (state, dispatch, npcId, locationKey) => {
   return true;
 };
 
+export const resolveDateEvent = (state, dispatch, finalVibe, logText) => {
+  dispatch({ type: 'RESOLVE_DATE_EVENT', payload: { finalVibe, logText } });
+};
+
+export const resolveStoryEvent = (state, dispatch, npcId, success) => {
+  dispatch({ type: 'RESOLVE_STORY_EVENT', payload: { npcId, success } });
+  return true;
+};
+
 export const proposeMarriage = (state, dispatch, npcId) => {
   const rel = state.matches[npcId]?.relationship || 0;
-  if (rel < 80 || state.stats.housingTier < 2) return false;
+  const chem = state.matches[npcId]?.chemistry || 10;
+  if (rel < 80 || state.stats.housingTier < 2 || chem < 60) return false;
 
   dispatch({ type: 'PROPOSE_MARRIAGE', payload: { npcId } });
   return true;
@@ -70,8 +80,9 @@ export const completeWedding = (state, dispatch, style, childName) => {
   dispatch({ type: 'COMPLETE_WEDDING', payload: { style, childName } });
 };
 
-export const selectParentingChoice = (state, dispatch, cost, statGains) => {
-  dispatch({ type: 'SELECT_PARENTING_CHOICE', payload: { cost, statGains } });
+export const selectParentingChoice = (state, dispatch, cost, statGains, stressIncrease) => {
+  dispatch({ type: 'SELECT_PARENTING_CHOICE', payload: { cost, statGains, stressIncrease } });
+  return true;
 };
 
 export const beginLegacy = (state, dispatch) => {
@@ -95,7 +106,26 @@ export const updateSwipePreferences = (state, dispatch, preferredStat) => {
   return true;
 };
 
+export const changeRelationship = (state, dispatch, npcId, delta) => {
+  dispatch({ type: 'CHANGE_RELATIONSHIP', payload: { npcId, delta } });
+};
+
+export const reduceChildStress = (state, dispatch, energyCost, stressReduction) => {
+  dispatch({ type: 'REDUCE_CHILD_STRESS', payload: { energyCost, stressReduction } });
+  return true;
+};
+
+export const askToMoveIn = (state, dispatch, npcId) => {
+  dispatch({ type: 'ASK_TO_MOVE_IN', payload: { npcId } });
+  return true;
+};
+
 export const instantMatch = (state, dispatch, npcId) => {
   dispatch({ type: 'INSTANT_MATCH', payload: { npcId } });
+  return true;
+};
+
+export const resolveNpcAlert = (state, dispatch, optionIndex) => {
+  dispatch({ type: 'RESOLVE_NPC_ALERT', payload: { optionIndex } });
   return true;
 };

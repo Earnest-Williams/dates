@@ -32,24 +32,80 @@
   }
 }
 
-/* Map Graphic Board */
+/* Styled Cartography Vector Board */
 .map-visual-board {
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-md);
-  background: rgba(0, 0, 0, 0.4);
+  background: radial-gradient(circle, #0e1424 0%, #04070f 100%);
+  /* Radial grid pattern */
+  background-image: 
+    radial-gradient(rgba(59, 130, 246, 0.1) 1.5px, transparent 1.5px), 
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px), 
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 40px 40px, 20px 20px, 20px 20px;
   border: var(--glass-border);
-  line-height: 0;
   box-shadow: var(--glass-shadow);
-}
-
-.map-img-asset {
   width: 100%;
-  height: auto;
-  display: block;
+  aspect-ratio: 135 / 95;
+  box-sizing: border-box;
 }
 
-/* Coordinates Pins Overlay */
+/* SVG Vector Overlay */
+.map-vector-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.vector-road {
+  fill: none;
+  stroke-width: 1.5px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.45;
+  transition: all var(--transition-normal) ease;
+}
+
+/* Surface styles */
+.road-surface-paved_road { stroke: #60a5fa; } /* neon blue */
+.road-surface-old_turnpike { stroke: #fbbf24; } /* gold */
+.road-surface-market_road { stroke: #34d399; } /* green */
+.road-surface-lane { stroke: #a78bfa; } /* purple */
+.road-surface-causeway { stroke: #2dd4bf; } /* teal */
+.road-surface-forest_road { stroke: #84cc16; stroke-dasharray: 3 3; } /* lime dashed */
+.road-surface-drove_road { stroke: #d97706; stroke-dasharray: 4 3; } /* orange dashed */
+.road-surface-foot_track { stroke: #6b7280; stroke-dasharray: 1 3; } /* gray dotted */
+.road-surface-no_regular_road { stroke: #ef4444; stroke-dasharray: 1 4; }
+
+/* Excluded / broken route */
+.excluded-route {
+  stroke: #ef4444;
+  opacity: 0.15;
+  stroke-dasharray: 1 3;
+}
+
+/* Travel shortest path glowing overlay */
+.highlighted-route {
+  stroke: #10b981;
+  stroke-width: 3.5px;
+  opacity: 0.95;
+  filter: drop-shadow(0 0 6px #10b981);
+  stroke-dasharray: 12 6;
+  animation: routeDashPulse 1.2s infinite linear;
+}
+
+@keyframes routeDashPulse {
+  to {
+    stroke-dashoffset: -18;
+  }
+}
+
+/* Settlement Pin Elements */
 .location-pin {
   position: absolute;
   transform: translate(-50%, -50%);
@@ -68,49 +124,46 @@
   position: relative;
   width: 30px;
   height: 30px;
-  background: rgba(15, 23, 42, 0.9);
+  background: #0b0f19;
   border: 2px solid var(--accent-blue);
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  font-size: 0.95rem;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
   transition: all var(--transition-fast);
-  z-index: 2;
+  z-index: 3;
 }
 
 .location-pin:hover .pin-marker {
   transform: scale(1.2);
-  background: var(--bg-secondary);
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
+  background: #111827;
+  border-color: #60a5fa;
+  box-shadow: 0 0 16px rgba(59, 130, 246, 0.8);
 }
 
-/* Pin States */
+/* Active Pin overrides */
 .location-pin.current-here .pin-marker {
   border-color: var(--accent-pink);
-  box-shadow: 0 0 12px rgba(236, 72, 153, 0.7);
+  box-shadow: 0 0 15px rgba(236, 72, 153, 0.6);
 }
 
 .location-pin.current-here:hover .pin-marker {
-  box-shadow: 0 0 18px rgba(236, 72, 153, 0.9);
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.9);
+  border-color: #f472b6;
 }
 
 .location-pin.selected-pin .pin-marker {
-  border-color: #fbbf24;
-  box-shadow: 0 0 12px rgba(251, 191, 36, 0.7);
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.7);
 }
 
 .location-pin.selected-pin:hover .pin-marker {
-  box-shadow: 0 0 18px rgba(251, 191, 36, 0.9);
+  box-shadow: 0 0 22px rgba(251, 191, 36, 0.9);
 }
 
-.location-pin.gated-pin .pin-marker {
-  border-color: #f87171;
-  box-shadow: 0 0 8px rgba(248, 113, 113, 0.4);
-}
-
-/* Pulsing effect under the pin */
+/* Pin radar pulsing ring */
 .pin-pulse {
   position: absolute;
   top: -2px;
@@ -121,7 +174,7 @@
   border: 2px solid var(--accent-blue);
   opacity: 0;
   pointer-events: none;
-  animation: pinPulseAnimation 2s infinite;
+  animation: pinPulseAnimation 2.2s infinite cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 1;
 }
 
@@ -130,43 +183,42 @@
 }
 
 .location-pin.selected-pin .pin-pulse {
-  border-color: #fbbf24;
+  border-color: var(--accent-gold);
 }
 
 @keyframes pinPulseAnimation {
   0% {
-    transform: scale(0.9);
+    transform: scale(0.95);
     opacity: 0.9;
   }
   100% {
-    transform: scale(1.8);
+    transform: scale(2.3);
     opacity: 0;
   }
 }
 
-/* Pin Labels */
 .pin-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: white;
-  background: rgba(15, 23, 42, 0.85);
-  padding: 0.15rem 0.45rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #f3f4f6;
+  background: rgba(11, 15, 25, 0.9);
+  padding: 0.15rem 0.4rem;
   border-radius: var(--radius-sm);
   margin-top: 0.3rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   white-space: nowrap;
   pointer-events: none;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
   opacity: 0.85;
   transition: all var(--transition-fast);
-  z-index: 2;
+  z-index: 3;
 }
 
 .location-pin:hover .pin-label,
 .location-pin.selected-pin .pin-label {
   opacity: 1;
-  background: rgba(15, 23, 42, 0.95);
-  border-color: rgba(255, 255, 255, 0.25);
+  background: #0f172a;
+  border-color: rgba(255, 255, 255, 0.2);
   transform: translateY(1px);
 }
 
@@ -176,7 +228,7 @@
   background: var(--bg-panel);
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.15rem;
   border: var(--glass-border);
   box-shadow: var(--glass-shadow);
   border-radius: var(--radius-md);
@@ -209,118 +261,192 @@
 }
 
 .location-desc-detail {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--text-secondary);
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
-.location-cost-banner {
-  background: rgba(59, 130, 246, 0.08);
-  border: 1px solid rgba(59, 130, 246, 0.15);
-  color: var(--text-primary);
-  padding: 0.6rem 0.8rem;
+/* Settlement metadata bento grid */
+.settlement-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+}
+
+.meta-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.45rem 0.6rem;
   border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.meta-label {
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.meta-value {
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Travel Diagnostics details panel */
+.travel-diagnostic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  margin: 0.5rem 0 0.75rem 0;
+}
+
+.diagnostic-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.8rem;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.04);
+  padding-bottom: 0.25rem;
+  color: var(--text-secondary);
 }
 
-/* Travel Action Box */
-.map-travel-action-box {
-  margin-top: 0.5rem;
+.diagnostic-item strong {
+  color: var(--text-primary);
+}
+
+.sub-title-details {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 0.3rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.travel-path-itinerary {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  background: rgba(0, 0, 0, 0.15);
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-sm);
+  line-height: 1.35;
+}
+
+.path-route-string {
+  color: var(--neon-blue);
+  font-weight: 600;
 }
 
 .btn-travel-large {
   width: 100%;
-  padding: 0.85rem;
-  font-weight: bold;
+  padding: 0.8rem;
+  font-weight: 700;
+  font-size: 0.88rem;
   text-align: center;
-  font-size: 0.9rem;
 }
 
+/* Interactive Tabs section */
+.venue-tabs {
+  display: flex;
+  gap: 0.4rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.75rem;
+  overflow-x: auto;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: 0.35rem 0.7rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast) ease;
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tab-btn.active {
+  color: var(--neon-blue);
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+}
+
+/* Custom Local Activity Card */
+.activity-card-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.5rem;
+}
+
+.activity-card-action strong {
+  font-size: 0.8rem;
+  color: var(--text-primary);
+}
+
+.activity-desc {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  line-height: 1.25;
+  margin-top: 0.1rem;
+}
+
+/* Gated access lock panel */
 .gated-lock-box {
-  background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.15);
-  padding: 0.8rem;
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.12);
+  padding: 0.75rem;
   border-radius: var(--radius-sm);
   text-align: center;
 }
 
 .lock-reason-title {
   color: #f87171;
-  font-weight: bold;
-  font-size: 0.8rem;
-  margin-bottom: 0.2rem;
-  letter-spacing: 0.05em;
+  font-weight: 700;
+  font-size: 0.78rem;
+  margin-bottom: 0.15rem;
+  letter-spacing: 0.04em;
 }
 
 .lock-reason-desc {
   color: var(--text-secondary);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
+  line-height: 1.3;
 }
 
-/* Interactive Options Area */
-.location-interactive-area {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  padding-top: 0.75rem;
-}
-
-.interaction-title {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-}
-
-.loc-interactive-content {
-  font-size: 0.85rem;
-  color: var(--text-primary);
-}
-
-.home-assets-preview {
-  margin-top: 0.75rem;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  padding: 0.6rem;
-  border-radius: var(--radius-sm);
-}
-
-.home-assets-preview h6 {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  margin-bottom: 0.35rem;
-  text-transform: uppercase;
-}
-
-.preview-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  font-size: 0.75rem;
-  color: var(--text-primary);
-}
-
-/* Shopping grid in map detail */
+/* Shopping items layout */
 .shop-grid {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
-  max-height: 250px;
+  gap: 0.5rem;
+  max-height: 260px;
   overflow-y: auto;
-  margin-top: 0.5rem;
-  padding-right: 0.25rem;
+  margin-top: 0.4rem;
+  padding-right: 0.2rem;
 }
 
 .shop-item-card {
-  padding: 0.6rem;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.5rem 0.65rem;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: var(--radius-sm);
   display: flex;
   justify-content: space-between;
@@ -331,45 +457,36 @@
 .shop-item-info {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
+  gap: 0.05rem;
 }
 
 .shop-item-name {
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text-primary);
 }
 
 .shop-item-desc {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--text-secondary);
   line-height: 1.2;
 }
 
 .shop-item-cost {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: #4ade80;
-  font-weight: bold;
-}
-
-.shop-item-slots {
-  font-size: 0.65rem;
-  color: #c084fc;
+  font-weight: 700;
   margin-top: 0.1rem;
 }
 
-/* NPC lists in map detail */
-.npc-list-location {
-  margin-top: 0.5rem;
-}
-
+/* NPC lists overlay card */
 .location-npc-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.6rem;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.5rem 0.6rem;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: var(--radius-sm);
   margin-bottom: 0.4rem;
 }
@@ -377,25 +494,223 @@
 .npc-info-mini {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
+  gap: 0.05rem;
 }
 
 .npc-name {
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text-primary);
 }
 
 .npc-archetype-mini {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--text-secondary);
-  line-height: 1.2;
 }
 
 .no-npcs-msg {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-secondary);
   font-style: italic;
-  text-align: center;
-  padding: 1rem 0;
 }
+
+/* Library loans panel */
+.loan-warning-panel {
+  padding: 0.5rem 0.65rem;
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.12);
+  border-radius: var(--radius-sm);
+  color: #fca5a5;
+  font-size: 0.72rem;
+  margin-bottom: 0.6rem;
+}
+
+.active-course-panel {
+  background: rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 0.85rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.courses-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.course-card {
+  padding: 0.55rem 0.7rem;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.home-assets-preview {
+  margin-top: 0.6rem;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 0.55rem;
+  border-radius: var(--radius-sm);
+}
+
+.home-assets-preview h6 {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.3rem;
+  text-transform: uppercase;
+}
+
+.preview-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.7rem;
+  color: var(--text-primary);
+}
+
+/* Dining selection styling */
+.dining-select-btn {
+  width: 100%;
+  text-align: left;
+  padding: 0.70rem 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all var(--transition-fast) ease;
+}
+
+.dining-select-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+/* Address Book styling */
+.address-book-panel {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.5rem;
+}
+
+.badge-count {
+  background: var(--accent-blue);
+  color: white;
+  border-radius: var(--radius-full);
+  padding: 0.05rem 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.address-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 160px;
+  overflow-y: auto;
+  margin-top: 0.4rem;
+  padding-right: 0.2rem;
+}
+
+.address-item-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0.5rem;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast) ease;
+}
+
+.address-item-card:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.address-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.address-name {
+  font-weight: 600;
+  font-size: 0.78rem;
+  color: var(--text-primary);
+}
+
+.address-town {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+}
+
+.btn-address-go, .btn-address-travel {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: none;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.btn-address-go {
+  background: rgba(59, 130, 246, 0.25);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+.btn-address-go:hover {
+  background: rgba(59, 130, 246, 0.45);
+}
+
+.btn-address-travel {
+  background: rgba(167, 139, 250, 0.25);
+  border: 1px solid rgba(167, 139, 250, 0.4);
+}
+
+.btn-address-travel:hover:not(:disabled) {
+  background: rgba(167, 139, 250, 0.45);
+}
+
+.btn-address-travel:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Star Pin button styling */
+.btn-pin-star {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 1.15rem;
+  cursor: pointer;
+  padding: 0.1rem 0.3rem;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.btn-pin-star:hover {
+  color: var(--accent-gold);
+  transform: scale(1.15);
+}
+
+.btn-pin-star.pinned {
+  color: var(--accent-gold);
+  text-shadow: 0 0 4px rgba(251, 191, 36, 0.5);
+}
+

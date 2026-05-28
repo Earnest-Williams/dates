@@ -1,5 +1,6 @@
 import { ITEMS } from '../../data/items';
 import { HOUSING_TIERS } from '../../data/housing';
+import { ASSETS } from '../../data/investments';
 
 export const inventoryReducer = (state, action) => {
   switch (action.type) {
@@ -154,6 +155,101 @@ export const inventoryReducer = (state, action) => {
           energy: Math.min(100, state.needs.energy + 10)
         },
         logs: ["Took premium supplements. (+20 Health, +10 Energy)", ...state.logs].slice(0, 20)
+      };
+    }
+
+    case 'BUY_ASSET': {
+      const { assetId, quantity } = action.payload;
+      const price = state.assetPrices[assetId];
+      const cost = price * quantity;
+
+      if (state.stats.money < cost) {
+        return {
+          ...state,
+          logs: ["⚠️ Insufficient funds to buy asset.", ...state.logs].slice(0, 20)
+        };
+      }
+
+      const current = state.portfolio[assetId] || { quantity: 0, avgPrice: 0 };
+      const newQty = current.quantity + quantity;
+      const newAvg = ((current.quantity * current.avgPrice) + cost) / newQty;
+
+      return {
+        ...state,
+        stats: {
+          ...state.stats,
+          money: Math.max(0, state.stats.money - cost)
+        },
+        portfolio: {
+          ...state.portfolio,
+          [assetId]: { quantity: newQty, avgPrice: newAvg }
+        },
+        logs: [`Bought ${quantity} ${ASSETS[assetId].ticker} for $${cost.toFixed(2)} (Avg: $${newAvg.toFixed(2)}).`, ...state.logs].slice(0, 20)
+      };
+    }
+
+    case 'SELL_ASSET': {
+      const { assetId, quantity } = action.payload;
+      const current = state.portfolio[assetId] || { quantity: 0, avgPrice: 0 };
+
+      if (current.quantity < quantity) {
+        return {
+          ...state,
+          logs: ["⚠️ You do not own enough of this asset to sell.", ...state.logs].slice(0, 20)
+        };
+      }
+
+      const price = state.assetPrices[assetId];
+      const revenue = price * quantity;
+      const costBasis = current.avgPrice * quantity;
+      const profit = revenue - costBasis;
+      const newQty = current.quantity - quantity;
+      const newAvg = newQty === 0 ? 0 : current.avgPrice;
+
+      return {
+        ...state,
+        stats: {
+          ...state.stats,
+          money: state.stats.money + revenue
+        },
+        portfolio: {
+          ...state.portfolio,
+          [assetId]: { quantity: newQty, avgPrice: newAvg }
+        },
+        logs: [`Sold ${quantity} ${ASSETS[assetId].ticker} for $${revenue.toFixed(2)}. Profit: $${profit.toFixed(2)}.`, ...state.logs].slice(0, 20)
+      };
+    }
+
+    case 'PAY_TAXES': {
+      let logMsg;
+      let newMoney = state.stats.money;
+      let newTaxOwed = state.stats.taxOwed || 0;
+
+      if (newTaxOwed <= 0) {
+        return {
+          ...state,
+          logs: ["⚠️ You do not owe any taxes.", ...state.logs].slice(0, 20)
+        };
+      }
+
+      if (newMoney >= newTaxOwed) {
+        newMoney -= newTaxOwed;
+        logMsg = `Paid $${newTaxOwed} to the IRS. You are completely debt-free!`;
+        newTaxOwed = 0;
+      } else {
+        newTaxOwed -= newMoney;
+        logMsg = `Paid $${newMoney} to the IRS. You still owe $${newTaxOwed}.`;
+        newMoney = 0;
+      }
+
+      return {
+        ...state,
+        stats: {
+          ...state.stats,
+          money: newMoney,
+          taxOwed: newTaxOwed
+        },
+        logs: [logMsg, ...state.logs].slice(0, 20)
       };
     }
 
