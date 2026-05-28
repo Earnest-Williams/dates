@@ -1,3 +1,10 @@
+// NPC relationship schema note: romance progress is authored through shared time,
+// meaningful choices, remembered context, compatibility, dates, routines,
+// conflict/repair, and long-term follow-through. Do not add loved/liked/
+// disliked gift lists, archetype gift bonuses, or repeatable item-based
+// relationship gains to NPC records. Contextual props belong only inside
+// specific story beats.
+
 export const ARCHETYPES = {
   SCHOLAR: {
     name: "Scholar",

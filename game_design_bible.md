@@ -146,19 +146,15 @@ Furniture is purchased at the Mall and placed at home. Only **one bed** can be p
 | `smart_tv` | 55" Smart TV | Decor | \$600 | 1 | Unlocks "Watch TV" action (+30 Mood, -5 Energy) |
 | `luxury_painting`| Abstract Canvas | Decor | \$1000 | 1 | Instantly gives $+5$ Style, $+5$ Charm |
 
-### Personal Upgrades & Gifts
+### Personal Upgrades & Consumables
 
-Gifts are purchased at the Mall and kept in your inventory until given to an NPC. Upgrades automatically apply an instant stat boost upon purchase.
+Mall inventory supports self-improvement, home utility, mobility, and personal upkeep. It must not include a repeatable romance-gift loop: no purchasable item grants relationship points, no item has archetype romance bonuses, and no shopping path bypasses shared time or authored relationship scenes.
 
-| Item Key | Item Name | Category | Cost | Type | Effects & Archetype Bonuses |
+| Item Key | Item Name | Category | Cost | Type | Effects |
 |:---|:---|:---:|:---:|:---:|:---|
-| `flowers` | Bouquet of Roses | Gift | \$30 | Gift | $+10$ Relationship ($1.5\times$ bonus for Socialite, Artist, Scholar) |
-| `chocolates` | Artisanal Chocolates | Gift | \$20 | Gift | $+8$ Relationship ($1.5\times$ bonus for Artist, Gym Rat) |
-| `book` | Ancient History Volume | Gift | \$45 | Gift | $+15$ Relationship ($1.5\times$ bonus for Scholar) |
-| `supplements` | Premium Whey Protein | Gift | \$60 | Gift | $+15$ Relationship ($1.5\times$ bonus for Gym Rat). Can also be consumed from Dashboard ($+20$ Health, $+10$ Energy). |
-| `watch` | Designer Watch | Gift | \$500 | Gift | $+40$ Relationship ($1.5\times$ bonus for Socialite, Executive) |
 | `clothes` | Designer Outfit | Personal | \$150 | Upgrade | Instantly gives $+15$ Style |
 | `cologne` | Luxury Fragrance | Personal | \$80 | Upgrade | Instantly gives $+10$ Charm |
+| `supplements` | Premium Supplements | Personal | \$60 | Consumable | Supports the player's recovery when consumed ($+20$ Health, $+10$ Energy); never functions as NPC affection currency |
 
 ---
 
@@ -340,7 +336,7 @@ Expand dates into scene-style multi-step events:
 **Design intent:** Dates should feel story-driven; failed dates should still create memorable narrative value.
 
 ### E. Relationship Memory & Meaningful Follow-Through
-`dates` does not use a typical visual-novel gift-giving system. Relationship progress must come primarily from conversations, shared activities, compatibility, remembered choices, dates, routines, conflict/repair, and long-term follow-through. Items may appear as contextual story props, but not as repeatable affection-optimization gifts.
+**Life Sim** intentionally does not include a typical visual-novel gift-giving system. Relationship progress should come from shared time, meaningful choices, remembered context, compatibility, dates, routines, conflict/repair, and long-term follow-through. Items may appear as contextual story props, but they must not function as repeatable affection currency.
 
 Relationship memory tracks:
 - Remembered choices and topics an NPC cares about.

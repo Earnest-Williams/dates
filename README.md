@@ -2,6 +2,8 @@
 
 Welcome to **Life Sim**, an immersive dating-centric life simulation game built with React, Vite, and custom CSS. In this game, you navigate the delicate balance of self-improvement, career progression, relationship-building, and generational planning. Your ultimate goal is to find a compatible partner, raise an outstanding heir, and build a lasting family legacy across generations.
 
+**Content note:** The game is intended for adult audiences and includes mature themes such as smoking, drinking, drug use, and sex/intimacy in narrative text and implied story context. These themes are not shown visually.
+
 ---
 
 ## 🎮 Game Premise & Core Loop
@@ -46,8 +48,8 @@ You begin your journey in **Generation 1** as **Alex**, renting a basic Studio A
 
 ### 4. Dating, Matching, & Relationship Memory
 * **Swipe App**: Swipe on NPCs like **Elena** (Scholar), **Brad** (Gym Rat), **Sophia** (Socialite), **Marcus** (Executive), and **Chloe** (Artist). Matching chance depends on your Style, Charm, and how well you meet their archetype stat requirements.
-* **Socializing**: Build relationships through conversations, shared routines, dates, remembered choices, emotional support, and long-term compatibility. Items may appear in specific story moments, but relationships are not advanced through repeatable gift-giving.
-* **Relationship Memory Rule**: `dates` does not use a typical visual-novel gift-giving system. Relationship progress must come primarily from conversations, shared activities, compatibility, remembered choices, dates, routines, conflict/repair, and long-term follow-through. Items may appear as contextual story props, but not as repeatable affection-optimization gifts.
+* **Socializing**: Build relationships through shared time, conversations, meaningful choices, remembered context, compatibility, routines, conflict/repair, emotional support, and long-term follow-through.
+* **Relationship Memory Rule**: **Life Sim** intentionally does not include a typical visual-novel gift-giving system. Items may appear as contextual story props in specific moments, but they must not function as repeatable affection currency or advance relationships.
 * **Dates**: Meet NPCs at locations. Shared time, compatibility, conversation tone, and remembered follow-through shape relationship and mood outcomes.
 
 ### 5. Marriage & Generational Legacy Shift
@@ -131,3 +133,11 @@ Verify code correctness and format standards:
 npm run lint
 ```
 *(The project enforces zero warnings/errors in the ESLint profile.)*
+
+---
+
+## 🧭 Contributor Content Guardrails
+
+* Keep romance progression grounded in shared time, meaningful choices, remembered context, compatibility, dates, routines, conflict/repair, and long-term follow-through.
+* Do not add custom gift-giving as a core loop, NPC gift preference lists, archetype item bonuses, gift multipliers, repeatable item-based relationship gains, or shopping paths for romance progress.
+* Contextual items can appear as one-off story props only when an authored scene calls for them.

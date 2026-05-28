@@ -23,8 +23,8 @@ START_PROJECT, WORK_ON_PROJECT, RESOLVE_WORK_EVENT, ENROLL_COURSE, STUDY_COURSE,
 ## Notes
 - Unknown action types produce a development warning from `gameReducer`.
 - Store actions dispatch into mapped reducer cases except deprecated compatibility shims that intentionally return `false` without dispatching.
-
+- `GIVE_GIFT` is intentionally absent from active reducers. The legacy `giveGift` shim may remain only as a no-op compatibility surface and must not change relationships, consume items, or create shopping-based romance progress.
 - Inventory can be validated via `npm run audit:actions`.
 
 ## Relationship memory rule
-`dates` does not use a typical visual-novel gift-giving system. Relationship progress must come primarily from conversations, shared activities, compatibility, remembered choices, dates, routines, conflict/repair, and long-term follow-through. Items may appear as contextual story props, but not as repeatable affection-optimization gifts.
+**Life Sim** intentionally does not include a typical visual-novel gift-giving system. Relationship progress should come from shared time, meaningful choices, remembered context, compatibility, dates, routines, conflict/repair, and long-term follow-through. Items may appear as contextual story props, but they must not function as repeatable affection currency.

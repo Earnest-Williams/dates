@@ -1,6 +1,6 @@
 # Relationship Memory System
 
-`dates` does not use a typical visual-novel gift-giving system. Relationship progress must come primarily from conversations, shared activities, compatibility, remembered choices, dates, routines, conflict/repair, and long-term follow-through. Items may appear as contextual story props, but not as repeatable affection-optimization gifts.
+**Life Sim** does not use a typical visual-novel gift-giving system; it replaces repeatable item affection loops with memory-driven relationship play. Relationship progress should come from shared time, meaningful choices, remembered context, compatibility, dates, routines, conflict/repair, and long-term follow-through. Items may appear as contextual story props, but they must not function as repeatable affection currency.
 
 ## State shape
 
