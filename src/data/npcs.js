@@ -111,12 +111,6 @@ const BASE_NPCS = [
     id: "elena",
     name: "Elena",
     gender: "female",
-    paperDoll: {
-      model: "woman_01",
-      outfit: "spring_01",
-      skinTone: "#f5d0c5",
-      hairColor: "#5c4033"
-    },
     archetype: "SCHOLAR",
     description: "A Ph.D. candidate who loves ancient history, strategy games, and reading in coffee shops.",
     gatedBy: {
@@ -171,12 +165,6 @@ const BASE_NPCS = [
     id: "sophia",
     name: "Sophia",
     gender: "female",
-    paperDoll: {
-      model: "woman_02",
-      outfit: "summer_02",
-      skinTone: "#d4a88a",
-      hairColor: "#d4af37"
-    },
     archetype: "SOCIALITE",
     description: "A fashion influencer who loves VIP parties, fine dining, and fast cars.",
     gatedBy: {
@@ -230,12 +218,6 @@ const BASE_NPCS = [
     id: "chloe",
     name: "Chloe",
     gender: "female",
-    paperDoll: {
-      model: "woman_03",
-      outfit: "spring_02",
-      skinTone: "#f5d0c5",
-      hairColor: "#915c83"
-    },
     archetype: "ARTIST",
     description: "An indie painter who loves acoustic concerts, thirfting, and deep late-night talks.",
     gatedBy: {
@@ -263,12 +245,6 @@ const BASE_NPCS = [
     id: "rina",
     name: "Rina",
     gender: "female",
-    paperDoll: {
-      model: "woman_04",
-      outfit: "summer_01",
-      skinTone: "#6b4423",
-      hairColor: "#111111"
-    },
     archetype: "SOCIALITE",
     description: "A late-night lounge manager who loves vinyl jazz, sharp tailoring, and city lights.",
     gatedBy: {
@@ -297,12 +273,6 @@ const BASE_NPCS = [
     name: "Maya",
     gender: "female",
     sexuality: "bisexual",
-    paperDoll: {
-      model: "woman_05",
-      outfit: "spring_01",
-      skinTone: "#8d5524",
-      hairColor: "#5c4033"
-    },
     archetype: "ARTIST",
     description: "A bisexual documentary photographer drawn to unfiltered emotion, travel, and street stories.",
     gatedBy: {
@@ -330,12 +300,6 @@ const BASE_NPCS = [
     id: "nora",
     name: "Nora",
     gender: "female",
-    paperDoll: {
-      model: "woman_06",
-      outfit: "spring_02",
-      skinTone: "#c68642",
-      hairColor: "#3c2f2f"
-    },
     archetype: "EXECUTIVE",
     description: "A rising pastry chef running a high-pressure kitchen with exacting standards and a soft heart.",
     gatedBy: {
