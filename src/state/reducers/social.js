@@ -165,7 +165,9 @@ export const socialReducer = (state, action) => {
     case 'ANSWER_DIALOGUE': {
       const { npcId, optionIndex } = action.payload;
       const npc = NPCS.find(n => n.id === npcId);
-      const choice = npc.dialogue.choices[optionIndex];
+      if (!npc) return state;
+      const choice = npc.dialogue?.choices?.[optionIndex];
+      if (!choice) return state;
 
       let relChange = choice.successRelation || 0;
       let logText = choice.successText;

@@ -27,7 +27,8 @@ const DialogueUI = ({ npcId, onClose }) => {
         : `Hey sweetheart! I'm so excited for our wedding. What's on your mind?`;
     }
     const memory = gameState.relationshipMemory?.[npcId];
-    const lastActivity = memory?.sharedActivities?.at(-1);
+    const shared = memory?.sharedActivities;
+    const lastActivity = shared && shared.length > 0 ? shared[shared.length - 1] : null;
     if (lastActivity) {
       return `I was thinking about ${lastActivity.replace('date_', 'our ')}. I like that you remember what matters to us.`;
     }
