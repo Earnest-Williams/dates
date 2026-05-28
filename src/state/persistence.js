@@ -2,10 +2,14 @@ const SAVE_KEY = 'dates-save-v1';
 const SAVE_VERSION = 1;
 
 const getStorage = () => {
-  if (typeof window === 'undefined' || !window.localStorage) {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return null;
+    }
+    return window.localStorage;
+  } catch {
     return null;
   }
-  return window.localStorage;
 };
 
 export const createSavePayload = (gameState) => ({
@@ -39,8 +43,12 @@ export const getSaveMetadata = () => {
 export const saveGameState = (gameState) => {
   const storage = getStorage();
   if (!storage) return false;
-  storage.setItem(SAVE_KEY, JSON.stringify(createSavePayload(gameState)));
-  return true;
+  try {
+    storage.setItem(SAVE_KEY, JSON.stringify(createSavePayload(gameState)));
+    return true;
+  } catch {
+    return false;
+  }
 };
 
 export const runSaveMigration = (payload) => {

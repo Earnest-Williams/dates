@@ -41,3 +41,30 @@ test('payload version is set', () => {
   assert.equal(payload.version, 1);
   assert.equal(typeof payload.savedAt, 'string');
 });
+
+test('storage access errors are handled safely', () => {
+  const blockedWindow = {};
+  Object.defineProperty(blockedWindow, 'localStorage', {
+    get() {
+      throw new Error('blocked');
+    },
+  });
+  global.window = blockedWindow;
+
+  assert.equal(saveGameState({}), false);
+  assert.equal(getSaveMetadata(), null);
+  assert.equal(loadGameState().ok, false);
+});
+
+test('save failures do not throw when storage write fails', () => {
+  global.window = {
+    localStorage: {
+      getItem: () => null,
+      setItem: () => {
+        throw new Error('quota exceeded');
+      },
+    },
+  };
+
+  assert.equal(saveGameState({}), false);
+});

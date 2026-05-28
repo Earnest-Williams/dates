@@ -1,6 +1,6 @@
-import { checkActionFeasibility } from '../selectors';
-import { getGroceriesCost } from '../../sim/economy';
-import { calculateTravelStats, SETTLEMENTS } from '../../data/geography';
+import { checkActionFeasibility } from '../selectors.js';
+import { getGroceriesCost } from '../../sim/economy.js';
+import { calculateTravelStats, SETTLEMENTS } from '../../data/geography.js';
 
 export const performAction = (
   state,
@@ -100,7 +100,7 @@ export const travelToLocation = (state, dispatch, locationKey) => {
   const travelStats = calculateTravelStats(
     state.activeLocation,
     locationKey,
-    state.properties.vehicles,
+    state.properties?.vehicles || [],
   );
   if (!travelStats) return false;
 

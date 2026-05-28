@@ -1,11 +1,11 @@
-import { NPCS } from '../../data/npcs';
-import { ITEMS } from '../../data/items';
-import { LOCATIONS } from '../../data/locations';
-import { calculateMatchProbability } from '../../sim/matching';
-import { calculateTravelStats } from '../../data/geography';
-import { simulateTicks } from './time';
-import { DATE_EVENTS } from '../../data/dates';
-import { calculateTraits } from '../../data/traits';
+import { NPCS } from '../../data/npcs.js';
+import { ITEMS } from '../../data/items.js';
+import { LOCATIONS } from '../../data/locations.js';
+import { calculateMatchProbability } from '../../sim/matching.js';
+import { calculateTravelStats } from '../../data/geography.js';
+import { simulateTicks } from './time.js';
+import { DATE_EVENTS } from '../../data/dates.js';
+import { calculateTraits } from '../../data/traits.js';
 
 const applyRelationshipCap = (currentRel, delta, storyTier = 0, stats = {}) => {
   let finalDelta = delta;

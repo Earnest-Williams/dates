@@ -1,9 +1,9 @@
-import { timeReducer } from './time';
-import { inventoryReducer } from './inventory';
-import { socialReducer } from './social';
-import { actionReducer } from './action';
-import { socialMediaReducer } from './socialMedia';
-import { careerReducer } from './career';
+import { timeReducer } from './time.js';
+import { inventoryReducer } from './inventory.js';
+import { socialReducer } from './social.js';
+import { actionReducer } from './action.js';
+import { socialMediaReducer } from './socialMedia.js';
+import { careerReducer } from './career.js';
 
 export const initialState = {
   gamePhase: 'living', // 'living', 'marriage', 'parenting'

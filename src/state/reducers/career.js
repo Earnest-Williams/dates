@@ -1,7 +1,7 @@
-import { simulateTicks } from './time';
-import { getProjectsForTrackAndTier, CAREER_TRACKS } from '../../data/projects';
-import { WORK_EVENTS } from '../../data/workEvents';
-import { gigs, sideHustles } from '../../data/gigs';
+import { simulateTicks } from './time.js';
+import { getProjectsForTrackAndTier, CAREER_TRACKS } from '../../data/projects.js';
+import { WORK_EVENTS } from '../../data/workEvents.js';
+import { gigs, sideHustles } from '../../data/gigs.js';
 
 export const careerReducer = (state, action) => {
   switch (action.type) {

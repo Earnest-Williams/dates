@@ -1,5 +1,5 @@
-import { ITEMS } from '../../data/items';
-import { HOUSING_TIERS } from '../../data/housing';
+import { ITEMS } from '../../data/items.js';
+import { HOUSING_TIERS } from '../../data/housing.js';
 
 export const buyItem = (state, dispatch, itemKey) => {
   const item = ITEMS[itemKey];

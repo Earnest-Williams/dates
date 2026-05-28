@@ -1,8 +1,8 @@
 import { create } from 'zustand';
-import { initialState, gameReducer } from './reducers/rootReducer';
-import * as selectors from './selectors';
-import * as actions from './actions';
-import { getSaveMetadata, loadGameState, saveGameState } from './persistence';
+import { initialState, gameReducer } from './reducers/rootReducer.js';
+import * as selectors from './selectors.js';
+import * as actions from './actions/index.js';
+import { getSaveMetadata, loadGameState, saveGameState } from './persistence.js';
 
 const AUTOSAVE_ACTIONS = new Set([
   'ADVANCE_TIME',
@@ -21,16 +21,36 @@ export const useGameStore = create((set, get) => ({
   dispatch: (action) => {
     set((state) => {
       const gameState = gameReducer(state.gameState, action);
-      if (AUTOSAVE_ACTIONS.has(action.type)) {
-        saveGameState(gameState);
+      let saveMetadata = state.saveMetadata;
+      if (AUTOSAVE_ACTIONS.has(action.type) && saveGameState(gameState)) {
+        saveMetadata = {
+          version: 1,
+          savedAt: new Date().toISOString(),
+          day: gameState.time?.day ?? null,
+          hour: gameState.time?.hour ?? null,
+          location: gameState.activeLocation ?? null,
+          playerName: gameState.family?.playerName ?? null,
+        };
       }
-      return { gameState, saveMetadata: getSaveMetadata() };
+      return { gameState, saveMetadata };
     });
   },
 
   manualSave: () => {
-    const ok = saveGameState(get().gameState);
-    set({ saveMetadata: getSaveMetadata() });
+    const gameState = get().gameState;
+    const ok = saveGameState(gameState);
+    if (ok) {
+      set({
+        saveMetadata: {
+          version: 1,
+          savedAt: new Date().toISOString(),
+          day: gameState.time?.day ?? null,
+          hour: gameState.time?.hour ?? null,
+          location: gameState.activeLocation ?? null,
+          playerName: gameState.family?.playerName ?? null,
+        },
+      });
+    }
     return ok;
   },
 

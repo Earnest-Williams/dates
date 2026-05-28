@@ -6,8 +6,9 @@ const cloneState = () => structuredClone(initialState);
 
 test('routes TAKE_GIG into career reducer (regression for unmapped action)', () => {
   const state = cloneState();
-  const next = gameReducer(state, { type: 'TAKE_GIG', payload: { gigId: 'missing-gig' } });
+  const next = gameReducer(state, { type: 'TAKE_GIG', payload: { gigId: 'data_entry' } });
   assert.notEqual(next, state);
+  assert.ok(next.stats.money > state.stats.money);
 });
 
 test('routes TOGGLE_HEALTH_INSURANCE into action reducer', () => {
