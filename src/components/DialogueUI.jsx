@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useGameStore } from '../state/store';
 import { LOCATIONS } from '../data/locations';
+import { DATE_TEMPLATES, NPC_DATE_PREFERENCES } from '../data/dates';
 import { NPCS } from '../data/npcs';
 import './DialogueUI.css';
 
@@ -77,11 +78,13 @@ const DialogueUI = ({ npcId, onClose }) => {
     setStoryMode(false);
   };
 
-  const handleDate = (locKey) => {
-    const success = goOnDate(npcId, locKey);
+  const handleDate = (dateType) => {
+    const template = DATE_TEMPLATES[dateType];
+    const locKey = template.venueKey;
+    const success = goOnDate(npcId, locKey, dateType);
     if (success) {
-      const comment = npc.dialogue.dateLines[locKey] || "I enjoyed going out with you.";
-      setDialogueText(`[Date at ${LOCATIONS[locKey].name}] "${comment}"`);
+      const comment = npc.dialogue.dateLines?.[locKey] || "I enjoyed going out with you.";
+      setDialogueText(`[${template.title} at ${LOCATIONS[locKey].name}] "${comment}"`);
     } else {
       setDialogueText(`Could not go on date. Check your energy.`);
     }
@@ -236,14 +239,18 @@ const DialogueUI = ({ npcId, onClose }) => {
 
         {dateMode && (
           <div className="selection-overlay">
-            <h5>Select Date Location</h5>
+            <h5>Select Date Type</h5>
+            <p style={{ margin: '8px 0', color: 'var(--text-secondary)' }}>
+              Preferred dates are based on personality and memories, not repeatable gifts.
+            </p>
             <div className="selection-grid">
-              {Object.entries(LOCATIONS).map(([key, loc]) => {
-                if (key === 'home' || key === 'mall') return null;
+              {(NPC_DATE_PREFERENCES[npcId] || ['coffee_date', 'park_walk']).map((dateType) => {
+                const template = DATE_TEMPLATES[dateType];
+                const loc = LOCATIONS[template.venueKey];
                 const isGated = loc.gated && !gameState.properties.vehicles.includes('sports_car') && stats.style < loc.reqStyle;
                 return (
-                  <button key={key} className="btn-mini btn-select-item" onClick={() => handleDate(key)} disabled={isGated}>
-                    {loc.name} {isGated && "🔒"}
+                  <button key={dateType} className="btn-mini btn-select-item" onClick={() => handleDate(dateType)} disabled={isGated}>
+                    {template.title} — {loc.name} {isGated && "🔒"}
                   </button>
                 );
               })}
