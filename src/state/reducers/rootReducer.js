@@ -1,9 +1,9 @@
-import { timeReducer } from './time';
-import { inventoryReducer } from './inventory';
-import { socialReducer } from './social';
-import { actionReducer } from './action';
-import { socialMediaReducer } from './socialMedia';
-import { careerReducer } from './career';
+import { timeReducer } from './time.js';
+import { inventoryReducer } from './inventory.js';
+import { socialReducer } from './social.js';
+import { actionReducer } from './action.js';
+import { socialMediaReducer } from './socialMedia.js';
+import { careerReducer } from './career.js';
 
 export const initialState = {
   gamePhase: 'living', // 'living', 'marriage', 'parenting'
@@ -150,9 +150,10 @@ export const initialState = {
   logs: ["Welcome to Life Sim! Start by studying, working out, or looking for a date."],
 };
 
+const isDevelopment = import.meta.env?.MODE !== 'production';
+
 export const gameReducer = (state, action) => {
   switch (action.type) {
-    // Time & Needs
     case 'ADVANCE_TIME':
     case 'DECAY_NEEDS':
     case 'PROCESS_WEEKLY_BILLS':
@@ -161,7 +162,6 @@ export const gameReducer = (state, action) => {
     case 'CHECK_EVICTION':
       return timeReducer(state, action);
 
-    // Inventory & Housing Customization
     case 'BUY_ITEM':
     case 'PLACE_FURNITURE':
     case 'STORE_FURNITURE':
@@ -169,17 +169,21 @@ export const gameReducer = (state, action) => {
     case 'UPGRADE_HOUSING':
     case 'BUY_ASSET':
     case 'SELL_ASSET':
+    case 'PAY_TAXES':
       return inventoryReducer(state, action);
 
-    // Dating, Dialogue, and Legacies
     case 'CHANGE_RELATIONSHIP':
     case 'SWIPE_NPC':
     case 'GIVE_GIFT':
     case 'ANSWER_DIALOGUE':
     case 'GO_ON_DATE':
+    case 'RESOLVE_DATE_EVENT':
+    case 'RESOLVE_STORY_EVENT':
     case 'PROPOSE_MARRIAGE':
+    case 'ASK_TO_MOVE_IN':
     case 'COMPLETE_WEDDING':
     case 'SELECT_PARENTING_CHOICE':
+    case 'REDUCE_CHILD_STRESS':
     case 'BEGIN_LEGACY':
     case 'SUBSCRIBE_PREMIUM':
     case 'CANCEL_PREMIUM':
@@ -188,13 +192,13 @@ export const gameReducer = (state, action) => {
     case 'RESOLVE_NPC_ALERT':
       return socialReducer(state, action);
 
-    // General Actions & Relocating
     case 'PERFORM_ACTION':
     case 'SLEEP':
     case 'COOK_MEAL':
     case 'DINE_OUT':
     case 'SHOWER':
     case 'PAY_BILLS':
+    case 'TOGGLE_HEALTH_INSURANCE':
     case 'WATCH_TV':
     case 'VISIT_HOSPITAL':
     case 'TRAVEL':
@@ -208,17 +212,25 @@ export const gameReducer = (state, action) => {
       };
     }
 
-    // Simstagram
     case 'POST_SIMSTAGRAM':
     case 'ADD_SIMSTAGRAM_BUFF':
       return socialMediaReducer(state, action);
 
-    // Career Hub
     case 'START_PROJECT':
     case 'WORK_ON_PROJECT':
+    case 'RESOLVE_WORK_EVENT':
+    case 'ENROLL_COURSE':
+    case 'STUDY_COURSE':
+    case 'TAKE_GIG':
+    case 'WORK_SIDE_HUSTLE':
+    case 'SWITCH_TRACK':
+    case 'USE_ABILITY':
       return careerReducer(state, action);
 
     default:
+      if (isDevelopment) {
+        console.warn(`[gameReducer] Unknown action type: ${action.type}`);
+      }
       return state;
   }
 };

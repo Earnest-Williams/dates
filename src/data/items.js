@@ -1,5 +1,5 @@
-import { FURNITURE } from './furniture';
-import { VEHICLES } from './vehicles';
+import { FURNITURE } from './furniture.js';
+import { VEHICLES } from './vehicles.js';
 
 export const GIFTS = {
   flowers: {

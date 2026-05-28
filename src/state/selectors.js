@@ -1,5 +1,5 @@
-import { calculateMatchProbability } from '../sim/matching';
-import { NPCS } from '../data/npcs';
+import { calculateMatchProbability } from '../sim/matching.js';
+import { NPCS } from '../data/npcs.js';
 
 export const getFormattedTime = (state) => {
   const { hour, minute } = state.time;

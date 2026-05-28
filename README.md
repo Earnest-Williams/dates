@@ -79,7 +79,7 @@ src/
 │   ├── needs.js           # Need decay rates and sleep multipliers
 │   ├── matching.js        # Swipe app probability matching chance
 │   └── economy.js         # Salaries, storage billing, and groceries
-├── state/                 # Global React Context layer
+├── state/                 # Global Zustand store layer
 │   ├── actions/           # Domain action dispatch actions
 │   │   ├── action.js      # Actions for self-care, sleep, work, etc.
 │   │   ├── index.js       # Aggregator export
@@ -92,7 +92,7 @@ src/
 │   │   ├── rootReducer.js # Root state layout & reducer router
 │   │   ├── social.js      # Swipe matching, gifts, dialogue, dating, legacy
 │   │   └── time.js        # Time simulation, rent, bills, collapses
-│   ├── GameContext.jsx     # Context provider setup, exports useGame
+│   ├── store.js             # Zustand store, actions, dispatch bridge
 │   ├── ItemDatabase.js    # Data connector for items
 │   ├── NpcDatabase.js     # Data connector for npcs
 │   └── selectors.js       # Selectors (match calculations, time displays)

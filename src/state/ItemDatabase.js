@@ -1,1 +1,1 @@
-export { ITEMS } from '../data/items';
+export { ITEMS } from '../data/items.js';

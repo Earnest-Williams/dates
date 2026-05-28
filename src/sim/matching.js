@@ -1,4 +1,4 @@
-import { ARCHETYPES } from '../data/npcs';
+import { ARCHETYPES } from '../data/npcs.js';
 
 export const calculateMatchProbability = (stats, npc, preferences = {}, isPremium = false) => {
   const baseChance = 25;

@@ -1,5 +1,5 @@
-import { NPCS } from '../../data/npcs';
-import { LOCATIONS } from '../../data/locations';
+import { NPCS } from '../../data/npcs.js';
+import { LOCATIONS } from '../../data/locations.js';
 
 export const swipeNpc = (state, dispatch, npcId, direction) => {
   if (!state.living.utilitiesActive || state.needs.hygiene < 30) return false;

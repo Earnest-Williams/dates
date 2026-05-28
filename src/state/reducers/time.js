@@ -1,9 +1,9 @@
-import { HOUSING_TIERS } from '../../data/housing';
-import { incrementTime } from '../../sim/time';
-import { decayNeeds } from '../../sim/needs';
-import { calculateStorageFee } from '../../sim/economy';
-import { NPCS } from '../../data/npcs';
-import { NPC_ALERTS, JEALOUSY_CONFRONTATION } from '../../data/npcAlerts';
+import { HOUSING_TIERS } from '../../data/housing.js';
+import { incrementTime } from '../../sim/time.js';
+import { decayNeeds } from '../../sim/needs.js';
+import { calculateStorageFee } from '../../sim/economy.js';
+import { NPCS } from '../../data/npcs.js';
+import { NPC_ALERTS, JEALOUSY_CONFRONTATION } from '../../data/npcAlerts.js';
 
 export const simulateTicks = (state, ticks) => {
   const { time: newTime, daysCrossed } = incrementTime(state.time, ticks);

@@ -1,4 +1,4 @@
-import { simulateTicks } from './time';
+import { simulateTicks } from './time.js';
 
 export const socialMediaReducer = (state, action) => {
   switch (action.type) {

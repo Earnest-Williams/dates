@@ -1,12 +1,12 @@
-import { HOUSING_TIERS } from '../../data/housing';
-import { LOCATIONS } from '../../data/locations';
-import { getSleepMultiplier } from '../../sim/needs';
-import { getGroceriesCost } from '../../sim/economy';
-import { calculateTravelStats, SETTLEMENTS } from '../../data/geography';
-import { simulateTicks } from './time';
-import { WORK_EVENTS, getCurrentCareer } from '../../data/careers';
-import { courses } from '../../data/education';
-import { abilities } from '../../data/abilities';
+import { HOUSING_TIERS } from '../../data/housing.js';
+import { LOCATIONS } from '../../data/locations.js';
+import { getSleepMultiplier } from '../../sim/needs.js';
+import { getGroceriesCost } from '../../sim/economy.js';
+import { calculateTravelStats, SETTLEMENTS } from '../../data/geography.js';
+import { simulateTicks } from './time.js';
+import { WORK_EVENTS, getCurrentCareer } from '../../data/careers.js';
+import { courses } from '../../data/education.js';
+import { abilities } from '../../data/abilities.js';
 
 export const actionReducer = (state, action) => {
   switch (action.type) {

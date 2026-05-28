@@ -1,15 +1,24 @@
-import { checkActionFeasibility } from '../selectors';
-import { getGroceriesCost } from '../../sim/economy';
-import { LOCATIONS } from '../../data/locations';
-import { calculateTravelStats, SETTLEMENTS } from '../../data/geography';
+import { checkActionFeasibility } from '../selectors.js';
+import { getGroceriesCost } from '../../sim/economy.js';
+import { calculateTravelStats, SETTLEMENTS } from '../../data/geography.js';
 
-export const performAction = (state, dispatch, actionName, timeIncrements, statChanges = {}, energyCost = 10, moneyChange = 0) => {
-  const feasibility = checkActionFeasibility(state, actionName, energyCost, moneyChange < 0 ? -moneyChange : 0);
+export const performAction = (
+  state,
+  dispatch,
+  actionName,
+  timeIncrements,
+  statChanges = {},
+  energyCost = 10,
+  moneyChange = 0,
+) => {
+  const feasibility = checkActionFeasibility(
+    state,
+    actionName,
+    energyCost,
+    moneyChange < 0 ? -moneyChange : 0,
+  );
   if (!feasibility.feasible) {
-    dispatch({
-      type: 'BUY_ITEM',
-      payload: { itemKey: null } // no-op logger trigger or warning
-    });
+    dispatch({ type: 'ADD_LOG', payload: { message: feasibility.reason } });
     return false;
   }
 
@@ -20,8 +29,8 @@ export const performAction = (state, dispatch, actionName, timeIncrements, statC
       ticks: timeIncrements,
       statChanges,
       energyCost,
-      moneyChange
-    }
+      moneyChange,
+    },
   });
 
   return true;
@@ -88,7 +97,11 @@ export const visitHospital = (state, dispatch) => {
 export const travelToLocation = (state, dispatch, locationKey) => {
   if (!SETTLEMENTS[locationKey]) return false;
 
-  const travelStats = calculateTravelStats(state.activeLocation, locationKey, state.properties.vehicles);
+  const travelStats = calculateTravelStats(
+    state.activeLocation,
+    locationKey,
+    state.properties?.vehicles || [],
+  );
   if (!travelStats) return false;
 
   if (state.needs.energy < travelStats.energyCost) return false;

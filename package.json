@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test test/persistence.test.js test/reducer.test.js test/selectors.test.js",
+    "audit:actions": "node scripts/audit-actions.mjs"
   },
   "dependencies": {
     "react": "^19.2.6",

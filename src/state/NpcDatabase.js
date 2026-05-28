@@ -1,1 +1,1 @@
-export { NPCS, ARCHETYPES } from '../data/npcs';
+export { NPCS, ARCHETYPES } from '../data/npcs.js';

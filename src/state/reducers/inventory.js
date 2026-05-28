@@ -1,6 +1,6 @@
-import { ITEMS } from '../../data/items';
-import { HOUSING_TIERS } from '../../data/housing';
-import { ASSETS } from '../../data/investments';
+import { ITEMS } from '../../data/items.js';
+import { HOUSING_TIERS } from '../../data/housing.js';
+import { ASSETS } from '../../data/investments.js';
 
 export const inventoryReducer = (state, action) => {
   switch (action.type) {

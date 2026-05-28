@@ -1,4 +1,4 @@
-import { ITEMS } from '../data/items';
+import { ITEMS } from '../data/items.js';
 
 export const decayNeeds = (currentNeeds, hoursPassed, activeTraits = [], stats = {}) => {
   let hungerRate = 5;
