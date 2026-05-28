@@ -6,6 +6,12 @@ import { calculateTravelStats } from '../../data/geography.js';
 import { simulateTicks } from './time.js';
 import { DATE_EVENTS } from '../../data/dates.js';
 import { calculateTraits } from '../../data/traits.js';
+import {
+  calculateCompatibilityScore,
+  generateCompatibilityTraits,
+  getCompatibilityBand,
+  inferPlayerCompatibilityTraits,
+} from '../../sim/compatibility.js';
 
 const applyRelationshipCap = (currentRel, delta, storyTier = 0, stats = {}) => {
   let finalDelta = delta;
@@ -257,8 +263,14 @@ export const socialReducer = (state, action) => {
 
     case 'RESOLVE_DATE_EVENT': {
       const { finalVibe, logText } = action.payload;
+      if (!state.activeDateEvent) return state;
       const { npcId } = state.activeDateEvent;
       const npc = NPCS.find(n => n.id === npcId);
+      if (!npc) return state;
+      const npcCompatibility = state.compatibility?.npcTraits?.[npcId] || generateCompatibilityTraits(npcId);
+      const playerCompatibility = inferPlayerCompatibilityTraits(state.stats, state.compatibility?.playerTraits);
+      const compatibilityScore = calculateCompatibilityScore(playerCompatibility, npcCompatibility);
+      const compatibilityBand = getCompatibilityBand(compatibilityScore);
 
       let nextState = simulateTicks(state, 3); // Time spent on date
 
@@ -282,6 +294,14 @@ export const socialReducer = (state, action) => {
         chemChange = -10;
       }
 
+      if (compatibilityBand === 'strong' && finalVibe < 50) {
+        relGain += 4;
+        chemChange += 4;
+      } else if (compatibilityBand === 'fragile' && finalVibe >= 80) {
+        relGain -= 5;
+        chemChange -= 3;
+      }
+
       const newChem = Math.min(100, Math.max(0, (currentMatch.chemistry || 10) + chemChange));
 
       // Chemistry multiplier
@@ -298,6 +318,7 @@ export const socialReducer = (state, action) => {
       const newMood = Math.min(100, currentMood + moodIncrease);
 
       const logMsg = `Date Over: ${logText} (Rel: ${newRel}/100, Chem: ${newChem}/100, +${moodIncrease} Mood)`;
+      const compatibilityLog = `You noticed ${npc.name}'s deeper patterns over time. (${compatibilityBand} long-term fit)`;
 
       return {
         ...nextState,
@@ -309,14 +330,22 @@ export const socialReducer = (state, action) => {
             ...currentMatch,
             relationship: newRel,
             chemistry: newChem,
-            dateCount: (currentMatch.dateCount || 0) + 1
+            dateCount: (currentMatch.dateCount || 0) + 1,
+            compatibilityScore
+          }
+        },
+        compatibility: {
+          playerTraits: playerCompatibility,
+          npcTraits: {
+            ...(state.compatibility?.npcTraits || {}),
+            [npcId]: npcCompatibility
           }
         },
         needs: {
           ...nextState.needs,
           mood: newMood
         },
-        logs: [logMsg, ...nextState.logs].slice(0, 20)
+        logs: [compatibilityLog, logMsg, ...nextState.logs].slice(0, 20)
       };
     }
 
@@ -380,12 +409,29 @@ export const socialReducer = (state, action) => {
     case 'ASK_TO_MOVE_IN': {
       const { npcId } = action.payload;
       const npc = NPCS.find(n => n.id === npcId);
-      const logMsg = `🏠 ${npc.name.toUpperCase()} moved in with you! They will now split rent and utility costs.`;
+      if (!npc) return state;
+      const matchData = state.matches[npcId] || {};
+      const npcCompatibility = state.compatibility?.npcTraits?.[npcId] || generateCompatibilityTraits(npcId);
+      const playerCompatibility = inferPlayerCompatibilityTraits(state.stats, state.compatibility?.playerTraits);
+      const score = matchData.compatibilityScore !== undefined
+        ? matchData.compatibilityScore
+        : calculateCompatibilityScore(playerCompatibility, npcCompatibility);
+      const fitLabel = getCompatibilityBand(score);
+      const moveInBonus = fitLabel === 'strong' ? 5 : fitLabel === 'fragile' ? -5 : 0;
+      const adjustedRelationship = applyRelationshipCap(matchData.relationship || 10, moveInBonus, matchData.storyTier || 0, state.stats);
+      const logMsg = `🏠 ${npc.name.toUpperCase()} moved in with you! (${fitLabel} cohab fit)`;
       return {
         ...state,
         living: {
           ...state.living,
           roommateId: npcId,
+        },
+        matches: {
+          ...state.matches,
+          [npcId]: {
+            ...matchData,
+            relationship: adjustedRelationship
+          }
         },
         logs: [logMsg, ...state.logs].slice(0, 20)
       };
@@ -394,6 +440,20 @@ export const socialReducer = (state, action) => {
     case 'PROPOSE_MARRIAGE': {
       const { npcId } = action.payload;
       const npc = NPCS.find(n => n.id === npcId);
+      if (!npc) return state;
+      const matchData = state.matches[npcId] || {};
+      const npcCompatibility = state.compatibility?.npcTraits?.[npcId] || generateCompatibilityTraits(npcId);
+      const playerCompatibility = inferPlayerCompatibilityTraits(state.stats, state.compatibility?.playerTraits);
+      const score = matchData.compatibilityScore !== undefined
+        ? matchData.compatibilityScore
+        : calculateCompatibilityScore(playerCompatibility, npcCompatibility);
+      const readiness = (matchData.relationship || 0) + (score * 0.4);
+      if (readiness < 85) {
+        return {
+          ...state,
+          logs: [`💔 ${npc.name.toUpperCase()} asked for more time before marriage. Build deeper long-term fit first.`, ...state.logs].slice(0, 20)
+        };
+      }
       const logMsg = `💍 YOU PROPOSED TO ${npc.name.toUpperCase()} AND THEY SAID YES! Marriage event triggered.`;
       return {
         ...state,
@@ -604,6 +664,18 @@ export const socialReducer = (state, action) => {
         storage: newStorage,
         inventory: {},
         matches: {},
+        compatibility: {
+          playerTraits: {
+            ambition: 'balanced',
+            socialStyle: 'quiet',
+            affectionStyle: 'quality_time',
+            conflictStyle: 'collaborative',
+            familyGoal: 'undecided',
+            spendingStyle: 'balanced',
+            emotionalOpenness: 'slow_burn',
+          },
+          npcTraits: {},
+        },
         swipePreferences: {
           preferredStat: '',
           sexPreference: 'anyone',

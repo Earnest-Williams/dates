@@ -89,6 +89,18 @@ export const initialState = {
     vehicles: [], // list of vehicleKeys
   },
   matches: {}, // Format: { [npcId]: { met: boolean, relationship: number, chemistry: number, dateCount: number } }
+  compatibility: {
+    playerTraits: {
+      ambition: 'balanced',
+      socialStyle: 'quiet',
+      affectionStyle: 'quality_time',
+      conflictStyle: 'collaborative',
+      familyGoal: 'undecided',
+      spendingStyle: 'balanced',
+      emotionalOpenness: 'slow_burn',
+    },
+    npcTraits: {},
+  },
   swipePreferences: {
     preferredStat: '', // e.g. 'intelligence', 'fitness', etc.
     sexPreference: 'anyone', // 'male', 'female', 'anyone'
