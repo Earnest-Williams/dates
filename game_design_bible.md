@@ -277,10 +277,14 @@ After completion of the 18th-year choice, the player starts their new life as th
 
 ## 10. Update Set: Daily Life & Relationship Depth (Designer Notes)
 
-This update set expands experiential content and social depth while intentionally avoiding changes to persistence infrastructure, reducer architecture, test tooling, CI, and developer docs outside this section.
+This update set expands experiential content and social depth while keeping implementation risk bounded. It may add narrowly scoped state fields, reducer cases, and persistence keys needed for these features, while avoiding unrelated rewrites to test tooling, CI, and developer docs outside this section.
 
 ### A. Daily Routine Gameplay Loop Expansion
-- Add a **Daily Planner** view that previews available morning/day/evening blocks.
+- Add a **Daily Planner** view that previews available morning/day/evening blocks as a UX layer over the existing tick clock.
+  - Morning block maps to current-day ticks from 08:00-11:59.
+  - Day block maps to current-day ticks from 12:00-17:59.
+  - Evening block maps to current-day ticks from 18:00-23:59.
+  - Planner actions still consume/advance the same tick-based time simulation used by dialogue and dates.
 - Add low-pressure routine actions that are not pure stat grind:
   - Reading
   - Cooking
@@ -303,6 +307,12 @@ Each romanceable NPC route is expanded into explicit chapter states:
 6. Confession
 7. Committed relationship content
 8. Marriage / long-term content
+
+Implementation mapping for existing relationship-cap architecture:
+- Story Tier 0 (cap 25): Chapters 1-2
+- Story Tier 1 (cap 50): Chapters 3-4
+- Story Tier 2 (cap 75): Chapters 5-6
+- Story Tier 3 (cap 100): Chapters 7-8
 
 **Design intent:** Relationship progression should feel narrative and emotional, not just point accumulation.
 
@@ -404,7 +414,7 @@ This update set is considered complete when:
 
 
 ### K. Pass 1 (Structure Tightening for Designers)
-To make implementation sequencing clearer, this pass adds explicit ordering guidance without changing architecture:
+To make implementation sequencing clearer, this pass adds explicit ordering guidance without broad architectural rewrites (while allowing targeted reducer/persistence additions needed for new systems):
 
 1. **Routine-first slice**: ship daily planner + low-pressure activities + weekly soft-goal nudges first.
 2. **Narrative backbone slice**: convert all romanceable NPC routes into chaptered progression states.
@@ -426,4 +436,3 @@ This pass defines content quality checks to prevent shallow implementations:
 - **Home expression check**: at least one NPC response changes based on room style tags/comfort profile.
 
 **Pass 2 completion signal:** two full playthroughs with different partner priorities generate measurably different social outcomes and romance pacing.
-
