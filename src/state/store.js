@@ -115,4 +115,5 @@ export const useGameStore = create((set, get) => ({
   workSideHustle: (hustleId) => get().dispatch({ type: 'WORK_SIDE_HUSTLE', payload: { hustleId } }),
   switchTrack: (trackId) => get().dispatch({ type: 'SWITCH_TRACK', payload: { trackId } }),
   useAbility: (abilityId) => get().dispatch({ type: 'USE_ABILITY', payload: { abilityId } }),
+  doRoutine: (routineId) => actions.doRoutine(get().gameState, get().dispatch, routineId),
 }));

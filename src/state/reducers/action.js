@@ -7,6 +7,7 @@ import { simulateTicks } from './time.js';
 import { WORK_EVENTS, getCurrentCareer } from '../../data/careers.js';
 import { courses } from '../../data/education.js';
 import { abilities } from '../../data/abilities.js';
+import { ROUTINES } from '../../data/routines.js';
 
 export const actionReducer = (state, action) => {
   switch (action.type) {
@@ -297,6 +298,41 @@ export const actionReducer = (state, action) => {
           hasHealthInsurance: newStatus
         },
         logs: [logMsg, ...state.logs].slice(0, 20)
+      };
+    }
+
+
+    case 'DO_ROUTINE': {
+      const { routineId } = action.payload;
+      const routine = ROUTINES.find((item) => item.id === routineId);
+      if (!routine) return state;
+
+      const nextState = simulateTicks(state, routine.durationTicks);
+      const updatedStats = { ...nextState.stats };
+      const updatedNeeds = { ...nextState.needs };
+
+      Object.entries(routine.effects || {}).forEach(([key, value]) => {
+        if (updatedNeeds[key] !== undefined) {
+          updatedNeeds[key] = Math.min(100, Math.max(0, updatedNeeds[key] + value));
+        } else if (updatedStats[key] !== undefined) {
+          updatedStats[key] = Math.min(100, Math.max(0, updatedStats[key] + value));
+        }
+      });
+
+      updatedNeeds.energy = Math.max(0, updatedNeeds.energy - (routine.energyCost || 0));
+
+      const memoryRoll = routine.memoryChance && Math.random() < routine.memoryChance;
+      const memoryLog = memoryRoll ? ' A memory of someone close surfaced.' : '';
+      const msgLog = memoryRoll && routine.id === 'call_family_friend'
+        ? ' A friend texted right after your call.'
+        : '';
+      const logMsg = `${routine.logTemplate || `Completed routine: ${routine.label}.`}${memoryLog}${msgLog}`;
+
+      return {
+        ...nextState,
+        stats: updatedStats,
+        needs: updatedNeeds,
+        logs: [logMsg, ...nextState.logs].slice(0, 20),
       };
     }
 

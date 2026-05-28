@@ -8,6 +8,7 @@ import NeedsPanel from './dashboard/NeedsPanel';
 import StatsPanel from './dashboard/StatsPanel';
 import HousingPanel from './dashboard/HousingPanel';
 import FurnitureManager from './dashboard/FurnitureManager';
+import DailyRoutinePanel from './dashboard/DailyRoutinePanel';
 import './Dashboard.css';
 
 const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) => {
@@ -22,7 +23,8 @@ const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) =
     placeFurniture,
     storeFurniture,
     sellAsset,
-    useAbility
+    useAbility,
+    doRoutine
   } = useGameStore();
 
   const { day } = gameState.time;
@@ -81,6 +83,7 @@ const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) =
         <HousingPanel />
 
         <FurnitureManager />
+        <DailyRoutinePanel gameState={gameState} doRoutine={doRoutine} />
 
         {/* Active Perks & Traits */}
         <div className="bento-card perks-panel">
