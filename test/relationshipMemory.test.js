@@ -78,3 +78,19 @@ test('dialogue and dates record relationship memory instead of item affection', 
   assert.ok(afterDate.relationshipMemory.elena.sharedActivities.includes('date_library'));
   assert.ok(afterDate.relationshipMemory.elena.importantMoments.includes('memorable_date'));
 });
+
+test('design docs reject typical gift-system route progression', async () => {
+  const fs = await import('node:fs/promises');
+  const docs = await Promise.all([
+    fs.readFile('README.md', 'utf8'),
+    fs.readFile('docs/npc-content-authoring.md', 'utf8'),
+    fs.readFile('docs/relationship-memory.md', 'utf8'),
+    fs.readFile('game_design_bible.md', 'utf8'),
+  ]);
+  const combinedDocs = docs.join('\n').toLowerCase();
+
+  assert.equal(combinedDocs.includes('gift preferences are discoverable'), false);
+  assert.ok(combinedDocs.includes('does not use a typical visual-novel gift-giving system'));
+  assert.ok(combinedDocs.includes('no loved gifts'));
+  assert.ok(combinedDocs.includes('gift-based route progression'));
+});
