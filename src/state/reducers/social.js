@@ -16,6 +16,12 @@ import { scoreDatePhaseChoice } from '../../sim/dateScoring.js';
 import { applyDateDiminishingReturns } from '../../sim/dateDiminishingReturns.js';
 import { appendRelationshipEvent } from '../../sim/relationshipEvents.js';
 import { evaluateRepairAction } from '../../sim/relationshipRepair.js';
+import {
+  adjustReputationForOrganicEncounter,
+  adjustReputationForPublicDate,
+  calculateGossipRisk,
+  selectRelevantReputationCircle,
+} from '../../sim/reputation.js';
 import { describeTimePassage, getTimeWindowStatus } from '../../sim/time.js';
 
 const createEmptyMemory = () => ({
@@ -83,6 +89,24 @@ const countRelationshipMemorySignals = (memory = createEmptyMemory()) => {
 
 const clamp = (value, min = 0, max = 100) => Math.max(min, Math.min(max, value));
 
+const getReputationChange = (before = {}, after = {}, circle) => {
+  if (!circle) return 0;
+  return (after?.[circle] || 0) - (before?.[circle] || 0);
+};
+
+const describeReputationChange = (circle, delta, context) => {
+  if (!circle || delta === 0) return null;
+  const sign = delta > 0 ? '+' : '';
+  return `Reputation in your ${circle} circle ${context} (${sign}${delta}).`;
+};
+
+const isPublicLocation = (locationKey) => locationKey && locationKey !== 'home';
+
+const calculateGossipPenalty = (state, npcId, qualityScore, hasConflict) => {
+  if (qualityScore >= 30 && !hasConflict) return 0;
+  const gossipRisk = calculateGossipRisk(state, npcId);
+  return gossipRisk > 0 ? Math.max(1, Math.ceil(gossipRisk * 4)) : 0;
+};
 
 const summarizeHomeStyle = (state, npcId) => {
   const reaction = getNpcHomeStyleReaction(npcId, state.placedFurniture || []);
@@ -316,6 +340,21 @@ export const socialReducer = (state, action) => {
       const totalCost = travelEnergy + 10;
       const finalEnergy = Math.max(0, nextState.needs.energy - totalCost);
 
+      const dateLocationKey = locationKey || dateTemplate.venueKey;
+      const reputationCircle = selectRelevantReputationCircle(npcId);
+      const reputationAfterPublicDate = isPublicLocation(dateLocationKey)
+        ? adjustReputationForPublicDate(nextState, npcId, dateLocationKey)
+        : nextState.reputation;
+      const reputationDelta = getReputationChange(
+        nextState.reputation,
+        reputationAfterPublicDate,
+        reputationCircle
+      );
+      const reputationLog = describeReputationChange(
+        reputationCircle,
+        reputationDelta,
+        'noticed the public date'
+      );
       const logMsg = `${timePassage} Arrived at ${location.name} via ${vehicleUsedName} for a date with ${npc.name}. (-${travelEnergy} Travel Energy, -10 Date Energy)`;
 
       return {
@@ -324,7 +363,7 @@ export const socialReducer = (state, action) => {
         activeLocation: destinationSettlement,
         activeDateEvent: { 
           npcId, 
-          locationKey: locationKey || dateTemplate.venueKey,
+          locationKey: dateLocationKey,
           dateType: dateTemplate.id,
           currentPhaseIndex: 0,
           connectionScore: dateTemplate.venueKey === 'home'
@@ -334,11 +373,13 @@ export const socialReducer = (state, action) => {
           memoryContext: state.relationshipMemory?.[npcId] || createEmptyMemory()
         },
         stats: newStats,
+        reputation: reputationAfterPublicDate,
         needs: {
           ...nextState.needs,
           energy: finalEnergy
         },
         logs: [
+          ...(reputationLog ? [reputationLog] : []),
           ...(dateTemplate.venueKey === 'home' ? [summarizeHomeStyle(state, npcId).logText] : []),
           logMsg,
           ...nextState.logs
@@ -481,6 +522,12 @@ export const socialReducer = (state, action) => {
         else if (newChem < 30) finalRelGain = Math.floor(relGain * 0.5);
       }
 
+      const dateLocationKey = state.activeDateEvent.locationKey;
+      const gossipPenalty = isPublicLocation(dateLocationKey)
+        ? calculateGossipPenalty(nextState, npcId, qualityScore, Boolean(dateOutcome.conflict))
+        : 0;
+      finalRelGain -= gossipPenalty;
+
       const newRel = applyRelationshipCap(currentMatch.relationship, finalRelGain, currentMatch.storyTier, nextState.stats);
       
       let moodIncrease = qualityScore >= 50 ? Math.floor(qualityScore / 5) : 0;
@@ -492,7 +539,10 @@ export const socialReducer = (state, action) => {
       const repairText = dateOutcome.repairScene
         ? ` A repair opportunity opened: ${dateOutcome.repairScene}.`
         : '';
-      const logMsg = `${timePassage} Date over: ${logText}${repairText} (Rel: ${newRel}/100, Chem: ${newChem}/100, Mood ${moodIncrease >= 0 ? '+' : ''}${moodIncrease})`;
+      const gossipText = gossipPenalty > 0
+        ? ` Public gossip added pressure (-${gossipPenalty} Rel).`
+        : '';
+      const logMsg = `${timePassage} Date over: ${logText}${repairText}${gossipText} (Rel: ${newRel}/100, Chem: ${newChem}/100, Mood ${moodIncrease >= 0 ? '+' : ''}${moodIncrease})`;
       const compatibilityLog = `You noticed ${npc.name}'s deeper patterns over time. (${compatibilityBand} long-term fit)`;
 
       let stateToReturn = {
@@ -506,6 +556,7 @@ export const socialReducer = (state, action) => {
           logText,
           relationshipChange: finalRelGain,
           chemistryChange: chemChange,
+          gossipPenalty,
           memoriesGained: dateOutcome.memories || [],
           promisesCreated: dateOutcome.callbacks || [],
           conflictRisk: dateOutcome.conflict,
@@ -1128,6 +1179,23 @@ export const socialReducer = (state, action) => {
       if (choice.callback) memoryUpdates.promises = { [choice.callback]: 'pending' };
 
       const updatedMemory = updateRelationshipMemory(nextState, npcId, memoryUpdates);
+      const reputationCircle = selectRelevantReputationCircle(npcId);
+      const updatedReputation = adjustReputationForOrganicEncounter(
+        nextState,
+        npcId,
+        relGain,
+        chemChange
+      );
+      const reputationDelta = getReputationChange(
+        nextState.reputation,
+        updatedReputation,
+        reputationCircle
+      );
+      const reputationLog = describeReputationChange(
+        reputationCircle,
+        reputationDelta,
+        'reacted to the encounter'
+      );
 
       let stateToReturn = {
         ...nextState,
@@ -1142,11 +1210,16 @@ export const socialReducer = (state, action) => {
           }
         },
         relationshipMemory: updatedMemory,
+        reputation: updatedReputation,
         needs: {
           ...nextState.needs,
           mood: newMood
         },
-        logs: [`${timePassage} Encounter finished: ${choice.text}`, ...nextState.logs].slice(0, 20)
+        logs: [
+          ...(reputationLog ? [reputationLog] : []),
+          `${timePassage} Encounter finished: ${choice.text}`,
+          ...nextState.logs
+        ].slice(0, 20)
       };
 
       return appendRelationshipEvent(stateToReturn, npcId, {
