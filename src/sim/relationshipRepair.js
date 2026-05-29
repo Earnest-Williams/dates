@@ -1,4 +1,5 @@
 import { NPCS, RELATIONSHIP_REPAIR_ACTIONS } from '../data/npcs.js';
+import { calculateRepairReputationModifier } from './reputation.js';
 
 const clamp = (value, min = 0, max = 100) => Math.max(min, Math.min(max, value));
 
@@ -201,6 +202,16 @@ export const evaluateRepairAction = (state, npcId, matchData, actionId) => {
     reasons.push('waited past the best repair window');
   }
 
+  const reputationModifier = calculateRepairReputationModifier(state, npcId);
+  if (reputationModifier !== 1) {
+    score = Math.round(score * reputationModifier);
+    reasons.push(
+      reputationModifier > 1
+        ? 'good standing made repair easier'
+        : 'bad standing made repair harder'
+    );
+  }
+
   score = clamp(score);
   const success = score >= 70;
   const relationshipDelta = success ? Math.max(6, Math.round(score / 9)) : -3;
@@ -216,6 +227,7 @@ export const evaluateRepairAction = (state, npcId, matchData, actionId) => {
     relationshipDelta,
     chemistryDelta,
     elapsedDays,
+    reputationModifier,
     title: repairEvent?.title || getRepairActionLabel(actionId),
   };
 };
