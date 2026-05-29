@@ -25,7 +25,26 @@ test('save and load round trip works', () => {
 
   const loaded = loadGameState();
   assert.equal(loaded.ok, true);
-  assert.deepEqual(loaded.gameState, gameState);
+  assert.deepEqual(loaded.gameState, {
+    ...gameState,
+    calendar: {
+      lastEventId: 0,
+      events: [],
+    },
+    career: {
+      supervisorNpcId: null,
+      supervisorName: null,
+      supervisorRole: null,
+      coworkerNpcIds: [],
+      workScheduleTemplate: [],
+      attendance: {
+        records: {},
+        consecutiveMisses: 0,
+        totalMissed: 0,
+        totalLate: 0,
+      },
+    },
+  });
 
   const metadata = getSaveMetadata();
   assert.equal(metadata.day, 3);
@@ -39,7 +58,7 @@ test('unsupported save version fails gracefully', () => {
 
 test('payload version is set', () => {
   const payload = createSavePayload({});
-  assert.equal(payload.version, 2);
+  assert.equal(payload.version, 3);
   assert.equal(typeof payload.savedAt, 'string');
 });
 

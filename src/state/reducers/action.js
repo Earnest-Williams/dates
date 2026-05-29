@@ -6,9 +6,12 @@ import { simulateTicks } from './time.js';
 import { WORK_EVENTS } from '../../data/careers.js';
 import { courses } from '../../data/education.js';
 import { abilities } from '../../data/abilities.js';
-import { ROUTINES } from '../../data/routines.js';
+import { ROUTINES, isRoutineAvailable } from '../../data/routines.js';
+import { describeTimePassage, getTimeWindowStatus } from '../../sim/time.js';
 
 const clampRoutineValue = (value) => Math.min(100, Math.max(0, value));
+const ADMIN_WINDOW = { startHour: 7, endHour: 22, requireFinish: true };
+const COURSE_ENROLL_WINDOW = { startHour: 8, endHour: 20, requireFinish: true };
 
 export const applyRoutineEffects = (nextState, routine) => {
   const updatedStats = { ...nextState.stats };
@@ -30,10 +33,21 @@ export const applyRoutineEffects = (nextState, routine) => {
 export const actionReducer = (state, action) => {
   switch (action.type) {
     case 'PERFORM_ACTION': {
-      const { actionName, ticks, statChanges, energyCost, moneyChange } = action.payload;
+      const { actionName, ticks, statChanges, energyCost, moneyChange, availableWindow, durationTicks } = action.payload;
+
+      if (availableWindow) {
+        const timeStatus = getTimeWindowStatus(state.time, availableWindow, durationTicks || ticks);
+        if (!timeStatus.available) {
+          return {
+            ...state,
+            logs: [`${actionName} is not practical right now. ${timeStatus.reason}`, ...state.logs].slice(0, 20),
+          };
+        }
+      }
       
       // 1. Unified state simulation (time increments, passive needs decay, collapse checks, billing cycles)
       let nextState = simulateTicks(state, ticks);
+      const timePassage = describeTimePassage(state.time, nextState.time, `finished ${actionName}`);
 
       const currentHealth = state.needs.health;
       const currentMood = state.needs.mood;
@@ -115,7 +129,7 @@ export const actionReducer = (state, action) => {
       const moneyDiff = finalMoneyChange !== 0 ? `${finalMoneyChange > 0 ? '+$' : '-$'}${Math.abs(finalMoneyChange)}` : '';
       const parts = [statGains, moodDiff, healthDiff, moneyDiff].filter(Boolean).join(', ');
       
-      const logMsg = `Finished: ${actionName} (${parts})`;
+      const logMsg = `${timePassage}${parts ? ` (${parts})` : ''}`;
       const finalLogs = [logMsg, ...nextState.logs].slice(0, 20);
 
       let newState = {
@@ -179,13 +193,14 @@ export const actionReducer = (state, action) => {
       const { hours } = action.payload;
       const ticks = hours * 6;
       let nextState = simulateTicks(state, ticks);
+      const timePassage = describeTimePassage(state.time, nextState.time, `slept for ${hours} hours`);
 
       const rate = HOUSING_TIERS[state.stats.housingTier].energyRate;
       const multiplier = getSleepMultiplier(state.placedFurniture);
       const energyGain = hours * rate * multiplier;
       const moodGain = hours;
 
-      const logMsg = `Slept for ${hours} hours in ${HOUSING_TIERS[state.stats.housingTier].name} (Bed multiplier: x${multiplier.toFixed(2)}). Restores energy and mood.`;
+      const logMsg = `${timePassage} ${HOUSING_TIERS[state.stats.housingTier].name} bed multiplier: x${multiplier.toFixed(2)}. Restores energy and mood.`;
       const finalLogs = [logMsg, ...nextState.logs].slice(0, 20);
 
       return {
@@ -202,6 +217,7 @@ export const actionReducer = (state, action) => {
     case 'COOK_MEAL': {
       const ticks = 3; // 30 mins
       let nextState = simulateTicks(state, ticks);
+      const timePassage = describeTimePassage(state.time, nextState.time, `cooked a ${state.placedFurniture.includes('gas_range') ? 'premium meal' : 'basic meal'}`);
 
       const hasGasRange = state.placedFurniture.includes('gas_range');
       const hasSmartFridge = state.placedFurniture.includes('smart_fridge');
@@ -217,7 +233,7 @@ export const actionReducer = (state, action) => {
       const newCulinary = Math.min(100, culinaryLevel + 2);
       const mealName = hasGasRange ? "premium meal on your Gas Range" : "basic meal on your Hot Plate";
 
-      const logMsg = `Cooked a ${mealName}. (-$${cost}, -${hygieneCost} Hygiene, -${hungerRecovery} Hunger${moodBonus ? `, +${moodBonus} Mood` : ''}, +2.0 Culinary Skill)`;
+      const logMsg = `${timePassage} ${mealName}. (-$${cost}, -${hygieneCost} Hygiene, -${hungerRecovery} Hunger${moodBonus ? `, +${moodBonus} Mood` : ''}, +2.0 Culinary Skill)`;
       const finalLogs = [logMsg, ...nextState.logs].slice(0, 20);
 
       return {
@@ -240,9 +256,10 @@ export const actionReducer = (state, action) => {
     case 'DINE_OUT': {
       const ticks = 6; // 1 hour
       let nextState = simulateTicks(state, ticks);
+      const timePassage = describeTimePassage(state.time, nextState.time, 'had dinner at a nice restaurant');
       const cost = 30;
 
-      const logMsg = "Had dinner at a nice restaurant. (-$30, -80 Hunger, +20 Mood)";
+      const logMsg = `${timePassage} (-$30, -80 Hunger, +20 Mood)`;
       const finalLogs = [logMsg, ...nextState.logs].slice(0, 20);
 
       return {
@@ -263,7 +280,8 @@ export const actionReducer = (state, action) => {
     case 'SHOWER': {
       const ticks = 3;
       let nextState = simulateTicks(state, ticks);
-      const finalLogs = ["Took a hot shower. Feeling fresh and clean!", ...nextState.logs].slice(0, 20);
+      const timePassage = describeTimePassage(state.time, nextState.time, 'took a hot shower');
+      const finalLogs = [`${timePassage} Feeling fresh and clean!`, ...nextState.logs].slice(0, 20);
       
       return {
         ...nextState,
@@ -276,45 +294,65 @@ export const actionReducer = (state, action) => {
     }
 
     case 'PAY_BILLS': {
-      const currentHousingTier = state.stats.housingTier;
-      const rentCost = HOUSING_TIERS[currentHousingTier].rent;
-      const billsCost = state.living.billsAmount;
-
-      const totalOwed = rentCost + billsCost;
-      if (state.stats.money >= totalOwed) {
+      const timeStatus = getTimeWindowStatus(state.time, ADMIN_WINDOW, 2);
+      if (!timeStatus.available) {
         return {
           ...state,
+          logs: [`Paying bills is not practical right now. ${timeStatus.reason}`, ...state.logs].slice(0, 20)
+        };
+      }
+
+      const nextState = simulateTicks(state, 2);
+      const timePassage = describeTimePassage(state.time, nextState.time, 'worked through utility and rent payments');
+      const currentHousingTier = state.stats.housingTier;
+      const rentCost = HOUSING_TIERS[currentHousingTier].rent;
+      const billsCost = nextState.living.billsAmount;
+
+      const totalOwed = rentCost + billsCost;
+      if (nextState.stats.money >= totalOwed) {
+        return {
+          ...nextState,
           stats: {
-            ...state.stats,
-            money: state.stats.money - totalOwed
+            ...nextState.stats,
+            money: nextState.stats.money - totalOwed
           },
           living: {
-            ...state.living,
+            ...nextState.living,
             utilitiesActive: true
           },
-          logs: [`Paid $${totalOwed} to restore utilities and catch up on rent.`, ...state.logs].slice(0, 20)
+          logs: [`${timePassage} Paid $${totalOwed} to restore utilities and catch up on rent.`, ...nextState.logs].slice(0, 20)
         };
       }
       return {
-        ...state,
-        logs: [`⚠️ Not enough money to pay bills ($${totalOwed} needed).`, ...state.logs].slice(0, 20)
+        ...nextState,
+        logs: [`${timePassage} Not enough money to pay bills ($${totalOwed} needed).`, ...nextState.logs].slice(0, 20)
       };
     }
 
     case 'TOGGLE_HEALTH_INSURANCE': {
-      const currentState = state.living.hasHealthInsurance;
+      const timeStatus = getTimeWindowStatus(state.time, ADMIN_WINDOW, 1);
+      if (!timeStatus.available) {
+        return {
+          ...state,
+          logs: [`Insurance services are closed right now. ${timeStatus.reason}`, ...state.logs].slice(0, 20)
+        };
+      }
+
+      const nextState = simulateTicks(state, 1);
+      const timePassage = describeTimePassage(state.time, nextState.time, 'handled health insurance paperwork');
+      const currentState = nextState.living.hasHealthInsurance;
       const newStatus = !currentState;
       const logMsg = newStatus 
-        ? `Subscribed to Health Insurance. You will be billed $150/month.` 
-        : `Cancelled Health Insurance. You are no longer protected from medical debt.`;
+        ? `${timePassage} Subscribed to health insurance. You will be billed $150/month.` 
+        : `${timePassage} Cancelled health insurance. You are no longer protected from medical debt.`;
         
       return {
-        ...state,
+        ...nextState,
         living: {
-          ...state.living,
+          ...nextState.living,
           hasHealthInsurance: newStatus
         },
-        logs: [logMsg, ...state.logs].slice(0, 20)
+        logs: [logMsg, ...nextState.logs].slice(0, 20)
       };
     }
 
@@ -323,8 +361,15 @@ export const actionReducer = (state, action) => {
       const { routineId } = action.payload;
       const routine = ROUTINES.find((item) => item.id === routineId);
       if (!routine) return state;
+      if (!isRoutineAvailable(routine, state)) {
+        return {
+          ...state,
+          logs: [`Cannot do "${routine.label}" right now.`, ...state.logs].slice(0, 20),
+        };
+      }
 
       const nextState = simulateTicks(state, routine.durationTicks);
+      const timePassage = describeTimePassage(state.time, nextState.time, `completed ${routine.label}`);
       const { updatedStats, updatedNeeds } = applyRoutineEffects(nextState, routine);
 
       const memoryRoll = routine.memoryChance && Math.random() < routine.memoryChance;
@@ -346,7 +391,7 @@ export const actionReducer = (state, action) => {
       });
       const balancedBonus = uniqueTags.size >= 5 ? 4 : 0;
       updatedNeeds.mood = Math.min(100, updatedNeeds.mood + balancedBonus);
-      const logMsg = `${routine.logTemplate || `Completed routine: ${routine.label}.`}${memoryLog}${msgLog}${balancedBonus ? ` Balanced day bonus: +${balancedBonus} Mood.` : ''}`;
+      const logMsg = `${timePassage} ${routine.logTemplate || `Completed routine: ${routine.label}.`}${memoryLog}${msgLog}${balancedBonus ? ` Balanced day bonus: +${balancedBonus} Mood.` : ''}`;
 
       return {
         ...nextState,
@@ -360,7 +405,8 @@ export const actionReducer = (state, action) => {
     case 'WATCH_TV': {
       const ticks = 6;
       let nextState = simulateTicks(state, ticks);
-      const finalLogs = ["Watched TV for 1 hour. (+30 Mood, -5 Energy)", ...nextState.logs].slice(0, 20);
+      const timePassage = describeTimePassage(state.time, nextState.time, 'watched TV');
+      const finalLogs = [`${timePassage} (+30 Mood, -5 Energy)`, ...nextState.logs].slice(0, 20);
 
       return {
         ...nextState,
@@ -376,7 +422,8 @@ export const actionReducer = (state, action) => {
     case 'VISIT_HOSPITAL': {
       const ticks = 6;
       let nextState = simulateTicks(state, ticks);
-      const finalLogs = ["Visited the Hospital clinic for treatment. (-$100, +40 Health)", ...nextState.logs].slice(0, 20);
+      const timePassage = describeTimePassage(state.time, nextState.time, 'visited the Hospital clinic');
+      const finalLogs = [`${timePassage} (-$100, +40 Health)`, ...nextState.logs].slice(0, 20);
 
       return {
         ...nextState,
@@ -413,15 +460,15 @@ export const actionReducer = (state, action) => {
       }
 
       let nextState = simulateTicks(state, ticks);
+      const timePassage = describeTimePassage(state.time, nextState.time, `traveled to ${SETTLEMENTS[locationKey]?.name || locationKey}`);
 
       const newStats = { ...nextState.stats };
       if (fitnessBonus > 0) {
         newStats.fitness = Math.min(100, newStats.fitness + fitnessBonus);
       }
 
-      const destName = SETTLEMENTS[locationKey]?.name || locationKey;
       const routeMsg = pathChain ? ` (Route: ${pathChain}, ${distance.toFixed(1)} km)` : ` (${distance.toFixed(1)} km)`;
-      const logMsg = `Traveled to ${destName} via ${vehicleUsed}.${routeMsg} (Took ${ticks * 10} mins, -${energyCost} Energy)`;
+      const logMsg = `${timePassage} Via ${vehicleUsed}.${routeMsg} (-${energyCost} Energy)`;
       const finalLogs = [logMsg, ...nextState.logs].slice(0, 20);
 
       return {
@@ -441,20 +488,19 @@ export const actionReducer = (state, action) => {
       const course = courses[courseId];
       if (!course) return state;
 
-      let newMoney = state.stats.money;
-      let newLoans = state.education.studentLoans || 0;
+      const timeStatus = getTimeWindowStatus(state.time, COURSE_ENROLL_WINDOW, 3);
+      if (!timeStatus.available) {
+        return {
+          ...state,
+          logs: [`Course registration is not practical right now. ${timeStatus.reason}`, ...state.logs].slice(0, 20)
+        };
+      }
 
       if (!useLoan && state.stats.money < course.cost) {
         return {
           ...state,
           logs: [`Not enough money to enroll in ${course.name}. Consider taking a student loan.`, ...state.logs].slice(0, 20)
         };
-      }
-
-      if (useLoan) {
-        newLoans += course.cost;
-      } else {
-        newMoney -= course.cost;
       }
 
       // Check requirements
@@ -469,19 +515,30 @@ export const actionReducer = (state, action) => {
         }
       }
 
+      const nextState = simulateTicks(state, 3);
+      const timePassage = describeTimePassage(state.time, nextState.time, `handled registration for ${course.name}`);
+      let newMoney = nextState.stats.money;
+      let newLoans = nextState.education.studentLoans || 0;
+
+      if (useLoan) {
+        newLoans += course.cost;
+      } else {
+        newMoney -= course.cost;
+      }
+
       return {
-        ...state,
+        ...nextState,
         stats: {
-          ...state.stats,
+          ...nextState.stats,
           money: newMoney
         },
         education: {
-          ...state.education,
+          ...nextState.education,
           activeCourse: courseId,
           courseProgress: 0,
           studentLoans: newLoans
         },
-        logs: [`Enrolled in ${course.name} ${useLoan ? '(Paid with Student Loan)' : 'for $' + course.cost}!`, ...state.logs].slice(0, 20)
+        logs: [`${timePassage} Enrolled in ${course.name} ${useLoan ? '(paid with student loan)' : 'for $' + course.cost}.`, ...nextState.logs].slice(0, 20)
       };
     }
 
@@ -494,6 +551,7 @@ export const actionReducer = (state, action) => {
       // Study session takes 20 ticks (approx 3 hours)
       const sessionTicks = 20;
       let nextState = simulateTicks(state, sessionTicks);
+      const timePassage = describeTimePassage(state.time, nextState.time, `studied for ${course.name}`);
 
       nextState.needs.energy = Math.max(0, nextState.needs.energy - 25);
       nextState.needs.mood = Math.max(0, nextState.needs.mood - 10);
@@ -535,7 +593,7 @@ export const actionReducer = (state, action) => {
                activeCourse: null,
                courseProgress: 0
              },
-             logs: [`Passed the final exam! Completed ${course.name}! Earned ${course.credentialEarned}.`, ...nextState.logs].slice(0, 20)
+             logs: [`${timePassage} Passed the final exam and earned ${course.credentialEarned}.`, ...nextState.logs].slice(0, 20)
            };
          } else {
            // Failed Exam
@@ -545,7 +603,7 @@ export const actionReducer = (state, action) => {
                ...state.education,
                courseProgress: Math.floor(course.durationTicks * 0.5) // Set back to 50%
              },
-             logs: [`Failed the final exam for ${course.name}. Your stats weren't high enough. Keep studying!`, ...nextState.logs].slice(0, 20)
+             logs: [`${timePassage} Failed the final exam. Your stats weren't high enough. Keep studying!`, ...nextState.logs].slice(0, 20)
            };
          }
       }
@@ -557,7 +615,7 @@ export const actionReducer = (state, action) => {
            ...state.education,
            courseProgress: newProgress
          },
-         logs: [`Studied for ${course.name}. Progress: ${Math.floor((newProgress / course.durationTicks) * 100)}%`, ...nextState.logs].slice(0, 20)
+         logs: [`${timePassage} Progress: ${Math.floor((newProgress / course.durationTicks) * 100)}%`, ...nextState.logs].slice(0, 20)
       };
     }
 
@@ -567,9 +625,10 @@ export const actionReducer = (state, action) => {
       if (!ability || state.needs.energy < ability.energyCost) return state;
 
       let nextState = simulateTicks(state, 4); // Take ~1 hour
+      const timePassage = describeTimePassage(state.time, nextState.time, `used ${ability.name}`);
       nextState.needs.energy = Math.max(0, nextState.needs.energy - ability.energyCost);
       
-      let logMsg = `Used ability: ${ability.name}.`;
+      let logMsg = `${timePassage}`;
       if (ability.riskChance && Math.random() < ability.riskChance) {
         logMsg = `Ability failed! ${ability.name} triggered a penalty.`;
         if (ability.effectType === 'money') {

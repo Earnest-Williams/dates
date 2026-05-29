@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { runSaveMigration } from '../src/state/persistence.js';
 
 test('save migration tests', async (t) => {
-  await t.test('migrates v1 payload to v2', () => {
+  await t.test('migrates v1 payload to latest', () => {
     const v1Payload = {
       version: 1,
       savedAt: '2026-05-28T00:00:00.000Z',
@@ -27,6 +27,8 @@ test('save migration tests', async (t) => {
     // Check features flag added
     assert.ok(gameState.features);
     assert.strictEqual(gameState.features.organicEncounters, false);
+    assert.ok(gameState.calendar);
+    assert.deepStrictEqual(gameState.calendar.events, []);
     
     // Check matches extended fields
     assert.ok(gameState.matches.elena);
@@ -34,7 +36,7 @@ test('save migration tests', async (t) => {
     assert.strictEqual(gameState.matches.elena.relationshipStage, 'matched');
   });
 
-  await t.test('accepts v2 payload without migration', () => {
+  await t.test('migrates v2 payload to latest', () => {
     const v2Payload = {
       version: 2,
       savedAt: '2026-05-28T00:00:00.000Z',
@@ -45,7 +47,8 @@ test('save migration tests', async (t) => {
 
     const result = runSaveMigration(v2Payload);
     assert.strictEqual(result.ok, true);
-    assert.strictEqual(result.migrated, false);
+    assert.strictEqual(result.migrated, true);
+    assert.ok(result.gameState.calendar);
   });
   
   await t.test('rejects unsupported version', () => {

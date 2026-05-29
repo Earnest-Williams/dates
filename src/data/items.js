@@ -7,6 +7,13 @@ import { FURNITURE } from './furniture.js';
 import { VEHICLES } from './vehicles.js';
 
 export const PERSONAL_ITEMS = {
+  basic_phone: {
+    id: "basic_phone",
+    name: "Basic Phone",
+    type: "tool",
+    cost: 0,
+    desc: "Calls, texts, maps, and slow job websites. Nothing fancy, but it works.",
+  },
   clothes: {
     id: "clothes",
     name: "Designer Outfit",

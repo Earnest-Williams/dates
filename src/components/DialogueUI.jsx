@@ -86,7 +86,7 @@ const DialogueUI = ({ npcId, onClose }) => {
       const comment = npc.dialogue.dateLines?.[locKey] || "I enjoyed going out with you.";
       setDialogueText(`[${template.title} at ${LOCATIONS[locKey].name}] "${comment}"`);
     } else {
-      setDialogueText(`Could not go on date. Check your energy.`);
+      setDialogueText('Could not start this date right now. Check time, access, and energy.');
     }
     setDateMode(false);
   };

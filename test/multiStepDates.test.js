@@ -79,7 +79,16 @@ test('mediocre and failed dates create memory, discovery, and repair state', () 
   assert.ok(afterMediocre.relationshipMemory.elena.comfortKnown.includes('library_late_focus'));
   assert.ok(afterMediocre.relationshipMemory.elena.rememberedChoices.includes('listened_in_the_stacks'));
 
-  const failedDating = gameReducer(afterMediocre, {
+  const nextMorning = {
+    ...afterMediocre,
+    time: {
+      ...afterMediocre.time,
+      day: afterMediocre.time.day + 1,
+      hour: 10,
+      minute: 0,
+    },
+  };
+  const failedDating = gameReducer(nextMorning, {
     type: 'GO_ON_DATE',
     payload: { npcId: 'elena', locationKey: 'library', dateType: 'study_date' },
   });

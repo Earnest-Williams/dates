@@ -1,6 +1,7 @@
 .career-app {
   width: 100%;
-  max-width: 580px;
+  max-width: none;
+  min-height: calc(100vh - 4rem);
   background: rgba(15, 23, 42, 0.85);
   backdrop-filter: blur(25px);
   -webkit-backdrop-filter: blur(25px);
@@ -12,6 +13,12 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+}
+
+.career-app .tab-content {
+  overflow-y: visible;
+  padding-right: 0.5rem;
+  min-height: 0;
 }
 
 .career-app .career-header {
@@ -91,6 +98,210 @@
   display: flex;
   align-items: center;
   gap: 0.35rem;
+}
+
+.career-app .unemployed-card p,
+.career-app .career-copy,
+.career-app .empty-career-state p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin: 0.35rem 0 0;
+}
+
+.career-app .starter-tools {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.career-app .starter-tools strong {
+  color: var(--accent-emerald);
+}
+
+.career-app .job-search-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(280px, 1fr));
+  gap: 0.85rem;
+  align-items: stretch;
+}
+
+.career-app .job-search-feedback {
+  grid-column: 1 / -1;
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.career-app .job-search-feedback.info {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.career-app .job-search-feedback.success {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.09);
+}
+
+.career-app .job-search-feedback.miss {
+  border-color: rgba(251, 191, 36, 0.4);
+  background: rgba(251, 191, 36, 0.08);
+}
+
+.career-app .job-search-feedback strong {
+  color: white;
+  font-size: 0.95rem;
+}
+
+.career-app .job-search-feedback p {
+  margin: 0.35rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.career-app .job-search-card {
+  display: flex;
+  min-height: 280px;
+  justify-content: space-between;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.career-app .job-search-card.unavailable {
+  opacity: 0.68;
+}
+
+.career-app .job-search-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.career-app .job-search-main strong {
+  color: white;
+  font-size: 1rem;
+}
+
+.career-app .job-search-main p {
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.career-app .job-search-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.career-app .job-search-meta span {
+  padding: 0.2rem 0.45rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.career-app .job-search-meta .met {
+  color: var(--accent-emerald);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.career-app .job-search-meta .unmet {
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.35);
+}
+
+.career-app .job-search-requirements {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.career-app .job-search-employers {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.2rem;
+}
+
+.career-app .job-search-employers span {
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  line-height: 1.25;
+}
+
+.career-app .career-action-window {
+  margin-top: 0.45rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.career-app .career-action-window.met {
+  color: var(--accent-emerald);
+}
+
+.career-app .career-action-window.unmet {
+  color: #f87171;
+}
+
+.career-app .empty-career-state {
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+@media (max-width: 1020px) {
+  .career-app {
+    min-height: auto;
+  }
+
+  .career-app .job-search-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .app-workspace-container {
+    padding: 0.75rem;
+  }
+
+  .career-app {
+    max-height: none;
+    padding: 1rem;
+  }
+
+  .career-app .job-search-list {
+    grid-template-columns: 1fr;
+  }
+
+  .career-app .job-search-card {
+    min-height: auto;
+  }
+
+  .career-app .job-search-card .btn-primary {
+    width: 100%;
+  }
 }
 
 /* Custom Progress Bars */

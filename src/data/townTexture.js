@@ -1,3 +1,5 @@
+import { getDaypart } from '../sim/time.js';
+
 export const NPC_SCHEDULE = {
   elena: [
     { days: ['mon', 'wed'], time: 'evening', location: 'library', reveals: 'quiet_evenings' },
@@ -117,15 +119,12 @@ const dayNames = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 export const getDayName = (day) => dayNames[(Math.max(1, day) - 1) % dayNames.length];
 
 export const getTimeOfDay = (hour) => {
-  if (hour < 12) return 'morning';
-  if (hour < 17) return 'afternoon';
-  if (hour < 21) return 'evening';
-  return 'night';
+  return getDaypart(hour);
 };
 
 export const getNpcEncounters = (time, locationKey) => {
   const dayName = getDayName(time.day || 1);
-  const timeOfDay = getTimeOfDay(time.hour || 8);
+  const timeOfDay = getTimeOfDay(time.hour ?? 8);
   return Object.entries(NPC_SCHEDULE).flatMap(([npcId, entries]) => (
     entries
       .filter((entry) => (

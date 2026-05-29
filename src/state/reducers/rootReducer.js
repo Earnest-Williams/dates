@@ -4,6 +4,7 @@ import { socialReducer } from './social.js';
 import { actionReducer } from './action.js';
 import { socialMediaReducer } from './socialMedia.js';
 import { careerReducer } from './career.js';
+import { recordCalendarEvent } from '../../sim/calendar.js';
 
 export const initialState = {
   gamePhase: 'intro', // 'intro', 'living', 'marriage', 'parenting'
@@ -90,7 +91,9 @@ export const initialState = {
   },
   placedFurniture: ['twin_bed', 'hot_plate'],
   storage: [],
-  inventory: {}, // Format: { [itemKey]: quantity }
+  inventory: {
+    basic_phone: 1,
+  }, // Format: { [itemKey]: quantity }
   properties: {
     vehicles: [], // list of vehicleKeys
   },
@@ -155,7 +158,20 @@ export const initialState = {
     projectProgress: 0,
     promotionPoints: 0,
     titleLevel: 1,
-    activeTrack: 'corporate',
+    activeTrack: null,
+    employerId: null,
+    jobTitle: null,
+    supervisorNpcId: null,
+    supervisorName: null,
+    supervisorRole: null,
+    coworkerNpcIds: [],
+    workScheduleTemplate: [],
+    attendance: {
+      records: {},
+      consecutiveMisses: 0,
+      totalMissed: 0,
+      totalLate: 0,
+    },
     activeGig: null,
     gigProgress: 0,
     gigReputation: 0,
@@ -170,6 +186,10 @@ export const initialState = {
     day: 1,
     completedToday: [],
     weeklyCounts: {},
+  },
+  calendar: {
+    lastEventId: 0,
+    events: [],
   },
   logs: [
     "Mom stocked the fridge before she left. Dad reminded you the first year of rent is already handled.",
@@ -199,9 +219,11 @@ export const initialState = {
 const isDevelopment = import.meta.env?.MODE !== 'production';
 
 export const gameReducer = (state, action) => {
+  let nextState = state;
+
   switch (action.type) {
     case 'COMPLETE_INTRO':
-      return {
+      nextState = {
         ...state,
         gamePhase: 'living',
         logs: [
@@ -209,6 +231,7 @@ export const gameReducer = (state, action) => {
           ...state.logs,
         ].slice(0, 20),
       };
+      break;
 
     case 'ADVANCE_TIME':
     case 'DECAY_NEEDS':
@@ -216,7 +239,8 @@ export const gameReducer = (state, action) => {
     case 'PROCESS_MONTHLY_BILLS':
     case 'CHECK_COLLAPSE':
     case 'CHECK_EVICTION':
-      return timeReducer(state, action);
+      nextState = timeReducer(state, action);
+      break;
 
     case 'BUY_ITEM':
     case 'PLACE_FURNITURE':
@@ -226,7 +250,8 @@ export const gameReducer = (state, action) => {
     case 'BUY_ASSET':
     case 'SELL_ASSET':
     case 'PAY_TAXES':
-      return inventoryReducer(state, action);
+      nextState = inventoryReducer(state, action);
+      break;
 
     case 'CHANGE_RELATIONSHIP':
     case 'SWIPE_NPC':
@@ -251,7 +276,8 @@ export const gameReducer = (state, action) => {
     case 'RESOLVE_NPC_ALERT':
     case 'CLOSE_DATE_RECAP':
     case 'ATTEMPT_REPAIR':
-      return socialReducer(state, action);
+      nextState = socialReducer(state, action);
+      break;
 
     case 'PERFORM_ACTION':
     case 'SLEEP':
@@ -264,35 +290,41 @@ export const gameReducer = (state, action) => {
     case 'VISIT_HOSPITAL':
     case 'TRAVEL':
     case 'DO_ROUTINE':
-      return actionReducer(state, action);
+    case 'ENROLL_COURSE':
+    case 'STUDY_COURSE':
+      nextState = actionReducer(state, action);
+      break;
 
     case 'ADD_LOG': {
       const { message } = action.payload;
-      return {
+      nextState = {
         ...state,
         logs: [message, ...state.logs].slice(0, 20)
       };
+      break;
     }
 
     case 'POST_SIMSTAGRAM':
     case 'ADD_SIMSTAGRAM_BUFF':
-      return socialMediaReducer(state, action);
+      nextState = socialMediaReducer(state, action);
+      break;
 
     case 'START_PROJECT':
     case 'WORK_ON_PROJECT':
     case 'RESOLVE_WORK_EVENT':
-    case 'ENROLL_COURSE':
-    case 'STUDY_COURSE':
     case 'TAKE_GIG':
     case 'WORK_SIDE_HUSTLE':
+    case 'JOB_HUNT':
     case 'SWITCH_TRACK':
     case 'USE_ABILITY':
-      return careerReducer(state, action);
+      nextState = careerReducer(state, action);
+      break;
 
     default:
       if (isDevelopment) {
         console.warn(`[gameReducer] Unknown action type: ${action.type}`);
       }
-      return state;
   }
+
+  return recordCalendarEvent(state, nextState, action);
 };

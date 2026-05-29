@@ -2,6 +2,7 @@ import React from 'react';
 import { useGameStore } from '../../state/store';
 import { HOUSING_TIERS } from '../../data/housing';
 import { CAREER_TRACKS } from '../../data/projects';
+import { getBusinessById } from '../../data/businesses';
 
 const MoneyRiskPanel = () => {
   const { stats, career, living, time } = useGameStore(state => state.gameState);
@@ -11,8 +12,9 @@ const MoneyRiskPanel = () => {
   const rentWaived = living?.rentWaivedUntilDay >= time.day && living?.rentWaivedHousingTier === housingTier;
   const rent = housingTier > 0 && !rentWaived ? currentHousing.rent : 0;
   
-  const activeCareer = career?.currentPath ? CAREER_TRACKS[career.currentPath] : null;
-  const currentLevel = activeCareer ? activeCareer.levels[career.currentLevel] : null;
+  const activeCareer = career?.activeTrack ? CAREER_TRACKS[career.activeTrack] : null;
+  const currentLevel = activeCareer ? activeCareer.levels.find(level => level.level === career.titleLevel) : null;
+  const employer = career?.employerId ? getBusinessById(career.employerId) : null;
   const income = currentLevel ? currentLevel.salary : 0;
 
   return (
@@ -30,9 +32,16 @@ const MoneyRiskPanel = () => {
         )}
         
         {income > 0 ? (
-          <p style={{ color: '#4ade80', marginBottom: '0.5rem' }}>
-            <strong>Income:</strong> +${income} / week
-          </p>
+          <>
+            <p style={{ color: '#4ade80', marginBottom: '0.5rem' }}>
+              <strong>Income:</strong> +${income} / week
+            </p>
+            {employer && (
+              <p style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                <strong>Employer:</strong> {employer.name}
+              </p>
+            )}
+          </>
         ) : (
           <p style={{ color: '#fbbf24', marginBottom: '0.5rem' }}>
             <strong>Career:</strong> Unemployed

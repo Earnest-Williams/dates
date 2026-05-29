@@ -15,6 +15,7 @@ import {
 import { scoreDatePhaseChoice } from '../../sim/dateScoring.js';
 import { applyDateDiminishingReturns } from '../../sim/dateDiminishingReturns.js';
 import { appendRelationshipEvent } from '../../sim/relationshipEvents.js';
+import { describeTimePassage, getTimeWindowStatus } from '../../sim/time.js';
 
 const createEmptyMemory = () => ({
   rememberedChoices: [],
@@ -150,13 +151,15 @@ export const socialReducer = (state, action) => {
         dailySwipesCount: isPremium ? swipeCount : swipeCount + 1,
         lastSwipedDay: lastDay
       };
+      const nextState = simulateTicks(state, 1);
+      const timePassage = describeTimePassage(state.time, nextState.time, `used LinkUp on ${npc.name}`);
 
       if (direction === 'left') {
         const logMsg = `Passed on ${npc.name}. (${isPremium ? 'Unlimited' : `Swipes left today: ${5 - nextSwipeStats.dailySwipesCount}`})`;
         return {
-          ...state,
+          ...nextState,
           swipeStats: nextSwipeStats,
-          logs: [logMsg, ...state.logs].slice(0, 20)
+          logs: [`${timePassage} ${logMsg}`, ...nextState.logs].slice(0, 20)
         };
       }
 
@@ -179,10 +182,10 @@ export const socialReducer = (state, action) => {
       }
 
       return {
-        ...state,
+        ...nextState,
         matches: updatedMatches,
         swipeStats: nextSwipeStats,
-        logs: [logMsg, ...state.logs].slice(0, 20)
+        logs: [`${timePassage} ${logMsg}`, ...nextState.logs].slice(0, 20)
       };
     }
 
@@ -204,6 +207,7 @@ export const socialReducer = (state, action) => {
 
       // Advances 30 mins (3 ticks)
       let nextState = simulateTicks(state, 3);
+      const timePassage = describeTimePassage(state.time, nextState.time, `talked with ${npc.name}`);
 
       const currentMatch = nextState.matches[npcId] || { met: true, relationship: 10, chemistry: 10, dateCount: 0, storyTier: 0 };
       
@@ -224,7 +228,7 @@ export const socialReducer = (state, action) => {
       const currentMood = nextState.needs.mood !== undefined ? nextState.needs.mood : 100;
       const newMood = clamp(currentMood + moodIncrease);
 
-      const logMsg = `[${npc.name}] ${logText} (Rel: ${newRel}/100, Chem: ${newChem}/100${moodIncrease ? `, +${moodIncrease} Mood` : ''})`;
+      const logMsg = `${timePassage} [${npc.name}] ${logText} (Rel: ${newRel}/100, Chem: ${newChem}/100${moodIncrease ? `, +${moodIncrease} Mood` : ''})`;
       const finalLogs = [logMsg, ...nextState.logs].slice(0, 20);
 
       const memoryUpdates = {
@@ -268,6 +272,13 @@ export const socialReducer = (state, action) => {
       const dateTemplate = getDateTemplate(dateType, locationKey);
       const location = LOCATIONS[locationKey || dateTemplate.venueKey];
       const npc = NPCS.find(n => n.id === npcId);
+      const timeStatus = getTimeWindowStatus(state.time, location.availableWindow, 6);
+      if (!timeStatus.available) {
+        return {
+          ...state,
+          logs: [`Date at ${location.name} is not practical right now. ${timeStatus.reason}`, ...state.logs].slice(0, 20),
+        };
+      }
 
       const destinationSettlement = {
         library: 'Brockleigh',
@@ -294,6 +305,7 @@ export const socialReducer = (state, action) => {
       }
 
       let nextState = simulateTicks(state, travelTicks);
+      const timePassage = describeTimePassage(state.time, nextState.time, `traveled to ${destinationSettlement}`);
 
       const newStats = { ...nextState.stats };
       if (fitnessBonus > 0) {
@@ -303,7 +315,7 @@ export const socialReducer = (state, action) => {
       const totalCost = travelEnergy + 10;
       const finalEnergy = Math.max(0, nextState.needs.energy - totalCost);
 
-      const logMsg = `Arrived at ${destinationSettlement} (${location.name}) via ${vehicleUsedName} for a date with ${npc.name}. (Took ${travelTicks * 10} mins, -${travelEnergy} Travel Energy, -10 Date Energy)`;
+      const logMsg = `${timePassage} Arrived at ${location.name} via ${vehicleUsedName} for a date with ${npc.name}. (-${travelEnergy} Travel Energy, -10 Date Energy)`;
 
       return {
         ...nextState,
@@ -344,11 +356,13 @@ export const socialReducer = (state, action) => {
       const choice = currentPhase.choices[optionIndex];
       if (!choice) return state;
 
-      const scored = scoreDatePhaseChoice(state, state.activeDateEvent, choice);
+      const nextState = simulateTicks(state, 1);
+      const timePassage = describeTimePassage(state.time, nextState.time, `spent a moment on the date with ${npcId}`);
+      const scored = scoreDatePhaseChoice(nextState, nextState.activeDateEvent, choice);
 
       const nextPhaseIndex = currentPhaseIndex + 1;
-      const nextVibe = Math.min(100, Math.max(0, state.activeDateEvent.vibe + scored.connectionChange));
-      const nextConnection = Math.min(100, Math.max(0, state.activeDateEvent.connectionScore + scored.connectionChange));
+      const nextVibe = Math.min(100, Math.max(0, nextState.activeDateEvent.vibe + scored.connectionChange));
+      const nextConnection = Math.min(100, Math.max(0, nextState.activeDateEvent.connectionScore + scored.connectionChange));
 
       const memoryUpdates = {
         rememberedChoices: [],
@@ -363,36 +377,42 @@ export const socialReducer = (state, action) => {
       if (scored.repairScene) memoryUpdates.promises[scored.repairScene] = 'pending';
       if (scored.conflict) memoryUpdates.importantMoments.push(scored.conflict);
 
-      const updatedMemory = updateRelationshipMemory(state, npcId, memoryUpdates);
+      const updatedMemory = updateRelationshipMemory(nextState, npcId, memoryUpdates);
 
       const nextDateEvent = {
-        ...state.activeDateEvent,
+        ...nextState.activeDateEvent,
         vibe: nextVibe,
         connectionScore: nextConnection,
         currentPhaseIndex: nextPhaseIndex,
         memoryContext: updatedMemory[npcId],
         dateOutcome: {
-          ...(state.activeDateEvent.dateOutcome || {}),
-          relationship: (state.activeDateEvent.dateOutcome?.relationship || 0) + (choice.relationship || 0),
-          chemistry: (state.activeDateEvent.dateOutcome?.chemistry || 0) + scored.chemistryChange,
-          mood: (state.activeDateEvent.dateOutcome?.mood || 0) + scored.moodChange,
-          energy: (state.activeDateEvent.dateOutcome?.energy || 0) + scored.energyChange,
-          repairScene: choice.repairScene || state.activeDateEvent.dateOutcome?.repairScene,
-          conflict: choice.conflict || state.activeDateEvent.dateOutcome?.conflict,
+          ...(nextState.activeDateEvent.dateOutcome || {}),
+          relationship: (nextState.activeDateEvent.dateOutcome?.relationship || 0) + (choice.relationship || 0),
+          chemistry: (nextState.activeDateEvent.dateOutcome?.chemistry || 0) + scored.chemistryChange,
+          mood: (nextState.activeDateEvent.dateOutcome?.mood || 0) + scored.moodChange,
+          energy: (nextState.activeDateEvent.dateOutcome?.energy || 0) + scored.energyChange,
+          repairScene: choice.repairScene || nextState.activeDateEvent.dateOutcome?.repairScene,
+          conflict: choice.conflict || nextState.activeDateEvent.dateOutcome?.conflict,
         }
       };
 
       if (nextPhaseIndex >= phases.length) {
         return socialReducer(
-          { ...state, activeDateEvent: nextDateEvent, relationshipMemory: updatedMemory },
+          {
+            ...nextState,
+            activeDateEvent: nextDateEvent,
+            relationshipMemory: updatedMemory,
+            logs: [`${timePassage} Chose: ${choice.text}`, ...nextState.logs].slice(0, 20),
+          },
           { type: 'RESOLVE_DATE_EVENT', payload: { finalVibe: nextVibe, logText: `Completed ${dateTemplate.title}`, dateOutcome: nextDateEvent.dateOutcome } }
         );
       }
 
       return {
-        ...state,
+        ...nextState,
         activeDateEvent: nextDateEvent,
-        relationshipMemory: updatedMemory
+        relationshipMemory: updatedMemory,
+        logs: [`${timePassage} Chose: ${choice.text}`, ...nextState.logs].slice(0, 20),
       };
     }
 
@@ -408,6 +428,7 @@ export const socialReducer = (state, action) => {
       const compatibilityBand = getCompatibilityBand(compatibilityScore);
 
       let nextState = simulateTicks(state, 3); // Time spent on date
+      const timePassage = describeTimePassage(state.time, nextState.time, `wrapped up the date with ${npc.name}`);
 
       const currentMatch = nextState.matches[npcId] || { met: true, relationship: 10, chemistry: 10, dateCount: 0, storyTier: 0 };
       
@@ -466,7 +487,7 @@ export const socialReducer = (state, action) => {
       const repairText = dateOutcome.repairScene
         ? ` A repair opportunity opened: ${dateOutcome.repairScene}.`
         : '';
-      const logMsg = `Date Over: ${logText}${repairText} (Rel: ${newRel}/100, Chem: ${newChem}/100, Mood ${moodIncrease >= 0 ? '+' : ''}${moodIncrease})`;
+      const logMsg = `${timePassage} Date over: ${logText}${repairText} (Rel: ${newRel}/100, Chem: ${newChem}/100, Mood ${moodIncrease >= 0 ? '+' : ''}${moodIncrease})`;
       const compatibilityLog = `You noticed ${npc.name}'s deeper patterns over time. (${compatibilityBand} long-term fit)`;
 
       let stateToReturn = {
@@ -556,6 +577,7 @@ export const socialReducer = (state, action) => {
       const storyTier = currentMatch.storyTier || 0;
       
       let nextState = simulateTicks(state, 4); // Takes time to do story event
+      const timePassage = describeTimePassage(state.time, nextState.time, `spent time on ${npc.name}'s story`);
 
       if (success) {
         // Unlock next tier and boost relationship
@@ -565,12 +587,12 @@ export const socialReducer = (state, action) => {
         const isFirstNight = storyTier === 3; // 100 relationship milestone
 
         let finalNeeds = { ...nextState.needs };
-        let logMsg = `You successfully completed ${npc.name}'s story event! Relationship Cap increased to ${nextTier * 25 + 25}.`;
+        let logMsg = `${timePassage} You successfully completed ${npc.name}'s story event! Relationship Cap increased to ${nextTier * 25 + 25}.`;
 
         if (isFirstNight) {
           finalNeeds.mood = 100;
           finalNeeds.energy = 100;
-          logMsg = `You experienced an unforgettable First Night with ${npc.name}. You feel a lasting Afterglow! (+100 Mood, +100 Energy)`;
+          logMsg = `${timePassage} You experienced an unforgettable First Night with ${npc.name}. You feel a lasting Afterglow! (+100 Mood, +100 Energy)`;
         }
         
         return {
@@ -604,7 +626,7 @@ export const socialReducer = (state, action) => {
               relationship: newRel
             }
           },
-          logs: [`You failed ${npc.name}'s story event. Try again tomorrow.`, ...nextState.logs].slice(0, 20)
+          logs: [`${timePassage} You failed ${npc.name}'s story event. Try again tomorrow.`, ...nextState.logs].slice(0, 20)
         };
       }
     }
@@ -622,37 +644,39 @@ export const socialReducer = (state, action) => {
       const fitLabel = getCompatibilityBand(score);
       const moveInBonus = fitLabel === 'strong' ? 5 : fitLabel === 'fragile' ? -5 : 0;
       const adjustedRelationship = applyRelationshipCap(matchData.relationship || 10, moveInBonus, matchData.storyTier || 0, state.stats);
-      const logMsg = `🏠 ${npc.name.toUpperCase()} moved in with you! (${fitLabel} cohab fit)`;
+      const nextState = simulateTicks(state, 12);
+      const timePassage = describeTimePassage(state.time, nextState.time, `helped ${npc.name} move in`);
+      const logMsg = `${timePassage} ${npc.name.toUpperCase()} moved in with you! (${fitLabel} cohab fit)`;
       return {
-        ...state,
-        relationshipMemory: updateRelationshipMemory(state, npcId, {
+        ...nextState,
+        relationshipMemory: updateRelationshipMemory(nextState, npcId, {
           importantMoment: 'cohabitation_step',
           promises: { share_home_routine: 'pending' },
-          lastMeaningfulInteractionDay: state.time.day
+          lastMeaningfulInteractionDay: nextState.time.day
         }),
         living: {
-          ...state.living,
+          ...nextState.living,
           roommateId: npcId,
           homeLog: [
             `${npc.name} moved in and started sharing home routines.`,
-            ...(state.living.homeLog || [])
+            ...(nextState.living.homeLog || [])
           ].slice(0, 10),
           availableHomeActivities: [
             ...new Set([
-              ...(state.living.availableHomeActivities || []),
+              ...(nextState.living.availableHomeActivities || []),
               'decompress_after_work',
               'decorate_together'
             ])
           ]
         },
         matches: {
-          ...state.matches,
+          ...nextState.matches,
           [npcId]: {
             ...matchData,
             relationship: adjustedRelationship
           }
         },
-        logs: [logMsg, ...state.logs].slice(0, 20)
+        logs: [logMsg, ...nextState.logs].slice(0, 20)
       };
     }
 
@@ -670,40 +694,44 @@ export const socialReducer = (state, action) => {
       const memoryReadiness = Math.min(10, countRelationshipMemorySignals(memory) * 2);
       const readiness = (matchData.relationship || 0) + (score * 0.4) + memoryReadiness;
       if (readiness < 85) {
+        const nextState = simulateTicks(state, 2);
+        const timePassage = describeTimePassage(state.time, nextState.time, `talked with ${npc.name} about marriage`);
         return {
-          ...state,
-          logs: [`💔 ${npc.name.toUpperCase()} asked for more time before marriage. Build deeper long-term fit first.`, ...state.logs].slice(0, 20)
+          ...nextState,
+          logs: [`${timePassage} ${npc.name.toUpperCase()} asked for more time before marriage. Build deeper long-term fit first.`, ...nextState.logs].slice(0, 20)
         };
       }
-      const logMsg = `💍 YOU PROPOSED TO ${npc.name.toUpperCase()} AND THEY SAID YES! Marriage event triggered.`;
+      const nextState = simulateTicks(state, 2);
+      const timePassage = describeTimePassage(state.time, nextState.time, `proposed to ${npc.name}`);
+      const logMsg = `${timePassage} YOU PROPOSED TO ${npc.name.toUpperCase()} AND THEY SAID YES! Marriage event triggered.`;
       return {
-        ...state,
+        ...nextState,
         gamePhase: 'marriage',
-        relationshipMemory: updateRelationshipMemory(state, npcId, {
+        relationshipMemory: updateRelationshipMemory(nextState, npcId, {
           importantMoment: 'proposal_accepted',
           promises: { marriage_commitment: 'pending' },
-          lastMeaningfulInteractionDay: state.time.day
+          lastMeaningfulInteractionDay: nextState.time.day
         }),
         family: {
-          ...state.family,
+          ...nextState.family,
           spouseId: npcId,
           spouseName: npc.name,
         },
         living: {
-          ...state.living,
+          ...nextState.living,
           homeLog: [
             `${npc.name} began planning married life in your shared home.`,
-            ...(state.living.homeLog || [])
+            ...(nextState.living.homeLog || [])
           ].slice(0, 10),
           availableHomeActivities: [
             ...new Set([
-              ...(state.living.availableHomeActivities || []),
+              ...(nextState.living.availableHomeActivities || []),
               'host_dinner',
               'help_with_personal_project'
             ])
           ]
         },
-        logs: [logMsg, ...state.logs].slice(0, 20)
+        logs: [logMsg, ...nextState.logs].slice(0, 20)
       };
     }
 
@@ -761,22 +789,24 @@ export const socialReducer = (state, action) => {
         parentLog = `Married at the registry office! Simple and sweet.`;
       }
 
-      const newMoney = Math.max(0, state.stats.money - fee);
-      const newMood = Math.min(100, state.needs.mood + moodBonus);
+      const nextState = simulateTicks(state, 24);
+      const timePassage = describeTimePassage(state.time, nextState.time, 'held the wedding');
+      const newMoney = Math.max(0, nextState.stats.money - fee);
+      const newMood = Math.min(100, nextState.needs.mood + moodBonus);
 
       return {
-        ...state,
+        ...nextState,
         gamePhase: 'parenting',
         stats: {
-          ...state.stats,
+          ...nextState.stats,
           money: newMoney,
         },
         needs: {
-          ...state.needs,
+          ...nextState.needs,
           mood: newMood,
         },
         family: {
-          ...state.family,
+          ...nextState.family,
           married: true,
           childName: childName || 'Alex Jr',
         },
@@ -785,55 +815,59 @@ export const socialReducer = (state, action) => {
           stress: 0,
           heirStats: initialHeirStats,
         },
-        logs: [parentLog, ...state.logs].slice(0, 20)
+        logs: [`${timePassage} ${parentLog}`, ...nextState.logs].slice(0, 20)
       };
     }
 
     case 'SELECT_PARENTING_CHOICE': {
       const { cost, statGains, stressIncrease } = action.payload;
-      const newMoney = Math.max(0, state.stats.money - cost);
+      const nextState = simulateTicks(state, 6);
+      const timePassage = describeTimePassage(state.time, nextState.time, "made a parenting choice");
+      const newMoney = Math.max(0, nextState.stats.money - cost);
       
-      const newHeirStats = { ...state.parentingGame.heirStats };
+      const newHeirStats = { ...nextState.parentingGame.heirStats };
       Object.entries(statGains).forEach(([statKey, value]) => {
         if (newHeirStats[statKey] !== undefined) {
           newHeirStats[statKey] = Math.min(100, newHeirStats[statKey] + value);
         }
       });
 
-      const newStress = Math.min(100, (state.parentingGame.stress || 0) + (stressIncrease || 20));
+      const newStress = Math.min(100, (nextState.parentingGame.stress || 0) + (stressIncrease || 20));
 
       return {
-        ...state,
+        ...nextState,
         stats: {
-          ...state.stats,
+          ...nextState.stats,
           money: newMoney,
         },
         parentingGame: {
-          ...state.parentingGame,
-          currentStep: state.parentingGame.currentStep + 1,
+          ...nextState.parentingGame,
+          currentStep: nextState.parentingGame.currentStep + 1,
           heirStats: newHeirStats,
           stress: newStress
         },
-        logs: [`Parenting: Made choice for child's development. Child Stress is now ${newStress}%.`, ...state.logs].slice(0, 20)
+        logs: [`${timePassage} Parenting: made choice for child's development. Child Stress is now ${newStress}%.`, ...nextState.logs].slice(0, 20)
       };
     }
 
     case 'REDUCE_CHILD_STRESS': {
       const { energyCost, stressReduction } = action.payload;
-      const newEnergy = Math.max(0, state.needs.energy - energyCost);
-      const newStress = Math.max(0, state.parentingGame.stress - stressReduction);
+      const nextState = simulateTicks(state, 3);
+      const timePassage = describeTimePassage(state.time, nextState.time, 'spent time with your child');
+      const newEnergy = Math.max(0, nextState.needs.energy - energyCost);
+      const newStress = Math.max(0, nextState.parentingGame.stress - stressReduction);
 
       return {
-        ...state,
+        ...nextState,
         needs: {
-          ...state.needs,
+          ...nextState.needs,
           energy: newEnergy
         },
         parentingGame: {
-          ...state.parentingGame,
+          ...nextState.parentingGame,
           stress: newStress
         },
-        logs: [`Spent time with child to reduce stress. Stress is now ${newStress}%.`, ...state.logs].slice(0, 20)
+        logs: [`${timePassage} Stress is now ${newStress}%.`, ...nextState.logs].slice(0, 20)
       };
     }
 
@@ -965,46 +999,54 @@ export const socialReducer = (state, action) => {
     case 'SUBSCRIBE_PREMIUM': {
       const fee = 15;
       if (state.stats.money < fee) {
+        const nextState = simulateTicks(state, 1);
+        const timePassage = describeTimePassage(state.time, nextState.time, 'checked LinkUp Gold');
         return {
-          ...state,
-          logs: ["LinkUp Gold subscription failed: Insufficient funds. ($15 required)", ...state.logs].slice(0, 20)
+          ...nextState,
+          logs: [`${timePassage} LinkUp Gold subscription failed: insufficient funds. ($15 required)`, ...nextState.logs].slice(0, 20)
         };
       }
+      const nextState = simulateTicks(state, 1);
+      const timePassage = describeTimePassage(state.time, nextState.time, 'subscribed to LinkUp Gold');
       return {
-        ...state,
+        ...nextState,
         stats: {
-          ...state.stats,
-          money: state.stats.money - fee
+          ...nextState.stats,
+          money: nextState.stats.money - fee
         },
         swipePremium: {
-          ...state.swipePremium,
+          ...nextState.swipePremium,
           active: true
         },
-        logs: ["✨ Subscribed to LinkUp Gold! $15 deducted. Welcome to premium services!", ...state.logs].slice(0, 20)
+        logs: [`${timePassage} $15 deducted. Welcome to premium services!`, ...nextState.logs].slice(0, 20)
       };
     }
 
     case 'CANCEL_PREMIUM': {
+      const nextState = simulateTicks(state, 1);
+      const timePassage = describeTimePassage(state.time, nextState.time, 'cancelled LinkUp Gold');
       return {
-        ...state,
+        ...nextState,
         swipePremium: {
-          ...state.swipePremium,
+          ...nextState.swipePremium,
           active: false
         },
-        logs: ["Cancelled LinkUp Gold subscription. You will retain premium until weekly billing cycle.", ...state.logs].slice(0, 20)
+        logs: [`${timePassage} You will retain premium until weekly billing cycle.`, ...nextState.logs].slice(0, 20)
       };
     }
 
     case 'UPDATE_SWIPE_PREFERENCES': {
       const { preferredStat, sexPreference } = action.payload;
+      const nextState = simulateTicks(state, 1);
+      const timePassage = describeTimePassage(state.time, nextState.time, 'updated dating preferences');
       return {
-        ...state,
+        ...nextState,
         swipePreferences: {
-          ...state.swipePreferences,
+          ...nextState.swipePreferences,
           ...(preferredStat !== undefined && { preferredStat }),
           ...(sexPreference !== undefined && { sexPreference })
         },
-        logs: [`Updated dating preferences.`, ...state.logs].slice(0, 20)
+        logs: [`${timePassage}`, ...nextState.logs].slice(0, 20)
       };
     }
     case 'DISCOVER_NPC_AT_LOCATION': {
@@ -1017,10 +1059,13 @@ export const socialReducer = (state, action) => {
         return state; // Already met
       }
 
+      const nextState = simulateTicks(state, 1);
+      const timePassage = describeTimePassage(state.time, nextState.time, `met ${npc.name} around ${locationKey}`);
+
       return {
-        ...state,
+        ...nextState,
         matches: {
-          ...state.matches,
+          ...nextState.matches,
           [npcId]: {
             ...currentMatch,
             met: true,
@@ -1032,7 +1077,7 @@ export const socialReducer = (state, action) => {
             relationshipStage: 'acquaintance',
           }
         },
-        logs: [`You met ${npc.name} at the ${locationKey}!`, ...state.logs].slice(0, 20)
+        logs: [`${timePassage}`, ...nextState.logs].slice(0, 20)
       };
     }
 
@@ -1055,6 +1100,7 @@ export const socialReducer = (state, action) => {
       const npcId = encounter.npcId;
 
       let nextState = simulateTicks(state, 2); // Takes 20 minutes
+      const timePassage = describeTimePassage(state.time, nextState.time, `handled an encounter at ${encounter.location}`);
 
       let relGain = choice.relationship || 0;
       let chemChange = choice.chemistry || 0;
@@ -1089,7 +1135,7 @@ export const socialReducer = (state, action) => {
           ...nextState.needs,
           mood: newMood
         },
-        logs: [`Encounter finished: ${choice.text}`, ...nextState.logs].slice(0, 20)
+        logs: [`${timePassage} Encounter finished: ${choice.text}`, ...nextState.logs].slice(0, 20)
       };
 
       return appendRelationshipEvent(stateToReturn, npcId, {
@@ -1107,14 +1153,17 @@ export const socialReducer = (state, action) => {
       const npc = NPCS.find((n) => n.id === npcId);
       if (!npc) return state;
 
+      const nextState = simulateTicks(state, 1);
+      const timePassage = describeTimePassage(state.time, nextState.time, `used instant match with ${npc.name}`);
+
       if (!state.features?.instantMatchRebalance) {
         // Legacy behavior
         const memoryContext = createEmptyMemory();
-        memoryContext.comfortKnowns.push('preferred_chat_hours');
+        memoryContext.comfortKnown.push('preferred_chat_hours');
         return {
-          ...state,
+          ...nextState,
           matches: {
-            ...state.matches,
+            ...nextState.matches,
             [npcId]: {
               met: true,
               relationship: 35,
@@ -1124,10 +1173,10 @@ export const socialReducer = (state, action) => {
             },
           },
           relationshipMemory: {
-            ...state.relationshipMemory,
+            ...nextState.relationshipMemory,
             [npcId]: memoryContext,
           },
-          logs: [`You matched with ${npc.name} instantly! (Premium)`, ...state.logs].slice(0, 20),
+          logs: [`${timePassage} Premium match confirmed.`, ...nextState.logs].slice(0, 20),
         };
       }
 
@@ -1136,9 +1185,9 @@ export const socialReducer = (state, action) => {
       if (currentMatch && currentMatch.met) return state;
 
       let stateToReturn = {
-        ...state,
+        ...nextState,
         matches: {
-          ...state.matches,
+          ...nextState.matches,
           [npcId]: {
             ...currentMatch,
             met: true,
@@ -1150,7 +1199,7 @@ export const socialReducer = (state, action) => {
             relationshipStage: 'matched',
           },
         },
-        logs: [`You matched with ${npc.name} instantly! (Premium)`, ...state.logs].slice(0, 20),
+        logs: [`${timePassage} Premium match confirmed.`, ...nextState.logs].slice(0, 20),
       };
       
       return appendRelationshipEvent(stateToReturn, npcId, {
@@ -1179,36 +1228,39 @@ export const socialReducer = (state, action) => {
       const energyCost = choice.energyCost || 0;
       const logText = success ? choice.successText : choice.failText;
 
-      const currentMatch = state.matches[npcId] || { met: true, relationship: 10, chemistry: 10, dateCount: 0 };
+      const nextState = simulateTicks(state, 2);
+      const timePassage = describeTimePassage(state.time, nextState.time, 'handled an urgent message');
+
+      const currentMatch = nextState.matches[npcId] || { met: true, relationship: 10, chemistry: 10, dateCount: 0 };
       const newRel = Math.min(100, Math.max(0, currentMatch.relationship + relGain));
       const newChem = Math.min(100, Math.max(0, (currentMatch.chemistry || 10) + chemGain));
       
       const newStats = {
-        ...state.stats,
-        money: Math.max(0, state.stats.money - moneyCost)
+        ...nextState.stats,
+        money: Math.max(0, nextState.stats.money - moneyCost)
       };
-      const newEnergy = Math.max(0, state.needs.energy - energyCost);
+      const newEnergy = Math.max(0, nextState.needs.energy - energyCost);
 
       const logMsg = `Alert Resolved: ${logText} (Rel: ${newRel}/100, Chem: ${newChem}/100)`;
 
       return {
-        ...state,
+        ...nextState,
         gamePhase: 'living',
         activeNpcAlert: null,
         stats: newStats,
         needs: {
-          ...state.needs,
+          ...nextState.needs,
           energy: newEnergy
         },
         matches: {
-          ...state.matches,
+          ...nextState.matches,
           [npcId]: {
             ...currentMatch,
             relationship: newRel,
             chemistry: newChem
           }
         },
-        logs: [logMsg, ...state.logs].slice(0, 20)
+        logs: [`${timePassage} ${logMsg}`, ...nextState.logs].slice(0, 20)
       };
     }
 
@@ -1226,25 +1278,18 @@ export const socialReducer = (state, action) => {
       if (!currentMatch) return state;
 
       let nextState = simulateTicks(state, 2); // Taking time to repair
+      const timePassage = describeTimePassage(state.time, nextState.time, `tried to repair things with ${npcId}`);
       
       const success = Math.random() > 0.3; // Placeholder logic for now
-      
-      let newRel = currentMatch.relationship;
-      let newChem = currentMatch.chemistry;
-      let logMsg = "";
-      let newConflictId = currentMatch.activeConflictId;
-      let newRepairScene = currentMatch.pendingRepairScene;
-
-      if (success) {
-        newRel = applyRelationshipCap(currentMatch.relationship, 10, currentMatch.storyTier, nextState.stats);
-        newChem = Math.min(100, currentMatch.chemistry + 5);
-        logMsg = `Successfully repaired relationship with ${npcId} using ${repairActionId}.`;
-        newConflictId = null;
-        newRepairScene = null;
-      } else {
-        newRel = Math.max(0, currentMatch.relationship - 5);
-        logMsg = `Repair attempt failed with ${npcId}. Needs more time or a different approach.`;
-      }
+      const newRel = success
+        ? applyRelationshipCap(currentMatch.relationship, 10, currentMatch.storyTier, nextState.stats)
+        : Math.max(0, currentMatch.relationship - 5);
+      const newChem = success ? Math.min(100, currentMatch.chemistry + 5) : currentMatch.chemistry;
+      const logMsg = success
+        ? `Successfully repaired relationship with ${npcId} using ${repairActionId}.`
+        : `Repair attempt failed with ${npcId}. Needs more time or a different approach.`;
+      const newConflictId = success ? null : currentMatch.activeConflictId;
+      const newRepairScene = success ? null : currentMatch.pendingRepairScene;
 
       return {
         ...nextState,
@@ -1258,7 +1303,7 @@ export const socialReducer = (state, action) => {
             pendingRepairScene: newRepairScene
           }
         },
-        logs: [logMsg, ...nextState.logs].slice(0, 20)
+        logs: [`${timePassage} ${logMsg}`, ...nextState.logs].slice(0, 20)
       };
     }
 

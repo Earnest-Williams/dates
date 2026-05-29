@@ -5,6 +5,7 @@ import { calculateStorageFee } from '../../sim/economy.js';
 import { NPCS } from '../../data/npcs.js';
 import { NPC_ALERTS, JEALOUSY_CONFRONTATION } from '../../data/npcAlerts.js';
 import { applyMarketNews } from '../../sim/markets.js';
+import { getShiftForDay, getAttendanceRecord, withAttendanceRecord } from '../../sim/workSchedule.js';
 
 export const simulateTicks = (state, ticks) => {
   const { time: newTime, daysCrossed } = incrementTime(state.time, ticks);
@@ -28,6 +29,33 @@ export const simulateTicks = (state, ticks) => {
   }
 
   daysCrossed.forEach(dayNum => {
+    const dayClosed = dayNum - 1;
+    const shift = getShiftForDay(state.career, dayClosed);
+    if (shift && state.career?.activeTrack) {
+      const alreadyMarked = getAttendanceRecord(state.career, dayClosed);
+      if (!alreadyMarked) {
+        const updatedCareer = withAttendanceRecord(state.career, dayClosed, 'missed');
+        state.career = updatedCareer;
+        tempLogs.push(`[Day ${dayClosed}] You skipped your ${shift.startHour}:00-${shift.endHour}:00 shift at ${state.career.jobTitle || 'work'}.`);
+        if (updatedCareer.attendance.consecutiveMisses >= 3) {
+          tempLogs.push(`[Day ${dayClosed}] You were fired after repeated no-shows.`);
+          state.career = {
+            ...updatedCareer,
+            activeTrack: null,
+            employerId: null,
+            jobTitle: null,
+            currentProject: null,
+            projectProgress: 0,
+            supervisorNpcId: null,
+            supervisorName: null,
+            supervisorRole: null,
+            coworkerNpcIds: [],
+            workScheduleTemplate: [],
+          };
+        }
+      }
+    }
+
     // 1. Weekly Rent, Storage, Subscription and Interest
     if (dayNum % 7 === 0) {
       // Interest payment and Loan Interest
@@ -268,7 +296,8 @@ export const simulateTicks = (state, ticks) => {
     storage: currentStorage,
     assetPrices: currentPrices,
     priceHistories: currentHistories,
-    logs: newLogs
+    logs: newLogs,
+    career: state.career,
   };
 
   // 4. Alert & Jealousy check

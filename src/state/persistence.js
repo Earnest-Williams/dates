@@ -1,5 +1,20 @@
 const SAVE_KEY = 'dates-save-v1';
-const SAVE_VERSION = 2;
+const SAVE_VERSION = 3;
+
+const ensureCareerEmploymentFields = (state) => {
+  state.career = state.career || {};
+  state.career.supervisorNpcId = state.career.supervisorNpcId || null;
+  state.career.supervisorName = state.career.supervisorName || null;
+  state.career.supervisorRole = state.career.supervisorRole || null;
+  state.career.coworkerNpcIds = state.career.coworkerNpcIds || [];
+  state.career.workScheduleTemplate = state.career.workScheduleTemplate || [];
+  state.career.attendance = state.career.attendance || {
+    records: {},
+    consecutiveMisses: 0,
+    totalMissed: 0,
+    totalLate: 0,
+  };
+};
 
 const getStorage = () => {
   try {
@@ -94,7 +109,22 @@ export const runSaveMigration = (payload) => {
     migrated = true;
   }
 
+  if (payload.version === 2) {
+    migratedState.calendar = migratedState.calendar || {
+      lastEventId: 0,
+      events: [],
+    };
+    ensureCareerEmploymentFields(migratedState);
+    payload.version = 3;
+    migrated = true;
+  }
+
   if (payload.version === SAVE_VERSION) {
+    migratedState.calendar = migratedState.calendar || {
+      lastEventId: 0,
+      events: [],
+    };
+    ensureCareerEmploymentFields(migratedState);
     return { ok: true, gameState: migratedState, migrated };
   }
 

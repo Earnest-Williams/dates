@@ -2,6 +2,8 @@ import { ITEMS } from '../../data/items.js';
 import { HOUSING_TIERS } from '../../data/housing.js';
 import { ASSETS } from '../../data/investments.js';
 import { calculateTransactionFriction } from '../../sim/markets.js';
+import { describeTimePassage } from '../../sim/time.js';
+import { simulateTicks } from './time.js';
 
 export const inventoryReducer = (state, action) => {
   switch (action.type) {
@@ -9,36 +11,40 @@ export const inventoryReducer = (state, action) => {
       const currentHousingTier = state.stats.housingTier;
       const nextTier = currentHousingTier + 1;
       const moveInCost = HOUSING_TIERS[nextTier].rent * 2;
+      const nextState = simulateTicks(state, 36);
+      const timePassage = describeTimePassage(state.time, nextState.time, `moved into ${HOUSING_TIERS[nextTier].name}`);
       return {
-        ...state,
+        ...nextState,
         stats: {
-          ...state.stats,
-          money: Math.max(0, state.stats.money - moveInCost),
+          ...nextState.stats,
+          money: Math.max(0, nextState.stats.money - moveInCost),
           housingTier: nextTier
         },
         living: {
-          ...state.living,
-          rentWaivedUntilDay: nextTier === state.living.rentWaivedHousingTier
-            ? state.living.rentWaivedUntilDay
+          ...nextState.living,
+          rentWaivedUntilDay: nextTier === nextState.living.rentWaivedHousingTier
+            ? nextState.living.rentWaivedUntilDay
             : 0,
         },
-        logs: [`Moved into a ${HOUSING_TIERS[nextTier].name}! (-$${moveInCost})`, ...state.logs].slice(0, 20)
+        logs: [`${timePassage} (-$${moveInCost})`, ...nextState.logs].slice(0, 20)
       };
     }
 
     case 'BUY_ITEM': {
       const { itemKey } = action.payload;
       const item = ITEMS[itemKey];
+      const nextState = simulateTicks(state, 3);
+      const timePassage = describeTimePassage(state.time, nextState.time, `shopped for ${item.name}`);
       
-      const negotiationLevel = state.stats.negotiation || 10;
+      const negotiationLevel = nextState.stats.negotiation || 10;
       const discountPercent = Math.min(0.20, negotiationLevel * 0.002);
       const finalCost = Math.floor(item.cost * (1 - discountPercent));
 
-      const updatedStats = { ...state.stats, money: Math.max(0, state.stats.money - finalCost) };
-      const updatedInventory = { ...state.inventory };
-      const updatedProperties = { ...state.properties };
-      let updatedPlaced = [...(state.placedFurniture || [])];
-      let updatedStorage = [...(state.storage || [])];
+      const updatedStats = { ...nextState.stats, money: Math.max(0, nextState.stats.money - finalCost) };
+      const updatedInventory = { ...nextState.inventory };
+      const updatedProperties = { ...nextState.properties };
+      let updatedPlaced = [...(nextState.placedFurniture || [])];
+      let updatedStorage = [...(nextState.storage || [])];
       let logMsg;
 
       const discountSuffix = discountPercent > 0 ? ` (includes ${Math.round(discountPercent * 100)}% negotiation discount)` : '';
@@ -50,7 +56,7 @@ export const inventoryReducer = (state, action) => {
         updatedStats[item.effect.stat] = Math.min(100, updatedStats[item.effect.stat] + item.effect.value);
         logMsg = `Purchased ${item.name} (-$${finalCost}${discountSuffix}).`;
       } else if (item.type === 'furniture') {
-        const currentTier = state.stats.housingTier;
+        const currentTier = nextState.stats.housingTier;
         const maxSlots = HOUSING_TIERS[currentTier].slots;
         let occupiedSlots = updatedPlaced.reduce((sum, id) => sum + (ITEMS[id]?.slots || 0), 0);
 
@@ -83,31 +89,33 @@ export const inventoryReducer = (state, action) => {
       }
 
       return {
-        ...state,
+        ...nextState,
         stats: updatedStats,
         inventory: updatedInventory,
         properties: updatedProperties,
         placedFurniture: updatedPlaced,
         storage: updatedStorage,
-        logs: [logMsg, ...state.logs].slice(0, 20)
+        logs: [`${timePassage} ${logMsg}`, ...nextState.logs].slice(0, 20)
       };
     }
 
     case 'PLACE_FURNITURE': {
       const { itemKey } = action.payload;
       const item = ITEMS[itemKey];
+      const nextState = simulateTicks(state, 2);
+      const timePassage = describeTimePassage(state.time, nextState.time, `placed ${item.name}`);
 
       const isBed = item.category === 'bed';
       let bedToReplace = null;
       if (isBed) {
-        const placedBed = (state.placedFurniture || []).find(id => ITEMS[id]?.category === 'bed');
+        const placedBed = (nextState.placedFurniture || []).find(id => ITEMS[id]?.category === 'bed');
         if (placedBed) {
           bedToReplace = placedBed;
         }
       }
 
-      let updatedStorage = [...state.storage];
-      let updatedPlaced = [...(state.placedFurniture || [])];
+      let updatedStorage = [...nextState.storage];
+      let updatedPlaced = [...(nextState.placedFurniture || [])];
       let logMsg;
 
       const index = updatedStorage.indexOf(itemKey);
@@ -125,43 +133,47 @@ export const inventoryReducer = (state, action) => {
       updatedPlaced.push(itemKey);
 
       return {
-        ...state,
+        ...nextState,
         storage: updatedStorage,
         placedFurniture: updatedPlaced,
-        logs: [logMsg, ...state.logs].slice(0, 20)
+        logs: [`${timePassage} ${logMsg}`, ...nextState.logs].slice(0, 20)
       };
     }
 
     case 'STORE_FURNITURE': {
       const { itemKey } = action.payload;
       const item = ITEMS[itemKey];
+      const nextState = simulateTicks(state, 1);
+      const timePassage = describeTimePassage(state.time, nextState.time, `moved ${item.name} to storage`);
 
-      const updatedPlaced = (state.placedFurniture || []).filter(id => id !== itemKey);
-      const updatedStorage = [...(state.storage || []), itemKey];
+      const updatedPlaced = (nextState.placedFurniture || []).filter(id => id !== itemKey);
+      const updatedStorage = [...(nextState.storage || []), itemKey];
       const logMsg = `Moved ${item.name} to storage.`;
 
       return {
-        ...state,
+        ...nextState,
         placedFurniture: updatedPlaced,
         storage: updatedStorage,
-        logs: [logMsg, ...state.logs].slice(0, 20)
+        logs: [`${timePassage} ${logMsg}`, ...nextState.logs].slice(0, 20)
       };
     }
 
     case 'TAKE_SUPPLEMENTS': {
-      const updatedInventory = { ...state.inventory };
+      const nextState = simulateTicks(state, 1);
+      const timePassage = describeTimePassage(state.time, nextState.time, 'took premium supplements');
+      const updatedInventory = { ...nextState.inventory };
       updatedInventory.supplements -= 1;
       if (updatedInventory.supplements === 0) delete updatedInventory.supplements;
 
       return {
-        ...state,
+        ...nextState,
         inventory: updatedInventory,
         needs: {
-          ...state.needs,
-          health: Math.min(100, (state.needs.health || 0) + 20),
-          energy: Math.min(100, state.needs.energy + 10)
+          ...nextState.needs,
+          health: Math.min(100, (nextState.needs.health || 0) + 20),
+          energy: Math.min(100, nextState.needs.energy + 10)
         },
-        logs: ["Took premium supplements. (+20 Health, +10 Energy)", ...state.logs].slice(0, 20)
+        logs: [`${timePassage} (+20 Health, +10 Energy)`, ...nextState.logs].slice(0, 20)
       };
     }
 
@@ -180,18 +192,20 @@ export const inventoryReducer = (state, action) => {
       const current = state.portfolio[assetId] || { quantity: 0, avgPrice: 0 };
       const newQty = current.quantity + quantity;
       const newAvg = ((current.quantity * current.avgPrice) + cost) / newQty;
+      const nextState = simulateTicks(state, 1);
+      const timePassage = describeTimePassage(state.time, nextState.time, `bought ${ASSETS[assetId].ticker}`);
 
       return {
-        ...state,
+        ...nextState,
         stats: {
-          ...state.stats,
-          money: Math.max(0, state.stats.money - cost)
+          ...nextState.stats,
+          money: Math.max(0, nextState.stats.money - cost)
         },
         portfolio: {
-          ...state.portfolio,
+          ...nextState.portfolio,
           [assetId]: { quantity: newQty, avgPrice: newAvg }
         },
-        logs: [`Bought ${quantity} ${ASSETS[assetId].ticker} for $${cost.toFixed(2)} (Avg: $${newAvg.toFixed(2)}).`, ...state.logs].slice(0, 20)
+        logs: [`${timePassage} Bought ${quantity} ${ASSETS[assetId].ticker} for $${cost.toFixed(2)} (Avg: $${newAvg.toFixed(2)}).`, ...nextState.logs].slice(0, 20)
       };
     }
 
@@ -212,18 +226,20 @@ export const inventoryReducer = (state, action) => {
       const profit = revenue - costBasis;
       const newQty = current.quantity - quantity;
       const newAvg = newQty === 0 ? 0 : current.avgPrice;
+      const nextState = simulateTicks(state, 1);
+      const timePassage = describeTimePassage(state.time, nextState.time, `sold ${ASSETS[assetId].ticker}`);
 
       return {
-        ...state,
+        ...nextState,
         stats: {
-          ...state.stats,
-          money: state.stats.money + revenue
+          ...nextState.stats,
+          money: nextState.stats.money + revenue
         },
         portfolio: {
-          ...state.portfolio,
+          ...nextState.portfolio,
           [assetId]: { quantity: newQty, avgPrice: newAvg }
         },
-        logs: [`Sold ${quantity} ${ASSETS[assetId].ticker} for $${revenue.toFixed(2)}. Profit: $${profit.toFixed(2)}.`, ...state.logs].slice(0, 20)
+        logs: [`${timePassage} Sold ${quantity} ${ASSETS[assetId].ticker} for $${revenue.toFixed(2)}. Profit: $${profit.toFixed(2)}.`, ...nextState.logs].slice(0, 20)
       };
     }
 
@@ -248,15 +264,17 @@ export const inventoryReducer = (state, action) => {
         logMsg = `Paid $${newMoney} to the IRS. You still owe $${newTaxOwed}.`;
         newMoney = 0;
       }
+      const nextState = simulateTicks(state, 2);
+      const timePassage = describeTimePassage(state.time, nextState.time, 'handled tax payments');
 
       return {
-        ...state,
+        ...nextState,
         stats: {
-          ...state.stats,
+          ...nextState.stats,
           money: newMoney,
           taxOwed: newTaxOwed
         },
-        logs: [logMsg, ...state.logs].slice(0, 20)
+        logs: [`${timePassage} ${logMsg}`, ...nextState.logs].slice(0, 20)
       };
     }
 

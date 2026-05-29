@@ -130,7 +130,7 @@ function AppContent() {
       )}
 
       {activeView === 'career' && (
-        <div className="app-overlay-container animate-fade-in">
+        <div className="app-workspace-container animate-fade-in">
           <CareerApp onClose={() => setActiveView('dashboard')} />
         </div>
       )}

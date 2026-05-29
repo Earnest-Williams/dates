@@ -1,4 +1,5 @@
 import { simulateTicks } from './time.js';
+import { describeTimePassage } from '../../sim/time.js';
 
 export const socialMediaReducer = (state, action) => {
   switch (action.type) {
@@ -7,6 +8,7 @@ export const socialMediaReducer = (state, action) => {
       
       // Post takes 1 hour (4 ticks)
       let nextState = simulateTicks(state, 4);
+      const timePassage = describeTimePassage(state.time, nextState.time, `posted ${contentType} on Simstagram`);
 
       // Consume energy
       nextState.needs.energy = Math.max(0, nextState.needs.energy - energyCost);
@@ -74,8 +76,8 @@ export const socialMediaReducer = (state, action) => {
       }
 
       const logMsg = isViral 
-        ? `Your ${contentType} post went VIRAL! Gained ${gainedFollowers} followers.`
-        : `Posted ${contentType}. Gained ${gainedFollowers} followers.`;
+        ? `${timePassage} It went VIRAL! Gained ${gainedFollowers} followers.`
+        : `${timePassage} Gained ${gainedFollowers} followers.`;
       
       const allLogs = gainedSponsorship 
         ? [gainedSponsorship, logMsg, ...nextState.logs] 

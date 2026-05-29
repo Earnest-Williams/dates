@@ -37,6 +37,79 @@ export const CAREER_TRACKS = {
       { level: 5, title: 'Creative Director', reqPoints: 1100, salary: 500 },
       { level: 6, title: 'Chief Creative Officer', reqPoints: 1600, salary: 900 }
     ]
+  },
+  service: {
+    id: "service",
+    name: "Service & Retail",
+    description: "Work counters, shop floors, and late shifts while building people skills.",
+    levels: [
+      { level: 1, title: 'Crew Member', reqPoints: 0, salary: 35 },
+      { level: 2, title: 'Shift Lead', reqPoints: 90, salary: 70 },
+      { level: 3, title: 'Assistant Manager', reqPoints: 240, salary: 120 },
+      { level: 4, title: 'Store Manager', reqPoints: 520, salary: 220 },
+      { level: 5, title: 'Area Manager', reqPoints: 900, salary: 380 },
+      { level: 6, title: 'Operations Director', reqPoints: 1400, salary: 700 }
+    ]
+  }
+};
+
+export const CAREER_ACTIVITY_WINDOWS = {
+  projectWork: { startHour: 6, endHour: 24, requireFinish: true },
+  interview: { startHour: 9, endHour: 17 },
+};
+
+export const JOB_SEARCH_OPTIONS = {
+  job_center: {
+    id: 'job_center',
+    name: 'Visit the Job Centre',
+    description: 'Queue up, scan the notice boards, and let an adviser point you at starter roles.',
+    durationTicks: 12,
+    energyCost: 12,
+    moodCost: 4,
+    targetTrack: 'service',
+    primaryStat: 'socialIq',
+    secondaryStat: 'confidence',
+    scoreBonus: 14,
+    minimumScore: 25,
+    availableWindow: { startHour: 8, endHour: 17, requireFinish: true },
+    successLog: 'The Job Centre adviser lined up a Service & Retail interview. You got hired as a Crew Member.',
+    failLog: 'The Job Centre had leads, but nothing stuck today. You leave with a few names to try later.',
+    activityText: 'visited the Job Centre',
+  },
+  beat_pavement: {
+    id: 'beat_pavement',
+    name: 'Beat the Pavement',
+    description: 'Walk Endleigh with printed CVs and ask managers if they need anyone this week.',
+    durationTicks: 36,
+    energyCost: 20,
+    hygieneCost: 10,
+    targetTrack: 'service',
+    primaryStat: 'confidence',
+    secondaryStat: 'style',
+    scoreBonus: 10,
+    minimumScore: 28,
+    availableWindow: { startHour: 8, endHour: 18, requireFinish: true },
+    successLog: 'A tired manager liked that you showed up in person. You got hired into Service & Retail.',
+    failLog: ({ durationLabel }) => `You handed out CVs for ${durationLabel}, but every manager said to apply online.`,
+    activityText: 'beat the pavement around Endleigh',
+  },
+  job_websites: {
+    id: 'job_websites',
+    name: 'Check Job Websites',
+    description: 'Use your basic phone to trawl listings, fill forms, and send awkward first CVs.',
+    durationTicks: 8,
+    energyCost: 8,
+    moodCost: 2,
+    requiresItem: 'basic_phone',
+    targetTrack: 'tech',
+    primaryStat: 'programming',
+    secondaryStat: 'intelligence',
+    scoreBonus: 8,
+    minimumScore: 24,
+    availableWindow: { startHour: 7, endHour: 24 },
+    successLog: 'A small support desk replied to your online application. You got hired into Software Engineering.',
+    failLog: ({ durationLabel }) => `The job sites ate ${durationLabel}. You bookmarked a few listings, but no interview yet.`,
+    activityText: 'checked job websites on your basic phone',
   }
 };
 
@@ -61,6 +134,14 @@ const ALL_PROJECTS = [
   { id: 'brand_guidelines', track: 'creative', name: 'Develop Brand Guidelines', tier: 3, durationTicks: 35, requirements: { stats: { cha: 50, int: 30 } }, rewardPoints: 60 },
   { id: 'ad_campaign', track: 'creative', name: 'Direct Ad Campaign', tier: 4, durationTicks: 45, requirements: { stats: { cha: 70 } }, rewardPoints: 110 },
   { id: 'rebrand_company', track: 'creative', name: 'Full Company Rebrand', tier: 5, durationTicks: 65, requirements: { stats: { cha: 90, int: 50 } }, rewardPoints: 220 },
+
+  // Service & Retail
+  { id: 'cover_counter', track: 'service', name: 'Cover the Counter Rush', tier: 1, durationTicks: 10, requirements: { stats: { socialIq: 10 } }, rewardPoints: 12 },
+  { id: 'restock_shift', track: 'service', name: 'Restock the Shop Floor', tier: 1, durationTicks: 12, requirements: { stats: { fitness: 10 } }, rewardPoints: 12 },
+  { id: 'handle_complaints', track: 'service', name: 'Handle Customer Complaints', tier: 2, durationTicks: 20, requirements: { stats: { confidence: 20, socialIq: 20 } }, rewardPoints: 30 },
+  { id: 'train_new_hires', track: 'service', name: 'Train New Hires', tier: 3, durationTicks: 30, requirements: { stats: { socialIq: 35, empathy: 25 } }, rewardPoints: 55 },
+  { id: 'weekly_rota', track: 'service', name: 'Build the Weekly Rota', tier: 4, durationTicks: 36, requirements: { stats: { negotiation: 45, socialIq: 40 } }, rewardPoints: 90 },
+  { id: 'regional_launch', track: 'service', name: 'Open a New Regional Store', tier: 5, durationTicks: 60, requirements: { stats: { negotiation: 65, confidence: 60 } }, rewardPoints: 180 },
 ];
 
 export const getProjectsForTrackAndTier = (trackId, tier) => {

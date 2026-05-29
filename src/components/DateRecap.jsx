@@ -1,4 +1,3 @@
-import React from 'react';
 import { useGameStore } from '../state/store';
 
 const DateRecap = () => {

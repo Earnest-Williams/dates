@@ -1,104 +1,111 @@
-export const WORK_EVENTS = [
-  {
-    id: "whistleblower",
-    title: "Ethical Dilemma: Embezzlement",
-    description: "You notice an accounting discrepancy that points directly to your manager skimming company funds. What do you do?",
-    choices: [
-      {
-        text: "Report to HR (Whistleblow)",
-        statCheck: "negotiation",
-        threshold: 30,
-        successLog: "HR believed you! The manager was fired. You gained immense respect and a stress-free environment.",
-        failLog: "HR didn't believe you. You were reassigned to a worse desk and the manager is making your life hell.",
-        successRewards: { mood: 20, promotionPoints: 10, money: 500 },
-        failRewards: { mood: -30, promotionPoints: -10, energy: -20 }
-      },
-      {
-        text: "Cover for them",
-        statCheck: "corporate",
-        threshold: 20,
-        successLog: "The manager noticed you looking the other way. They rewarded you quietly, but you feel terrible.",
-        failLog: "The auditors caught the discrepancy anyway. You were implicated for not saying anything.",
-        successRewards: { money: 1000, mood: -20, promotionPoints: 5 },
-        failRewards: { money: -500, mood: -20, promotionPoints: -20 }
-      },
-      {
-        text: "Ignore it entirely",
-        statCheck: "none",
-        threshold: 0,
-        successLog: "You kept your head down. Someone else eventually reported it. Nothing changed for you.",
-        failLog: "You kept your head down. Someone else eventually reported it. Nothing changed for you.",
-        successRewards: { mood: 0 },
-        failRewards: { mood: 0 }
-      }
-    ]
+const baseChoices = {
+  steady: {
+    text: 'Handle it steadily and keep the line moving',
+    statCheck: 'socialIq',
+    threshold: 28,
+    successRewards: { promotionPoints: 8, mood: 4 },
+    failRewards: { promotionPoints: -4, mood: -6 },
   },
-  {
-    id: "burnout_crunch",
-    title: "Mandatory Crunch Time",
-    description: "Upper management has demanded weekend crunch hours to meet an impossible deadline. Everyone is exhausted.",
-    choices: [
-      {
-        text: "Push through the pain",
-        statCheck: "fitness",
-        threshold: 40,
-        successLog: "Your stamina paid off. You completed the work, impressing management.",
-        failLog: "You physically couldn't handle it and collapsed at your desk.",
-        successRewards: { promotionPoints: 15, money: 300, energy: -30 },
-        failRewards: { health: -20, energy: -50, mood: -30 }
-      },
-      {
-        text: "Organize a pushback",
-        statCheck: "charisma",
-        threshold: 50,
-        successLog: "You convinced the team to stand together. Management backed down and hired contractors.",
-        failLog: "Nobody stood with you. You looked like a slacker and were reprimanded.",
-        successRewards: { mood: 20, energy: 0, promotionPoints: 5 },
-        failRewards: { promotionPoints: -15, mood: -20 }
-      },
-      {
-        text: "Take sick leave",
-        statCheck: "none",
-        threshold: 0,
-        successLog: "You called in sick. The team suffered, but you got your rest.",
-        failLog: "You called in sick. The team suffered, but you got your rest.",
-        successRewards: { energy: 30, mood: 10, promotionPoints: -5 },
-        failRewards: { energy: 30, mood: 10, promotionPoints: -5 }
-      }
-    ]
+  escalate: {
+    text: 'Escalate to your supervisor and document everything',
+    statCheck: 'corporate',
+    threshold: 25,
+    successRewards: { promotionPoints: 6, mood: 2 },
+    failRewards: { promotionPoints: -2, mood: -4 },
   },
-  {
-    id: "office_gossip",
-    title: "Vicious Office Gossip",
-    description: "A rumor is spreading that could ruin a coworker's career, and you know it's completely false.",
-    choices: [
-      {
-        text: "Defend them publicly",
-        statCheck: "charisma",
-        threshold: 35,
-        successLog: "You shut the rumor down. The coworker owes you big time.",
-        failLog: "You tried to stop it, but got dragged into the drama yourself.",
-        successRewards: { mood: 15, promotionPoints: 10 },
-        failRewards: { mood: -15, stress: 10 }
-      },
-      {
-        text: "Join in the gossip",
-        statCheck: "corporate",
-        threshold: 30,
-        successLog: "You cleverly used the gossip to eliminate a rival for your next promotion.",
-        failLog: "It backfired. The rumor was traced back to you, hurting your reputation.",
-        successRewards: { promotionPoints: 15, mood: -10 },
-        failRewards: { promotionPoints: -20, mood: -20 }
-      },
-      {
-        text: "Stay out of it",
-        statCheck: "none",
-        threshold: 0,
-        successLog: "You put your headphones in and ignored everyone.",
-        failLog: "You put your headphones in and ignored everyone.",
-        successRewards: { mood: 0 },
-        failRewards: { mood: 0 }
-      }
-    ]
-  }
-];
+  wingIt: {
+    text: 'Wing it and hope nobody notices',
+    statCheck: 'none',
+    threshold: 0,
+    successRewards: { mood: 0 },
+    failRewards: { promotionPoints: -8, mood: -8 },
+  },
+};
+
+const buildEvent = (id, title, prompt, choices) => ({ id, title, prompt, choices });
+
+const withLogLines = (choice, successLog, failLog) => ({
+  ...choice,
+  successLog,
+  failLog,
+});
+
+const BY_BUSINESS_TYPE = {
+  grocery: [
+    buildEvent(
+      'grocery_stock_count_mismatch',
+      'Stock Count Mismatch',
+      'A pallet arrived short and the till totals do not match the delivery note.',
+      [
+        withLogLines(baseChoices.steady, 'You resolved the stock mismatch and kept customers flowing.', 'You lost track of the count and had to write off stock.'),
+        withLogLines(baseChoices.escalate, 'You escalated early and prevented a full inventory mess.', 'Your notes were incomplete and the issue got pinned on your shift.'),
+        withLogLines(baseChoices.wingIt, 'Nobody caught it this hour.', 'The gap was discovered at close and your supervisor is unhappy.'),
+      ],
+    ),
+  ],
+  petrol_station: [
+    buildEvent(
+      'forecourt_pump_alarm',
+      'Forecourt Pump Alarm',
+      'A pump fault alarm is blaring while a queue builds at the till.',
+      [
+        withLogLines(baseChoices.steady, 'You kept calm, paused the pump, and moved customers safely.', 'The queue got hostile and the forecourt stalled.'),
+        withLogLines(baseChoices.escalate, 'You called the supervisor immediately and the fault was contained.', 'You called late and the delay cost the station money.'),
+        withLogLines(baseChoices.wingIt, 'You guessed right this time.', 'You guessed wrong and the manager had to shut a pump lane.'),
+      ],
+    ),
+  ],
+  takeaway: [
+    buildEvent(
+      'takeaway_order_pileup',
+      'Order Pileup',
+      'Courier pickups and walk-ins both spike during your shift.',
+      [
+        withLogLines(baseChoices.steady, 'You triaged tickets and service recovered.', 'Tickets backed up and customers left angry.'),
+        withLogLines(baseChoices.escalate, 'You pulled in backup and saved dinner rush.', 'The escalation came too late to recover the rush.'),
+        withLogLines(baseChoices.wingIt, 'You survived on luck.', 'Orders went out wrong and refunds hit the till.'),
+      ],
+    ),
+  ],
+  pub: [
+    buildEvent(
+      'pub_bar_rush',
+      'Bar Rush',
+      'A match-day crowd arrives all at once with complex drink orders.',
+      [
+        withLogLines(baseChoices.steady, 'You kept tabs accurate and moved the bar line quickly.', 'You lost tab control and had to comp drinks.'),
+        withLogLines(baseChoices.escalate, 'You called support and stabilized the bar floor.', 'Support arrived too late and complaints piled up.'),
+        withLogLines(baseChoices.wingIt, 'You coasted through this one.', 'Cash-up found missing receipts and your shift took the blame.'),
+      ],
+    ),
+  ],
+  cafe: [
+    buildEvent(
+      'cafe_machine_failure',
+      'Coffee Machine Failure',
+      'The main espresso machine stalls during the busiest hour.',
+      [
+        withLogLines(baseChoices.steady, 'You rerouted drinks and kept regulars calm.', 'Service times spiked and tips dropped.'),
+        withLogLines(baseChoices.escalate, 'You got the supervisor to split stations and recover flow.', 'The handoff was messy and queue rage grew.'),
+        withLogLines(baseChoices.wingIt, 'You improvised for now.', 'The improvised workflow collapsed and orders were refunded.'),
+      ],
+    ),
+  ],
+  default: [
+    buildEvent(
+      'shift_pressure',
+      'Shift Pressure',
+      'An operational issue lands on your desk right before close.',
+      [
+        withLogLines(baseChoices.steady, 'You handled it cleanly and protected the shift.', 'You missed details and cleanup took longer.'),
+        withLogLines(baseChoices.escalate, 'You escalated with good notes and avoided fallout.', 'Escalation without details made things worse.'),
+        withLogLines(baseChoices.wingIt, 'You got away with a shortcut this time.', 'The shortcut backfired and hurt trust.'),
+      ],
+    ),
+  ],
+};
+
+export const getWorkEventsForContext = (businessType) => (
+  BY_BUSINESS_TYPE[businessType] || BY_BUSINESS_TYPE.default
+);
+

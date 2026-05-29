@@ -1,21 +1,53 @@
 import { useState } from 'react';
 import { useGameStore } from '../state/store';
-import { getProjectsForTrackAndTier, CAREER_TRACKS } from '../data/projects';
+import { getProjectsForTrackAndTier, CAREER_TRACKS, JOB_SEARCH_OPTIONS, CAREER_ACTIVITY_WINDOWS } from '../data/projects';
+import { getBusinessById, getJobOpeningsForSettlement } from '../data/businesses';
 import { gigs, sideHustles } from '../data/gigs';
+import { formatTimeWindow, getTimeWindowStatus } from '../sim/time';
+import { getDayKeyForDayNumber, getShiftForDay } from '../sim/workSchedule';
 import './CareerApp.css';
 
 export default function CareerApp({ onClose }) {
-  const { gameState, startProject, workOnProject, takeGig, switchTrack } = useGameStore();
+  const { gameState, startProject, workOnProject, takeGig, switchTrack, jobHunt } = useGameStore();
   const { activeTrack, currentProject, projectProgress, promotionPoints, titleLevel, gigReputation } = gameState.career;
   const { energy } = gameState.needs;
   const stats = gameState.stats;
 
-  const [activeTab, setActiveTab] = useState('projects'); // 'projects', 'gigs', 'hustles', 'tracks'
+  const [activeTab, setActiveTab] = useState(activeTrack ? 'projects' : 'jobSearch'); // 'jobSearch', 'projects', 'gigs', 'hustles', 'tracks'
+  const [jobSearchFeedback, setJobSearchFeedback] = useState(null);
 
   const trackData = CAREER_TRACKS[activeTrack];
   const currentTitle = trackData?.levels.find(t => t.level === titleLevel);
   const nextTitle = trackData?.levels.find(t => t.level === titleLevel + 1);
   const availableProjects = trackData ? getProjectsForTrackAndTier(activeTrack, titleLevel) : [];
+  const hasBasicPhone = Boolean(gameState.inventory?.basic_phone);
+  const currentSettlementId = gameState.activeLocation === 'home' ? 'Endleigh' : gameState.activeLocation;
+  const currentEmployer = getBusinessById(gameState.career.employerId);
+  const projectWorkStatus = getTimeWindowStatus(gameState.time, CAREER_ACTIVITY_WINDOWS.projectWork, 32);
+  const interviewStatus = getTimeWindowStatus(gameState.time, CAREER_ACTIVITY_WINDOWS.interview);
+  const todayShift = getShiftForDay(gameState.career, gameState.time.day);
+
+  const formatStat = (stat) => stat.replace(/([A-Z])/g, ' $1').replace(/^./, char => char.toUpperCase());
+  const getJobScore = (option) => (
+    (stats[option.primaryStat] || 0) +
+    Math.floor((stats[option.secondaryStat] || 0) / 2) +
+    option.scoreBonus
+  );
+  const handleJobHunt = (option) => {
+    const wasUnemployed = !useGameStore.getState().gameState.career.activeTrack;
+    jobHunt(option.id);
+
+    const nextState = useGameStore.getState().gameState;
+    const hired = wasUnemployed && Boolean(nextState.career.activeTrack);
+    const trackName = CAREER_TRACKS[nextState.career.activeTrack]?.name;
+    const employer = getBusinessById(nextState.career.employerId);
+
+    setJobSearchFeedback({
+      type: hired ? 'success' : 'miss',
+      title: hired ? `Offer accepted: ${employer?.name || trackName}` : 'No offer yet',
+      body: nextState.logs[0] || `${option.name} finished.`,
+    });
+  };
 
   return (
     <div className="career-app animate-fade-in glass-panel">
@@ -24,12 +56,43 @@ export default function CareerApp({ onClose }) {
         <button onClick={onClose} className="btn-close-career">Close</button>
       </div>
 
+      {!trackData && (
+        <div className="career-title-card unemployed-card">
+          <div>
+            <h3>Unemployed</h3>
+            <p>You have no job yet. The rent is handled for now, but the year will move quickly.</p>
+          </div>
+          <div className="starter-tools">
+            <span>Basic Phone</span>
+            <strong>{hasBasicPhone ? 'Ready' : 'Missing'}</strong>
+          </div>
+        </div>
+      )}
+
       {trackData && currentTitle && (
         <div className="career-title-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3>{trackData.name}</h3>
             <span style={{ opacity: 0.8 }}>Level {titleLevel}: {currentTitle.title}</span>
           </div>
+          {currentEmployer && (
+            <div className="starter-tools">
+              <span>{currentEmployer.name}</span>
+              <strong>{gameState.career.jobTitle || currentTitle.title}</strong>
+            </div>
+          )}
+          {gameState.career.supervisorName && (
+            <div className="starter-tools">
+              <span>Supervisor</span>
+              <strong>{gameState.career.supervisorName} ({gameState.career.supervisorRole || 'Shift Lead'})</strong>
+            </div>
+          )}
+          {todayShift && (
+            <div className="starter-tools">
+              <span>Today's Shift ({getDayKeyForDayNumber(gameState.time.day).toUpperCase()})</span>
+              <strong>{todayShift.startHour}:00-{todayShift.endHour}:00</strong>
+            </div>
+          )}
           {nextTitle ? (
             <div className="promotion-stats">
               <div className="promotion-points-label">
@@ -48,16 +111,86 @@ export default function CareerApp({ onClose }) {
       )}
 
       <div className="career-tabs" style={{ display: 'flex', gap: '1rem', margin: '1rem 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-        <button className={`tab-btn ${activeTab === 'projects' ? 'active' : ''}`} onClick={() => setActiveTab('projects')} style={{ background: 'none', border: 'none', color: activeTab === 'projects' ? 'var(--neon-blue)' : 'white', padding: '0.5rem', cursor: 'pointer', borderBottom: activeTab === 'projects' ? '2px solid var(--neon-blue)' : 'none' }}>Projects</button>
+        <button className={`tab-btn ${activeTab === 'jobSearch' ? 'active' : ''}`} onClick={() => setActiveTab('jobSearch')} style={{ background: 'none', border: 'none', color: activeTab === 'jobSearch' ? 'var(--neon-blue)' : 'white', padding: '0.5rem', cursor: 'pointer', borderBottom: activeTab === 'jobSearch' ? '2px solid var(--neon-blue)' : 'none' }}>Job Search</button>
+        <button disabled={!activeTrack} className={`tab-btn ${activeTab === 'projects' ? 'active' : ''}`} onClick={() => setActiveTab('projects')} style={{ background: 'none', border: 'none', color: activeTab === 'projects' ? 'var(--neon-blue)' : 'white', padding: '0.5rem', cursor: activeTrack ? 'pointer' : 'not-allowed', opacity: activeTrack ? 1 : 0.45, borderBottom: activeTab === 'projects' ? '2px solid var(--neon-blue)' : 'none' }}>Projects</button>
         <button className={`tab-btn ${activeTab === 'gigs' ? 'active' : ''}`} onClick={() => setActiveTab('gigs')} style={{ background: 'none', border: 'none', color: activeTab === 'gigs' ? 'var(--neon-blue)' : 'white', padding: '0.5rem', cursor: 'pointer', borderBottom: activeTab === 'gigs' ? '2px solid var(--neon-blue)' : 'none' }}>Freelance Gigs</button>
         <button className={`tab-btn ${activeTab === 'hustles' ? 'active' : ''}`} onClick={() => setActiveTab('hustles')} style={{ background: 'none', border: 'none', color: activeTab === 'hustles' ? 'var(--neon-blue)' : 'white', padding: '0.5rem', cursor: 'pointer', borderBottom: activeTab === 'hustles' ? '2px solid var(--neon-blue)' : 'none' }}>Side Hustles</button>
         <button className={`tab-btn ${activeTab === 'tracks' ? 'active' : ''}`} onClick={() => setActiveTab('tracks')} style={{ background: 'none', border: 'none', color: activeTab === 'tracks' ? 'var(--neon-blue)' : 'white', padding: '0.5rem', cursor: 'pointer', borderBottom: activeTab === 'tracks' ? '2px solid var(--neon-blue)' : 'none' }}>Career Tracks</button>
       </div>
 
-      <div className="tab-content" style={{ overflowY: 'auto', maxHeight: '400px', paddingRight: '0.5rem' }}>
+      <div className="tab-content">
+        {activeTab === 'jobSearch' && (
+          <div className="job-search-list">
+            <div className={`job-search-feedback ${jobSearchFeedback?.type || 'info'}`} role="status">
+              {jobSearchFeedback ? (
+                <>
+                <strong>{jobSearchFeedback.title}</strong>
+                <p>{jobSearchFeedback.body}</p>
+                </>
+              ) : (
+                <p>Starter work is found through named employers in {currentSettlementId}: official listings, walking around, and whatever your phone can load.</p>
+              )}
+            </div>
+            {Object.values(JOB_SEARCH_OPTIONS).map(option => {
+              const score = getJobScore(option);
+              const localOpenings = getJobOpeningsForSettlement(currentSettlementId, option.id);
+              const needsItem = option.requiresItem && !gameState.inventory?.[option.requiresItem];
+              const timeStatus = getTimeWindowStatus(gameState.time, option.availableWindow, option.durationTicks);
+              const canTry = !activeTrack && energy >= option.energyCost && !needsItem && localOpenings.length > 0 && timeStatus.available;
+
+              return (
+                <div key={option.id} className={`job-search-card glass-panel ${timeStatus.available ? '' : 'unavailable'}`}>
+                  <div className="job-search-main">
+                    <strong>{option.name}</strong>
+                    <p>{option.description}</p>
+                    <div className="job-search-meta">
+                      <span>{localOpenings.length} local opening{localOpenings.length === 1 ? '' : 's'}</span>
+                      <span>{Math.floor(option.durationTicks / 6)}h</span>
+                      <span className={timeStatus.available ? 'met' : 'unmet'}>
+                        {formatTimeWindow(option.availableWindow)}
+                      </span>
+                      <span>Energy {option.energyCost}</span>
+                      <span className={score >= option.minimumScore ? 'met' : 'unmet'}>
+                        Fit {score}/{option.minimumScore}
+                      </span>
+                    </div>
+                    <div className="job-search-requirements">
+                      Uses {formatStat(option.primaryStat)} and {formatStat(option.secondaryStat)}
+                      {option.requiresItem && ` • Requires ${option.requiresItem.replaceAll('_', ' ')}`}
+                      {!timeStatus.available && ` • ${timeStatus.reason}`}
+                    </div>
+                    {localOpenings.length > 0 && (
+                      <div className="job-search-employers">
+                        {localOpenings.slice(0, 4).map((opening) => (
+                          <span key={`${opening.businessId}-${opening.title}`}>
+                            {opening.businessName}: {opening.title}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    className="btn-primary"
+                    onClick={() => handleJobHunt(option)}
+                    disabled={!canTry}
+                  >
+                    {activeTrack ? 'Already Hired' : 'Try'}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {activeTab === 'projects' && (
           <>
-            {currentProject ? (
+            {!trackData && (
+              <div className="empty-career-state glass-panel">
+                <strong>No job yet.</strong>
+                <p>Find starter work from the Job Search tab before taking career projects.</p>
+              </div>
+            )}
+            {trackData && currentProject ? (
               <div className="active-project-card glass-panel">
                 <h4 style={{ color: 'var(--neon-pink)' }}>Active Project: {availableProjects.find(p => p.id === currentProject)?.name || 'Unknown'}</h4>
                 <div className="progress-bar-container" style={{ margin: '1rem 0' }}>
@@ -69,14 +202,18 @@ export default function CareerApp({ onClose }) {
                 </div>
                 
                 <button 
-                  disabled={energy < 20}
+                  disabled={energy < 20 || !projectWorkStatus.available}
                   onClick={() => workOnProject(20)}
                   className="btn-primary w-100"
                 >
                   Work on Project (8h) [⚡ 20]
                 </button>
+                <div className={`career-action-window ${projectWorkStatus.available ? 'met' : 'unmet'}`}>
+                  {formatTimeWindow(CAREER_ACTIVITY_WINDOWS.projectWork)}
+                  {!projectWorkStatus.available && ` • ${projectWorkStatus.reason}`}
+                </div>
               </div>
-            ) : (
+            ) : trackData ? (
               <div className="project-selection">
                 <h4 style={{ marginBottom: '1rem' }}>Available Projects</h4>
                 <div className="project-grid" style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
@@ -102,7 +239,7 @@ export default function CareerApp({ onClose }) {
                   {availableProjects.length === 0 && <p>No projects available at this tier.</p>}
                 </div>
               </div>
-            )}
+            ) : null}
           </>
         )}
 
@@ -116,7 +253,8 @@ export default function CareerApp({ onClose }) {
               const meetsCreds = !gig.requirements?.credentials || gig.requirements.credentials.every(c => stats.credentials?.includes(c));
               const meetsStats = !gig.requirements?.stats || Object.entries(gig.requirements.stats).every(([s, v]) => (stats[s] || 0) >= v);
               const meetsRep = !gig.requirements?.rep || (gigReputation || 0) >= gig.requirements.rep;
-              const canTake = meetsCreds && meetsStats && meetsRep && energy >= 30;
+              const timeStatus = getTimeWindowStatus(gameState.time, gig.availableWindow, gig.durationTicks);
+              const canTake = meetsCreds && meetsStats && meetsRep && energy >= 30 && timeStatus.available;
 
               return (
                 <div key={gig.id} className="gig-card glass-panel" style={{ padding: '1rem', borderRadius: '8px' }}>
@@ -132,6 +270,10 @@ export default function CareerApp({ onClose }) {
                       </div>
                       <div style={{ fontSize: '0.85rem', marginTop: '0.3rem', color: '#10b981' }}>
                         Earn: ${gig.rewards.money} (+{gig.rewards.rep || 0} Rep)
+                      </div>
+                      <div className={`career-action-window ${timeStatus.available ? 'met' : 'unmet'}`}>
+                        {formatTimeWindow(gig.availableWindow)}
+                        {!timeStatus.available && ` • ${timeStatus.reason}`}
                       </div>
                     </div>
                     <button 
@@ -155,7 +297,8 @@ export default function CareerApp({ onClose }) {
               const meetsVehicles = !hustle.requirements?.vehicles || hustle.requirements.vehicles.every(v => gameState.properties.vehicles?.includes(v));
               const meetsStats = !hustle.requirements?.stats || Object.entries(hustle.requirements.stats).every(([s, v]) => (stats[s] || 0) >= v);
               const energyCost = hustle.energyCostPerTick * 6; // 1 hour
-              const canTake = meetsVehicles && meetsStats && energy >= energyCost;
+              const timeStatus = getTimeWindowStatus(gameState.time, hustle.availableWindow, 6);
+              const canTake = meetsVehicles && meetsStats && energy >= energyCost && timeStatus.available;
 
               return (
                 <div key={hustle.id} className="hustle-card glass-panel" style={{ padding: '1rem', borderRadius: '8px' }}>
@@ -170,6 +313,10 @@ export default function CareerApp({ onClose }) {
                       </div>
                       <div style={{ fontSize: '0.85rem', marginTop: '0.3rem', color: '#10b981' }}>
                         Earn: ${hustle.moneyPerTick * 6} / hour
+                      </div>
+                      <div className={`career-action-window ${timeStatus.available ? 'met' : 'unmet'}`}>
+                        {formatTimeWindow(hustle.availableWindow)}
+                        {!timeStatus.available && ` • ${timeStatus.reason}`}
                       </div>
                     </div>
                     <button 
@@ -188,7 +335,11 @@ export default function CareerApp({ onClose }) {
 
         {activeTab === 'tracks' && (
           <div className="tracks-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <p style={{ opacity: 0.8, fontSize: '0.9rem' }}>Switching tracks requires passing an interview (minimum 20 in the track's primary stat). Doing so resets your current title progress.</p>
+            <p style={{ opacity: 0.8, fontSize: '0.9rem' }}>{activeTrack ? 'Switching tracks requires passing an interview. Doing so resets your current title progress.' : 'Formal tracks are harder to enter cold. Job Search is the practical first move, but you can still try an interview.'}</p>
+            <div className={`career-action-window ${interviewStatus.available ? 'met' : 'unmet'}`}>
+              Interviews: {formatTimeWindow(CAREER_ACTIVITY_WINDOWS.interview)}
+              {!interviewStatus.available && ` • ${interviewStatus.reason}`}
+            </div>
             {Object.values(CAREER_TRACKS).map(track => (
               <div key={track.id} className="track-card glass-panel" style={{ padding: '1rem', borderRadius: '8px', border: activeTrack === track.id ? '2px solid var(--neon-blue)' : 'none' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -197,8 +348,13 @@ export default function CareerApp({ onClose }) {
                     <p style={{ margin: '0.3rem 0', opacity: 0.8, fontSize: '0.9rem' }}>{track.description}</p>
                   </div>
                   {activeTrack !== track.id && (
-                    <button className="btn-primary" style={{ background: 'var(--neon-purple)' }} onClick={() => switchTrack(track.id)}>
-                      Switch Track
+                    <button
+                      className="btn-primary"
+                      style={{ background: 'var(--neon-purple)' }}
+                      onClick={() => switchTrack(track.id)}
+                      disabled={!interviewStatus.available}
+                    >
+                      {activeTrack ? 'Switch Track' : 'Interview'}
                     </button>
                   )}
                   {activeTrack === track.id && (

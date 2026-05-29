@@ -1,3 +1,5 @@
+import { getDaypart } from '../sim/time.js';
+
 export const ROUTINES = [
   {
     id: 'read_fiction',
@@ -63,9 +65,7 @@ export const ROUTINES = [
 ];
 
 export const getRoutineTimeBucket = (hour) => {
-  if (hour < 12) return 'morning';
-  if (hour < 18) return 'afternoon';
-  return 'evening';
+  return getDaypart(hour);
 };
 
 const HOME_SETTLEMENTS = {

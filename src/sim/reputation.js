@@ -33,7 +33,7 @@ export const adjustReputationForPublicDate = (state, npcId, locationKey) => {
   };
 };
 
-export const calculateGossipRisk = (state, npcId, locationKey) => {
+export const calculateGossipRisk = (state, npcId) => {
   const circle = selectRelevantReputationCircle(npcId);
   const rep = state.reputation?.[circle] || 0;
   

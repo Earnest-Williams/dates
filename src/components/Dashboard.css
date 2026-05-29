@@ -85,6 +85,7 @@
 .planning-grid {
   grid-template-areas:
     "risk risk housing housing"
+    "calendar calendar calendar calendar"
     "core prof lifestyle social"
     "perks perks logs logs";
 }
@@ -99,6 +100,7 @@
 
 .planning-grid .money-risk { grid-area: risk; }
 .planning-grid .housing { grid-area: housing; }
+.planning-grid .calendar { grid-area: calendar; }
 .planning-grid .core-stats { grid-area: core; }
 .planning-grid .career-skills { grid-area: prof; }
 .planning-grid .lifestyle { grid-area: lifestyle; }
@@ -125,6 +127,7 @@
   .planning-grid {
     grid-template-areas:
       "risk housing"
+      "calendar calendar"
       "core prof"
       "lifestyle social"
       "perks logs";
@@ -151,6 +154,7 @@
     grid-template-areas:
       "risk"
       "housing"
+      "calendar"
       "core"
       "prof"
       "lifestyle"
@@ -304,6 +308,66 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   box-shadow: 0 0 8px rgba(0,0,0,0.2);
+}
+
+.calendar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.calendar-item {
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.calendar-time {
+  min-width: 108px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.calendar-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.calendar-summary strong {
+  font-size: 0.86rem;
+  color: var(--text-primary);
+}
+
+.calendar-summary span {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.calendar-reminders {
+  margin-top: 0.9rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.calendar-reminders h3 {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem;
+}
+
+.calendar-reminders p {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
 }
 
 .perk-badge.trait {

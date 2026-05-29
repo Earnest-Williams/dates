@@ -1,5 +1,4 @@
-import React from 'react';
-import { useStore } from '../../state/store';
+import { useGameStore } from '../../state/store';
 import { selectNpcJournal } from '../../state/selectors';
 import { NPCS } from '../../data/npcs';
 import './Journal.css';
@@ -75,7 +74,7 @@ const DateRecap = ({ events }) => (
 );
 
 export const RelationshipJournal = ({ npcId }) => {
-  const journal = useStore(state => selectNpcJournal(state, npcId));
+  const journal = useGameStore(state => selectNpcJournal(state.gameState, npcId));
   const npc = NPCS.find(n => n.id === npcId);
 
   if (!npc || !journal) return <div>Loading Journal...</div>;

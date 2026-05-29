@@ -1,5 +1,6 @@
 import { NPCS } from '../../data/npcs.js';
 import { LOCATIONS } from '../../data/locations.js';
+import { getTimeWindowStatus } from '../../sim/time.js';
 
 export const swipeNpc = (state, dispatch, npcId, direction) => {
   if (!state.living.utilitiesActive || state.needs.hygiene < 30) return false;
@@ -40,6 +41,12 @@ export const goOnDate = (state, dispatch, npcId, locationKey, dateType = null) =
   const location = LOCATIONS[locationKey];
   const npc = NPCS.find(n => n.id === npcId);
   if (!location || !npc) return false;
+
+  const timeStatus = getTimeWindowStatus(state.time, location.availableWindow, 6);
+  if (!timeStatus.available) {
+    dispatch({ type: 'ADD_LOG', payload: { message: `Date at ${location.name} is not practical right now. ${timeStatus.reason}` } });
+    return false;
+  }
 
   const totalCost = location.energyCost + 10;
   if (state.needs.energy < totalCost) return false;

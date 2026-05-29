@@ -11,6 +11,7 @@ import {
   computeSettlementMetrics 
 } from '../data/geography';
 import { getNpcEncounters } from '../data/townTexture';
+import { ACTIVITY_WINDOWS } from '../data/activityWindows';
 import './MapUI.css';
 
 const MapUI = ({ onClose, onTalkNpc }) => {
@@ -193,42 +194,42 @@ const MapUI = ({ onClose, onTalkNpc }) => {
       const gotBuck = Math.random() < 0.4;
       const earnings = gotBuck ? 120 : 0;
       const actName = gotBuck ? "Hunted in Stagborough Chase (Got a Prize Buck!)" : "Hunted in Stagborough Chase (No buck found)";
-      performAction(actName, 12, { fitness: 1, confidence: 1, mood: 20 }, 25, earnings);
+      performAction(actName, 12, { fitness: 1, confidence: 1, mood: 20 }, 25, earnings, { availableWindow: ACTIVITY_WINDOWS.outdoors });
     } else if (type === 'mire') {
-      performAction("Explored the Endleigh Mire Paths", 6, { creativity: 2, mood: 10, fitness: 0.5 }, 10, 0);
+      performAction("Explored the Endleigh Mire Paths", 6, { creativity: 2, mood: 10, fitness: 0.5 }, 10, 0, { availableWindow: ACTIVITY_WINDOWS.outdoors });
     } else if (type === 'reed') {
-      performAction("Cut Reeds in Willow Fen", 12, { fitness: 0.5 }, 20, 45);
+      performAction("Cut Reeds in Willow Fen", 12, { fitness: 0.5 }, 20, 45, { availableWindow: ACTIVITY_WINDOWS.outdoors });
     } else if (type === 'drainage') {
-      performAction("Inspected the Harrowfen Drainage Works", 6, { intelligence: 1, confidence: 1 }, 10, 0);
+      performAction("Inspected the Harrowfen Drainage Works", 6, { intelligence: 1, confidence: 1 }, 10, 0, { availableWindow: ACTIVITY_WINDOWS.outdoors });
     } else if (type === 'barrow') {
-      performAction("Explored the Stillwater Ancient Barrow", 12, { intelligence: 2, confidence: 1 }, 20, 0);
+      performAction("Explored the Stillwater Ancient Barrow", 12, { intelligence: 2, confidence: 1 }, 20, 0, { availableWindow: ACTIVITY_WINDOWS.outdoors });
     } else if (type === 'forest') {
-      performAction("Foraged in Durnthorne Forest", 8, { intelligence: 1, fitness: 1, mood: 10 }, 15, 0);
+      performAction("Foraged in Durnthorne Forest", 8, { intelligence: 1, fitness: 1, mood: 10 }, 15, 0, { availableWindow: ACTIVITY_WINDOWS.outdoors });
     } else if (type === 'heath') {
-      performAction("Hiked the Blackmere Heath", 6, { fitness: 1.5, mood: 10 }, 10, 0);
+      performAction("Hiked the Blackmere Heath", 6, { fitness: 1.5, mood: 10 }, 10, 0, { availableWindow: ACTIVITY_WINDOWS.outdoors });
     } else if (type === 'shrine') {
-      performAction("Meditated at Fallowmere Woodland Shrine", 6, { empathy: 2, mood: 15 }, 10, 0);
+      performAction("Meditated at Fallowmere Woodland Shrine", 6, { empathy: 2, mood: 15 }, 10, 0, { availableWindow: ACTIVITY_WINDOWS.outdoors });
     } else if (type === 'hike') {
-      performAction("Hiked the Eldersley Grassy Rise", 6, { fitness: 1, confidence: 1, mood: 5 }, 10, 0);
+      performAction("Hiked the Eldersley Grassy Rise", 6, { fitness: 1, confidence: 1, mood: 5 }, 10, 0, { availableWindow: ACTIVITY_WINDOWS.outdoors });
     } else if (type === 'park') {
-      performAction("Walked in Bramblewick Greenwood Park", 3, { empathy: 1, mood: 10 }, 5, 0);
+      performAction("Walked in Bramblewick Greenwood Park", 3, { empathy: 1, mood: 10 }, 5, 0, { availableWindow: ACTIVITY_WINDOWS.outdoors });
     }
   };
 
   // Pub and Cafe actions handlers
   const handlePubAction = (pubName, actionType) => {
     if (actionType === 'drink') {
-      performAction(`Drank a pint of local ale at ${pubName}`, 3, { mood: 15 }, -20, -8);
+      performAction(`Drank a pint of local ale at ${pubName}`, 3, { mood: 15 }, -20, -8, { availableWindow: ACTIVITY_WINDOWS.pub });
     } else if (actionType === 'chat') {
-      performAction(`Chatted with locals at ${pubName}`, 6, { socialIq: 1, confidence: 1 }, 10, 0);
+      performAction(`Chatted with locals at ${pubName}`, 6, { socialIq: 1, confidence: 1 }, 10, 0, { availableWindow: ACTIVITY_WINDOWS.pub });
     }
   };
 
   const handleCafeAction = (cafeName, actionType) => {
     if (actionType === 'coffee') {
-      performAction(`Bought coffee & pastry at ${cafeName}`, 3, { mood: 10 }, -15, -6);
+      performAction(`Bought coffee & pastry at ${cafeName}`, 3, { mood: 10 }, -15, -6, { availableWindow: ACTIVITY_WINDOWS.cafe });
     } else if (actionType === 'study') {
-      performAction(`Studied on laptop at ${cafeName}`, 6, { intelligence: 1, programming: 0.5, creativity: 0.5 }, 10, 0);
+      performAction(`Studied on laptop at ${cafeName}`, 6, { intelligence: 1, programming: 0.5, creativity: 0.5 }, 10, 0, { availableWindow: ACTIVITY_WINDOWS.cafe });
     }
   };
 
@@ -791,7 +792,7 @@ const MapUI = ({ onClose, onTalkNpc }) => {
                           <strong>Self-Guided Study Session</strong>
                           <p className="activity-desc">Study and read books. (+1 Intelligence, ⚡ -15)</p>
                         </div>
-                        <button className="btn-primary" onClick={() => performAction("Studied at local library", 6, { intelligence: 1 }, 15, 0)} disabled={gameState.needs.energy < 15}>
+                        <button className="btn-primary" onClick={() => performAction("Studied at local library", 6, { intelligence: 1 }, 15, 0, { availableWindow: ACTIVITY_WINDOWS.study })} disabled={gameState.needs.energy < 15}>
                           Study
                         </button>
                       </div>
@@ -835,7 +836,7 @@ const MapUI = ({ onClose, onTalkNpc }) => {
                       </div>
                     ) : (
                       <p style={{ fontStyle: 'italic', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                        Not employed. Enroll from Phone Career App.
+                        Not employed. Find starter work from the Phone Career Hub.
                       </p>
                     )}
                   </div>
@@ -904,7 +905,7 @@ const MapUI = ({ onClose, onTalkNpc }) => {
                         <strong>Gym Workout Session</strong>
                         <p className="activity-desc">Gain fitness. (+2 Fitness, ⚡ -15, -25 Hygiene)</p>
                       </div>
-                      <button className="btn-primary" onClick={() => performAction("Worked out at Peak Fitness Gym", 6, { fitness: 2 }, 15, 0)} disabled={gameState.needs.energy < 15}>
+                      <button className="btn-primary" onClick={() => performAction("Worked out at Peak Fitness Gym", 6, { fitness: 2 }, 15, 0, { availableWindow: ACTIVITY_WINDOWS.workout })} disabled={gameState.needs.energy < 15}>
                         Exercise
                       </button>
                     </div>
@@ -936,7 +937,7 @@ const MapUI = ({ onClose, onTalkNpc }) => {
                           <strong>Hit the Dance Floor</strong>
                           <p className="activity-desc">Show off moves. (+1 Style, +15 Mood, ⚡ -15)</p>
                         </div>
-                        <button className="btn-primary" onClick={() => performAction("Danced at club", 6, { style: 1, mood: 15 }, 15, 0)} disabled={gameState.needs.energy < 15}>
+                        <button className="btn-primary" onClick={() => performAction("Danced at club", 6, { style: 1, mood: 15 }, 15, 0, { availableWindow: ACTIVITY_WINDOWS.nightlife })} disabled={gameState.needs.energy < 15}>
                           Dance
                         </button>
                       </div>

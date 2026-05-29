@@ -1,4 +1,4 @@
-import { NPCS, RELATIONSHIP_CONFLICT_TRIGGERS } from '../data/npcs.js';
+import { RELATIONSHIP_CONFLICT_TRIGGERS } from '../data/npcs.js';
 
 export const evaluateConflictTriggers = (state, npcId, currentMatch, eventType, eventData) => {
   // Pure function to evaluate if a conflict should trigger

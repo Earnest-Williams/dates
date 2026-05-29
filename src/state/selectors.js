@@ -1,12 +1,10 @@
 import { calculateMatchProbability } from '../sim/matching.js';
 import { NPCS } from '../data/npcs.js';
+import { formatTime, getDaypart } from '../sim/time.js';
 
 export const getFormattedTime = (state) => {
   const { hour, minute } = state.time;
-  const ampm = hour >= 12 ? 'PM' : 'AM';
-  const displayHour = hour % 12 || 12;
-  const displayMinute = minute.toString().padStart(2, '0');
-  return `${displayHour}:${displayMinute} ${ampm}`;
+  return formatTime(hour, minute);
 };
 
 export const calculateMatchChance = (state, npcId) => {
@@ -77,8 +75,10 @@ import { LOCATION_EVENTS } from '../data/townTexture.js';
 export const selectActiveLocationEvent = (state, locationKey) => {
   const event = LOCATION_EVENTS[locationKey];
   if (!event) return null;
-  
-  // Here we could check schedule (time/day) but townTexture events are mostly static flavor
+
+  const timeOfDay = getDaypart(state.time?.hour ?? 8);
+  if (event.times && !event.times.includes(timeOfDay)) return null;
+
   return event;
 };
 
@@ -90,24 +90,17 @@ export const selectLocationRomanceHooks = (state, locationKey) => {
 export const selectLocationPublicVisibility = (state, locationKey, time) => {
   // If location is home, visibility is low
   if (locationKey === 'home') return 'private';
-  
-  // Example simple logic
-  const isNight = time.hour >= 18;
-  if (locationKey === 'club' && isNight) return 'high_visibility';
-  if (locationKey === 'park' && !isNight) return 'high_visibility';
+
+  const timeOfDay = getDaypart(time.hour ?? 8);
+  const afterDark = timeOfDay === 'evening' || timeOfDay === 'night';
+  if (locationKey === 'club' && afterDark) return 'high_visibility';
+  if (locationKey === 'park' && !afterDark) return 'high_visibility';
   
   return 'moderate_visibility';
 };
 
 export const selectAvailableRoutinesByTimeBucket = (state) => {
-  const hour = state.time.hour;
-  let bucket = 'night';
-  if (hour >= 6 && hour < 12) bucket = 'morning';
-  else if (hour >= 12 && hour < 17) bucket = 'afternoon';
-  else if (hour >= 17 && hour < 22) bucket = 'evening';
-
-  // Return routines based on bucket, for now we just return all feasible
-  return bucket; 
+  return getDaypart(state.time.hour);
 };
 
 export const selectPlannerWarnings = (state) => {
@@ -147,17 +140,17 @@ export const selectHomeStyleFit = (state, npcId) => {
   return getNpcHomeStyleReaction(npcId, state.placedFurniture || []);
 };
 
-export const selectAvailableHomeScenes = (state, npcId) => {
+export const selectAvailableHomeScenes = () => {
   // Return scenes triggered by home identity
   return [];
 };
 
-export const selectHomeActivityDateOptions = (state, npcId) => {
+export const selectHomeActivityDateOptions = (state) => {
   // Filter home activities available as dates
   return state.living?.availableHomeActivities || [];
 };
 
-export const selectHomeRepairOptions = (state, npcId) => {
+export const selectHomeRepairOptions = () => {
   // Filter repair options available at home
   return [];
 };

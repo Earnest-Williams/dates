@@ -2,6 +2,7 @@ import { checkActionFeasibility } from '../selectors.js';
 import { getGroceriesCost } from '../../sim/economy.js';
 import { calculateTravelStats, SETTLEMENTS } from '../../data/geography.js';
 import { ROUTINES, isRoutineAvailable } from '../../data/routines.js';
+import { getTimeWindowStatus } from '../../sim/time.js';
 
 export const performAction = (
   state,
@@ -11,7 +12,17 @@ export const performAction = (
   statChanges = {},
   energyCost = 10,
   moneyChange = 0,
+  options = {},
 ) => {
+  const durationTicks = options.durationTicks ?? timeIncrements;
+  if (options.availableWindow) {
+    const timeStatus = getTimeWindowStatus(state.time, options.availableWindow, durationTicks);
+    if (!timeStatus.available) {
+      dispatch({ type: 'ADD_LOG', payload: { message: `${actionName} is not practical right now. ${timeStatus.reason}` } });
+      return false;
+    }
+  }
+
   const feasibility = checkActionFeasibility(
     state,
     actionName,
@@ -31,6 +42,8 @@ export const performAction = (
       statChanges,
       energyCost,
       moneyChange,
+      availableWindow: options.availableWindow || null,
+      durationTicks,
     },
   });
 

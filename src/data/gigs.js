@@ -7,6 +7,7 @@ export const gigs = {
     type: "Gig",
     requirements: { stats: { intelligence: 10 } },
     durationTicks: 20,
+    availableWindow: { startHour: 7, endHour: 24, requireFinish: true },
     rewards: { money: 100, stress: 10, rep: 5 },
   },
   logo_design: {
@@ -16,6 +17,7 @@ export const gigs = {
     type: "Gig",
     requirements: { stats: { creativity: 20 }, credentials: ["Design Certificate"] },
     durationTicks: 30,
+    availableWindow: { startHour: 7, endHour: 24, requireFinish: true },
     rewards: { money: 300, stress: 15, rep: 10 },
   },
 
@@ -27,6 +29,7 @@ export const gigs = {
     type: "Gig",
     requirements: { stats: { programming: 30 }, credentials: ["Full-Stack Certificate"], rep: 50 },
     durationTicks: 40,
+    availableWindow: { startHour: 7, endHour: 24, requireFinish: true },
     rewards: { money: 600, stress: 20, rep: 15 },
   },
   social_media_management: {
@@ -36,6 +39,7 @@ export const gigs = {
     type: "Gig",
     requirements: { stats: { marketing: 35 }, credentials: ["Marketing Certificate"], rep: 50 },
     durationTicks: 50,
+    availableWindow: { startHour: 7, endHour: 24, requireFinish: true },
     rewards: { money: 700, stress: 25, rep: 15 },
   },
 
@@ -47,6 +51,7 @@ export const gigs = {
     type: "Gig",
     requirements: { stats: { programming: 60 }, credentials: ["Computer Science Degree"], rep: 200 },
     durationTicks: 100,
+    availableWindow: { startHour: 7, endHour: 24, requireFinish: true },
     rewards: { money: 5000, stress: 50, rep: 50 },
   },
   branding_overhaul: {
@@ -56,6 +61,7 @@ export const gigs = {
     type: "Gig",
     requirements: { stats: { creativity: 60, marketing: 50 }, credentials: ["Design Certificate", "MBA"], rep: 200 },
     durationTicks: 100,
+    availableWindow: { startHour: 7, endHour: 24, requireFinish: true },
     rewards: { money: 6000, stress: 60, rep: 50 },
   }
 };
@@ -66,6 +72,7 @@ export const sideHustles = {
     name: 'Rideshare Driver',
     description: 'Drive people around in your spare time. Steady cash, high energy drain.',
     requirements: { vehicles: ['sports_car'] }, // Need a car
+    availableWindow: { startHour: 6, endHour: 2, requireFinish: true },
     energyCostPerTick: 5,
     moneyPerTick: 15
   },
@@ -74,6 +81,7 @@ export const sideHustles = {
     name: 'SimTube Streamer',
     description: 'Stream games online. High charisma needed, builds followers.',
     requirements: { stats: { gaming: 30, charisma: 30 } },
+    availableWindow: { startHour: 12, endHour: 2, requireFinish: true },
     energyCostPerTick: 3,
     moneyPerTick: 20
   }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useGameStore } from '../state/store';
 import { abilities } from '../data/abilities';
+import { ACTIVITY_WINDOWS } from '../data/activityWindows';
 import DashboardHeader from './dashboard/DashboardHeader';
 import NeedsPanel from './dashboard/NeedsPanel';
 import StatsPanel from './dashboard/StatsPanel';
@@ -11,6 +12,7 @@ import RelationshipsPanel from './dashboard/RelationshipsPanel';
 import PromisesPanel from './dashboard/PromisesPanel';
 import OpportunitiesPanel from './dashboard/OpportunitiesPanel';
 import MoneyRiskPanel from './dashboard/MoneyRiskPanel';
+import CalendarPanel from './dashboard/CalendarPanel';
 import './Dashboard.css';
 
 const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) => {
@@ -101,6 +103,7 @@ const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) =
           <>
             <MoneyRiskPanel />
             <HousingPanel />
+            <CalendarPanel gameState={gameState} />
             <StatsPanel />
             <div className="bento-card perks-panel perks">
               <h2 className="section-title">Active Perks & Traits</h2>
@@ -170,12 +173,12 @@ const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) =
           <span className="dock-label">Career</span>
           <div className="dock-tooltip">Open Career Hub</div>
         </button>
-        <button className="dock-btn" onClick={() => performAction('Study (2hrs)', 12, { intelligence: 2 }, studyEnergyCost)} disabled={energy < studyEnergyCost || hunger >= 95 || healthCritical || moodDepressed}>
+        <button className="dock-btn" onClick={() => performAction('Study (2hrs)', 12, { intelligence: 2 }, studyEnergyCost, 0, { availableWindow: ACTIVITY_WINDOWS.study })} disabled={energy < studyEnergyCost || hunger >= 95 || healthCritical || moodDepressed}>
           <span className="dock-icon">📚</span>
           <span className="dock-label">Study</span>
           <div className="dock-tooltip">Study 2hrs (+{currentStudyGain} Int)</div>
         </button>
-        <button className="dock-btn" onClick={() => performAction('Workout (1hr)', 6, { fitness: 2 }, workoutEnergyCost)} disabled={energy < workoutEnergyCost || hunger >= 95 || healthCritical}>
+        <button className="dock-btn" onClick={() => performAction('Workout (1hr)', 6, { fitness: 2 }, workoutEnergyCost, 0, { availableWindow: ACTIVITY_WINDOWS.workout })} disabled={energy < workoutEnergyCost || hunger >= 95 || healthCritical}>
           <span className="dock-icon">💪</span>
           <span className="dock-label">Gym</span>
           <div className="dock-tooltip">Workout 1hr (+{currentFitnessGain} Fit)</div>
