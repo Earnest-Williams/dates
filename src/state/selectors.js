@@ -57,20 +57,21 @@ export const selectProposalReadinessHint = (state, npcId) => {
   return 'They seem ready whenever you are.';
 };
 
-import { getNpcEncounters } from '../data/townTexture.js';
+import { getNpcEncounters, LOCATION_EVENTS } from '../data/townTexture.js';
 
-export const selectCurrentLocationEncounters = (state) => {
-  const { time, activeLocation } = state;
-  return getNpcEncounters(time, activeLocation);
+export const selectCurrentLocationEncounters = (state, venueKey) => {
+  return getNpcEncounters(state.time, venueKey);
 };
 
-export const selectAvailableOrganicEncounters = (state) => {
-  const encounters = selectCurrentLocationEncounters(state);
-  // Filter out those we shouldn't see or limit them
-  return encounters;
-};
+export const selectAvailableOrganicEncounters = (state, venueKey) => {
+  if (!state.features?.organicEncounters) return [];
 
-import { LOCATION_EVENTS } from '../data/townTexture.js';
+  if (venueKey) {
+    return selectCurrentLocationEncounters(state, venueKey);
+  }
+
+  return Object.keys(LOCATION_EVENTS).flatMap(v => selectCurrentLocationEncounters(state, v));
+};
 
 export const selectActiveLocationEvent = (state, locationKey) => {
   const event = LOCATION_EVENTS[locationKey];
