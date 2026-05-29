@@ -16,7 +16,7 @@ export const selectRelevantReputationCircle = (npcId) => {
   return null;
 };
 
-const getCurrentReputation = (state, circle) => state.reputation?.[circle] || 0;
+const getCurrentReputation = (state, circle) => state?.reputation?.[circle] || 0;
 
 export const adjustReputationForPublicDate = (state, npcId, locationKey) => {
   const circle = selectRelevantReputationCircle(npcId);
@@ -77,16 +77,16 @@ export const adjustReputationForOrganicEncounter = (
   chemistryDelta = 0
 ) => {
   const circle = selectRelevantReputationCircle(npcId);
-  if (!circle) return state.reputation || {};
+  if (!circle) return state?.reputation || {};
 
   const reputationDelta = calculateOrganicEncounterReputationDelta(
     relationshipDelta,
     chemistryDelta
   );
-  if (reputationDelta === 0) return state.reputation || {};
+  if (reputationDelta === 0) return state?.reputation || {};
 
   return {
-    ...(state.reputation || {}),
+    ...(state?.reputation || {}),
     [circle]: clamp(getCurrentReputation(state, circle) + reputationDelta)
   };
 };

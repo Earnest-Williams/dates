@@ -91,7 +91,7 @@ const clamp = (value, min = 0, max = 100) => Math.max(min, Math.min(max, value))
 
 const getReputationChange = (before = {}, after = {}, circle) => {
   if (!circle) return 0;
-  return (after[circle] || 0) - (before[circle] || 0);
+  return (after?.[circle] || 0) - (before?.[circle] || 0);
 };
 
 const describeReputationChange = (circle, delta, context) => {
