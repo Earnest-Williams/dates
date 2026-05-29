@@ -59,15 +59,14 @@ export const selectProposalReadinessHint = (state, npcId) => {
 
 import { getNpcEncounters } from '../data/townTexture.js';
 
-export const selectCurrentLocationEncounters = (state) => {
-  const { time, activeLocation } = state;
-  return getNpcEncounters(time, activeLocation);
+export const selectCurrentLocationEncounters = (state, locationKey = state.activeLocation) => {
+  return getNpcEncounters(state.time, locationKey);
 };
 
-export const selectAvailableOrganicEncounters = (state) => {
-  const encounters = selectCurrentLocationEncounters(state);
-  // Filter out those we shouldn't see or limit them
-  return encounters;
+export const selectAvailableOrganicEncounters = (state, locationKey = state.activeLocation) => {
+  if (!state.features?.organicEncounters) return [];
+
+  return selectCurrentLocationEncounters(state, locationKey);
 };
 
 import { LOCATION_EVENTS } from '../data/townTexture.js';

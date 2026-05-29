@@ -10,7 +10,7 @@ import {
   calculateTravelStats, 
   computeSettlementMetrics 
 } from '../data/geography';
-import { getNpcEncounters } from '../data/townTexture';
+import { selectAvailableOrganicEncounters } from '../state/selectors';
 import { ACTIVITY_WINDOWS } from '../data/activityWindows';
 import './MapUI.css';
 
@@ -183,8 +183,12 @@ const MapUI = ({ onClose, onTalkNpc }) => {
     localStorage.setItem('brockleighshire_pins', JSON.stringify(updated));
   };
 
-  // Determine which NPCs are active at the selected settlement and venue
-  const activeEncounters = activeLocation === selectedLocKey ? getNpcEncounters(gameState.time, activeTab === 'info' ? 'park' : activeTab) : [];
+  // Determine which feature-enabled NPCs are active at the selected settlement and venue
+  const selectedVenueKey = activeTab === 'info' ? 'park' : activeTab;
+  const organicEncountersEnabled = Boolean(gameState.features?.organicEncounters);
+  const activeEncounters = activeLocation === selectedLocKey
+    ? selectAvailableOrganicEncounters(gameState, selectedVenueKey)
+    : [];
 
   const isPlayerHomeHere = selectedLocKey === currentHomeSettlement;
 
@@ -661,33 +665,35 @@ const MapUI = ({ onClose, onTalkNpc }) => {
                       </div>
                     )}
 
-                    <div className="npc-list-location" style={{ marginTop: '1.25rem' }}>
-                      <h6 className="interaction-title">Characters Active Here</h6>
-                      {activeEncounters.map((encounter, idx) => {
-                        const npc = NPCS.find(n => n.id === encounter.npcId);
-                        if (!npc) return null;
-                        const isMatched = matches[npc.id];
-                        return (
-                          <div key={`${npc.id}-${idx}`} className="location-npc-card">
-                            <div className="npc-info-mini">
-                              <span className="npc-name">{npc.name}</span>
-                              <span className="npc-archetype-mini">{encounter.reveals ? `Reveals: ${encounter.reveals.replace(/_/g, ' ')}` : npc.description}</span>
-                            </div>
-                            <button className="btn-mini btn-talk" onClick={() => startOrganicEncounter({ ...encounter, location: activeTab === 'info' ? 'park' : activeTab })}>
-                              Encounter
-                            </button>
-                            {isMatched && (
-                              <button className="btn-mini btn-talk" onClick={() => onTalkNpc(npc.id)}>
-                                Talk
+                    {organicEncountersEnabled && (
+                      <div className="npc-list-location" style={{ marginTop: '1.25rem' }}>
+                        <h6 className="interaction-title">Characters Active Here</h6>
+                        {activeEncounters.map((encounter, idx) => {
+                          const npc = NPCS.find(n => n.id === encounter.npcId);
+                          if (!npc) return null;
+                          const isMatched = matches[npc.id];
+                          return (
+                            <div key={`${npc.id}-${idx}`} className="location-npc-card">
+                              <div className="npc-info-mini">
+                                <span className="npc-name">{npc.name}</span>
+                                <span className="npc-archetype-mini">{encounter.reveals ? `Reveals: ${encounter.reveals.replace(/_/g, ' ')}` : npc.description}</span>
+                              </div>
+                              <button className="btn-mini btn-talk" onClick={() => startOrganicEncounter({ ...encounter, location: selectedVenueKey })}>
+                                Encounter
                               </button>
-                            )}
-                          </div>
-                        );
-                      })}
-                      {activeEncounters.length === 0 && (
-                        <p className="no-npcs-msg" style={{ margin: '0.5rem 0' }}>No characters are currently active here at this time.</p>
-                      )}
-                    </div>
+                              {isMatched && (
+                                <button className="btn-mini btn-talk" onClick={() => onTalkNpc(npc.id)}>
+                                  Talk
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
+                        {activeEncounters.length === 0 && (
+                          <p className="no-npcs-msg" style={{ margin: '0.5rem 0' }}>No characters are currently active here at this time.</p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 
