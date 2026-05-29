@@ -124,6 +124,7 @@ export const useGameStore = create((set, get) => ({
   giveGift: (npcId, itemKey) => actions.giveGift(get().gameState, get().dispatch, npcId, itemKey),
   answerDialogue: (npcId, optionIndex) => actions.answerDialogue(get().gameState, get().dispatch, npcId, optionIndex),
   goOnDate: (npcId, locationKey, dateType = null) => actions.goOnDate(get().gameState, get().dispatch, npcId, locationKey, dateType),
+  chooseDatePhaseOption: (optionIndex) => actions.chooseDatePhaseOption(get().gameState, get().dispatch, optionIndex),
   resolveDateEvent: (finalVibe, logText, dateOutcome = {}) => actions.resolveDateEvent(get().gameState, get().dispatch, finalVibe, logText, dateOutcome),
   resolveStoryEvent: (npcId, success) => actions.resolveStoryEvent(get().gameState, get().dispatch, npcId, success),
   proposeMarriage: (npcId) => actions.proposeMarriage(get().gameState, get().dispatch, npcId),

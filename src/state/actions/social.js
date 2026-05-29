@@ -62,6 +62,12 @@ export const goOnDate = (state, dispatch, npcId, locationKey, dateType = null) =
   return true;
 };
 
+export const chooseDatePhaseOption = (state, dispatch, optionIndex) => {
+  if (!state.activeDateEvent) return false;
+  dispatch({ type: 'CHOOSE_DATE_PHASE_OPTION', payload: { optionIndex } });
+  return true;
+};
+
 export const resolveDateEvent = (state, dispatch, finalVibe, logText, dateOutcome = {}) => {
   dispatch({ type: 'RESOLVE_DATE_EVENT', payload: { finalVibe, logText, dateOutcome } });
 };
