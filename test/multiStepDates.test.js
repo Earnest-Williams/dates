@@ -105,6 +105,41 @@ test('mediocre and failed dates create memory, discovery, and repair state', () 
   });
   assert.equal(afterFailed.relationshipMemory.elena.promises.honest_study_repair, 'pending');
   assert.equal(afterFailed.matches.elena.pendingRepairScene, 'honest_study_repair');
+  assert.equal(afterFailed.matches.elena.activeConflictId, 'fake_expertise');
+});
+
+test('contextual repair resolves from memory and timing instead of randomness', () => {
+  const state = cloneState();
+  state.matches.elena = {
+    met: true,
+    relationship: 25,
+    chemistry: 20,
+    dateCount: 1,
+    storyTier: 1,
+    activeConflictId: 'fake_expertise',
+    pendingRepairScene: 'honest_study_repair',
+    repairOpenedDay: 1,
+    compatibilityScore: 72,
+  };
+  state.relationshipMemory.elena = {
+    rememberedChoices: ['listened_in_the_stacks'],
+    sharedActivities: ['date_library', 'date_study_date'],
+    promises: { honest_study_repair: 'pending' },
+    importantMoments: ['fake_expertise'],
+    comfortKnown: ['library_late_focus'],
+    lastMeaningfulInteractionDay: 1,
+  };
+
+  const repaired = gameReducer(state, {
+    type: 'ATTEMPT_REPAIR',
+    payload: { npcId: 'elena', repairActionId: 'context_repair' },
+  });
+
+  assert.equal(repaired.matches.elena.activeConflictId, null);
+  assert.equal(repaired.matches.elena.pendingRepairScene, null);
+  assert.equal(repaired.relationshipMemory.elena.promises.honest_study_repair, 'kept');
+  assert.ok(repaired.matches.elena.relationship > state.matches.elena.relationship);
+  assert.equal(repaired.matches.elena.repairHistory[0].success, true);
 });
 
 test('home style profile affects home dates without creating gift preferences', () => {

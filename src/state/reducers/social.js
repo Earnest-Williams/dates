@@ -15,6 +15,7 @@ import {
 import { scoreDatePhaseChoice } from '../../sim/dateScoring.js';
 import { applyDateDiminishingReturns } from '../../sim/dateDiminishingReturns.js';
 import { appendRelationshipEvent } from '../../sim/relationshipEvents.js';
+import { evaluateRepairAction } from '../../sim/relationshipRepair.js';
 import { describeTimePassage, getTimeWindowStatus } from '../../sim/time.js';
 
 const createEmptyMemory = () => ({
@@ -539,7 +540,13 @@ export const socialReducer = (state, action) => {
             dateCount: (currentMatch.dateCount || 0) + 1,
             compatibilityScore,
             lastDateQuality: qualityScore,
-            pendingRepairScene: dateOutcome.repairScene || currentMatch.pendingRepairScene
+            activeConflictId: dateOutcome.conflict
+              || (dateOutcome.repairScene ? currentMatch.activeConflictId || dateOutcome.repairScene : currentMatch.activeConflictId),
+            conflictStartedDay: dateOutcome.conflict || dateOutcome.repairScene
+              ? nextState.time.day
+              : currentMatch.conflictStartedDay,
+            pendingRepairScene: dateOutcome.repairScene || currentMatch.pendingRepairScene,
+            repairOpenedDay: dateOutcome.repairScene ? nextState.time.day : currentMatch.repairOpenedDay
           }
         },
         compatibility: {
@@ -1281,22 +1288,46 @@ export const socialReducer = (state, action) => {
       const currentMatch = state.matches[npcId];
       if (!currentMatch) return state;
 
-      let nextState = simulateTicks(state, 2); // Taking time to repair
+      const nextState = simulateTicks(state, 2);
       const timePassage = describeTimePassage(state.time, nextState.time, `tried to repair things with ${npcId}`);
-      
-      const success = Math.random() > 0.3; // Placeholder logic for now
-      const newRel = success
-        ? applyRelationshipCap(currentMatch.relationship, 10, currentMatch.storyTier, nextState.stats)
-        : Math.max(0, currentMatch.relationship - 5);
-      const newChem = success ? Math.min(100, currentMatch.chemistry + 5) : currentMatch.chemistry;
-      const logMsg = success
-        ? `Successfully repaired relationship with ${npcId} using ${repairActionId}.`
-        : `Repair attempt failed with ${npcId}. Needs more time or a different approach.`;
-      const newConflictId = success ? null : currentMatch.activeConflictId;
-      const newRepairScene = success ? null : currentMatch.pendingRepairScene;
-
-      return {
+      const evaluation = evaluateRepairAction(nextState, npcId, currentMatch, repairActionId);
+      const currentChemistry = currentMatch.chemistry ?? 10;
+      const newRel = applyRelationshipCap(
+        currentMatch.relationship ?? 10,
+        evaluation.relationshipDelta,
+        currentMatch.storyTier,
+        nextState.stats
+      );
+      const newChem = clamp(currentChemistry + evaluation.chemistryDelta);
+      const repairHistory = [
+        {
+          day: nextState.time.day,
+          actionId: repairActionId,
+          resolvedActionId: evaluation.resolvedActionId || repairActionId,
+          success: evaluation.success,
+          score: evaluation.score,
+          repairScene: evaluation.repairScene,
+        },
+        ...(currentMatch.repairHistory || []),
+      ].slice(0, 10);
+      const newConflictId = evaluation.success ? null : currentMatch.activeConflictId;
+      const newRepairScene = evaluation.success ? null : currentMatch.pendingRepairScene;
+      const repairedPromise = currentMatch.pendingRepairScene || evaluation.repairScene;
+      const logMsg = evaluation.success
+        ? `Repair with ${npcId} succeeded (${evaluation.title}, score ${evaluation.score}). ${evaluation.reason}.`
+        : `Repair with ${npcId} did not land (${evaluation.title}, score ${evaluation.score}). ${evaluation.reason}.`;
+      const updatedState = {
         ...nextState,
+        relationshipMemory: updateRelationshipMemory(nextState, npcId, {
+          importantMoment: evaluation.success
+            ? `repaired_${repairedPromise || currentMatch.activeConflictId || 'conflict'}`
+            : `attempted_repair_${repairedPromise || currentMatch.activeConflictId || 'conflict'}`,
+          promises: repairedPromise
+            ? { [repairedPromise]: evaluation.success ? 'kept' : 'pending' }
+            : {},
+          comfortKnown: evaluation.success ? 'repair_follow_through' : null,
+          lastMeaningfulInteractionDay: nextState.time.day,
+        }),
         matches: {
           ...nextState.matches,
           [npcId]: {
@@ -1304,11 +1335,22 @@ export const socialReducer = (state, action) => {
             relationship: newRel,
             chemistry: newChem,
             activeConflictId: newConflictId,
-            pendingRepairScene: newRepairScene
+            pendingRepairScene: newRepairScene,
+            repairHistory,
           }
         },
         logs: [`${timePassage} ${logMsg}`, ...nextState.logs].slice(0, 20)
       };
+
+      return appendRelationshipEvent(updatedState, npcId, {
+        source: 'repair',
+        type: evaluation.success ? 'repair' : 'conflict',
+        relationshipDelta: evaluation.relationshipDelta,
+        chemistryDelta: evaluation.chemistryDelta,
+        conflictId: currentMatch.activeConflictId || null,
+        repairScene: evaluation.repairScene,
+        summary: logMsg,
+      });
     }
 
     default:
