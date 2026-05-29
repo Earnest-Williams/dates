@@ -24,7 +24,7 @@ const ACTION_LABELS = {
   context_repair: 'Use the specific repair opening',
 };
 
-const getCurrentDay = (state) => state.time?.day || 1;
+const getCurrentDay = (state) => state?.time?.day || 1;
 
 const getElapsedDays = (state, matchData, memory) => {
   const startedDay = matchData.repairOpenedDay
@@ -65,6 +65,7 @@ const isValidRepairAction = (actionId) => {
 };
 
 export const getRepairActionLabel = (actionId) => {
+  if (typeof actionId !== 'string') return '';
   return ACTION_LABELS[actionId] || actionId.replaceAll('_', ' ');
 };
 
@@ -142,7 +143,7 @@ export const evaluateRepairAction = (state, npcId, matchData, actionId) => {
 
   const memory = {
     ...createEmptyMemory(),
-    ...(state.relationshipMemory?.[npcId] || {}),
+    ...(state?.relationshipMemory?.[npcId] || {}),
   };
   const repairEvent = getNpcRepairEvent(npcId);
   const resolvedActionId = normalizeRepairActionId(npcId, actionId);
