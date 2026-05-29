@@ -1,7 +1,7 @@
 import { NPCS } from '../data/npcs.js';
 
 export const scoreDatePhaseChoice = (state, activeDateEvent, choice) => {
-  const npc = NPCS.find((item) => item.id === activeDateEvent.npcId);
+  const npc = activeDateEvent ? NPCS.find((item) => item.id === activeDateEvent.npcId) : undefined;
   let connectionChange = choice.connection || 0;
   let relationshipChange = choice.relationship || 0;
   let moodChange = choice.mood || 0;
