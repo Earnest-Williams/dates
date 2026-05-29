@@ -138,7 +138,9 @@ test('multi-phase date choices accumulate state and automatically resolve at end
   });
   
   assert.equal(phase1.activeDateEvent.currentPhaseIndex, 1);
-  assert.equal(phase1.activeDateEvent.vibe, 42); // 30 + 12
+  assert.equal(phase1.activeDateEvent.vibe, 50); // 30 + 12 + scholar archetype bonus
+  assert.ok(phase1.activeDateEvent.dateOutcome.discoveries.includes('library_late_focus'));
+  assert.ok(phase1.activeDateEvent.dateOutcome.memories.includes('listened_in_the_stacks'));
   
   const phase2 = gameReducer(phase1, {
     type: 'CHOOSE_DATE_PHASE_OPTION',
@@ -146,8 +148,10 @@ test('multi-phase date choices accumulate state and automatically resolve at end
   });
   
   assert.equal(phase2.activeDateEvent.currentPhaseIndex, 2);
-  // Without high intelligence, it falls to fail -> base 14 + fail 2 = 16. 42 + 16 = 58
-  assert.equal(phase2.activeDateEvent.vibe, 58);
+  // Without high intelligence, it falls to fail -> base 14 + fail 2 = 16. 50 + 16 = 66
+  assert.equal(phase2.activeDateEvent.vibe, 66);
+  assert.ok(phase2.activeDateEvent.dateOutcome.discoveries.includes('enjoys_patient_effort'));
+  assert.ok(phase2.activeDateEvent.dateOutcome.memories.includes('solved_margin_mystery'));
   
   const phase3 = gameReducer(phase2, {
     type: 'CHOOSE_DATE_PHASE_OPTION',
@@ -158,4 +162,6 @@ test('multi-phase date choices accumulate state and automatically resolve at end
   assert.equal(phase3.activeDateEvent, null);
   assert.strictEqual(phase3.gamePhase, 'date_recap');
   assert.ok(phase3.relationshipMemory.elena.rememberedChoices.includes('helped_library_volunteers'));
+  assert.ok(phase3.lastDateRecap.memoriesGained.includes('helped_library_volunteers'));
+  assert.ok(phase3.lastDateRecap.promisesCreated.includes('book_sale_volunteer_callback'));
 });

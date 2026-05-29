@@ -379,6 +379,7 @@ export const socialReducer = (state, action) => {
 
       const updatedMemory = updateRelationshipMemory(nextState, npcId, memoryUpdates);
 
+      const currentDateOutcome = nextState.activeDateEvent.dateOutcome || {};
       const nextDateEvent = {
         ...nextState.activeDateEvent,
         vibe: nextVibe,
@@ -386,13 +387,16 @@ export const socialReducer = (state, action) => {
         currentPhaseIndex: nextPhaseIndex,
         memoryContext: updatedMemory[npcId],
         dateOutcome: {
-          ...(nextState.activeDateEvent.dateOutcome || {}),
-          relationship: (nextState.activeDateEvent.dateOutcome?.relationship || 0) + (choice.relationship || 0),
-          chemistry: (nextState.activeDateEvent.dateOutcome?.chemistry || 0) + scored.chemistryChange,
-          mood: (nextState.activeDateEvent.dateOutcome?.mood || 0) + scored.moodChange,
-          energy: (nextState.activeDateEvent.dateOutcome?.energy || 0) + scored.energyChange,
-          repairScene: choice.repairScene || nextState.activeDateEvent.dateOutcome?.repairScene,
-          conflict: choice.conflict || nextState.activeDateEvent.dateOutcome?.conflict,
+          ...currentDateOutcome,
+          relationship: (currentDateOutcome.relationship || 0) + scored.relationshipChange,
+          chemistry: (currentDateOutcome.chemistry || 0) + scored.chemistryChange,
+          mood: (currentDateOutcome.mood || 0) + scored.moodChange,
+          energy: (currentDateOutcome.energy || 0) + scored.energyChange,
+          discoveries: addUnique(currentDateOutcome.discoveries, scored.discovery),
+          memories: addUnique(currentDateOutcome.memories, scored.memory),
+          callbacks: addUnique(currentDateOutcome.callbacks, scored.callback),
+          repairScene: scored.repairScene || currentDateOutcome.repairScene,
+          conflict: scored.conflict || currentDateOutcome.conflict,
         }
       };
 
