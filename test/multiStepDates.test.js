@@ -10,7 +10,9 @@ import { initialState, gameReducer } from '../src/state/reducers/rootReducer.js'
 const cloneState = () => structuredClone(initialState);
 
 test('every NPC has at least two preferred non-gift date types', () => {
-  for (const npc of NPCS) {
+  // Only romanceable (female) NPCs need date preferences
+  const romanceableNPCs = NPCS.filter(n => n.gender === 'female');
+  for (const npc of romanceableNPCs) {
     const preferences = NPC_DATE_PREFERENCES[npc.id] || [];
     assert.ok(preferences.length >= 2, `${npc.id} needs at least two preferences`);
     for (const dateType of preferences.slice(0, 2)) {

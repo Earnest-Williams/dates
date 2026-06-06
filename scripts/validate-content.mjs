@@ -18,7 +18,10 @@ console.log('Validating NPC romance arcs...');
 
 const requiredArcTypes = ['introduction', 'early connection', 'personal reveal', 'conflict', 'trust event', 'commitment event'];
 
-for (const npc of NPCS) {
+// Only female NPCs are romanceable
+const romanceableNPCs = NPCS.filter(n => n.gender === 'female');
+
+for (const npc of romanceableNPCs) {
   const arcs = npc.romanceArc || [];
   
   if (!arcs || arcs.length === 0) {
@@ -127,8 +130,8 @@ console.log('Validating callbacks...');
 const definedCallbacks = new Set();
 const referencedCallbacks = new Set();
 
-// From NPC arcs
-for (const npc of NPCS) {
+// From NPC arcs (only romanceable NPCs)
+for (const npc of romanceableNPCs) {
   for (const arc of npc.romanceArc || []) {
     for (const choice of arc.choices || []) {
       if (choice.callback) {
@@ -139,7 +142,10 @@ for (const npc of NPCS) {
       }
     }
   }
-  
+}
+
+// From story events and repair scenes (all NPCs)
+for (const npc of NPCS) {
   // From story events
   if (npc.storyEvents) {
     for (const event of Object.values(npc.storyEvents)) {

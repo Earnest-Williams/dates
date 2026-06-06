@@ -17,9 +17,7 @@ export const DATE_TYPE_LABELS = {
 
 export const NPC_DATE_PREFERENCES = {
   elena: ['library_date', 'study_date', 'quiet_evening_in'],
-  brad: ['gym_date', 'workout_date', 'park_walk'],
   sophia: ['nightclub_date', 'mall_outing', 'coffee_date'],
-  marcus: ['coffee_date', 'home_dinner', 'errands_together'],
   chloe: ['park_walk', 'movie_night', 'quiet_evening_in'],
   rina: ['nightclub_date', 'coffee_date', 'movie_night'],
   maya: ['park_walk', 'study_date', 'home_dinner'],

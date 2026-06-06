@@ -42,9 +42,11 @@ const REQUIRED_REPAIR_ACTIONS = [
 ];
 
 test('all romanceable npcs have six romance arc chapters with required beats', () => {
-  assert.equal(NPCS.length, 8);
+  // Only female NPCs are romanceable
+  const romanceableNPCs = NPCS.filter(n => n.gender === 'female');
+  assert.equal(romanceableNPCs.length, 6);
 
-  for (const npc of NPCS) {
+  for (const npc of romanceableNPCs) {
     assert.ok(Array.isArray(npc.romanceArc));
     assert.ok(npc.romanceArc.length >= 6);
 
@@ -121,7 +123,9 @@ test('new npc roster includes three added female routes and one bisexual npc', (
 });
 
 test('chapters include progression and outcome structure', () => {
-  for (const npc of NPCS) {
+  // Only check romanceable (female) NPCs
+  const romanceableNPCs = NPCS.filter(n => n.gender === 'female');
+  for (const npc of romanceableNPCs) {
     for (const chapter of npc.romanceArc) {
       assert.equal(typeof chapter.minRelationship, 'number');
       assert.equal(typeof chapter.emotionalBeat, 'string');
