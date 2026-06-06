@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import readline from 'node:readline';
 
 const readDirFiles = (dir) =>
   fs
@@ -11,19 +12,45 @@ const actionFiles = readDirFiles('src/state/actions');
 const reducerFiles = readDirFiles('src/state/reducers');
 
 const dispatched = new Set();
+const actionTypePattern = /type:\s*['"`]([^'"`]+)['"`]/g;
+
 for (const filePath of actionFiles) {
-  const text = fs.readFileSync(filePath, 'utf8');
-  for (const match of text.matchAll(/type:\s*['"`]([^'"`]+)['"`]/g)) {
-    dispatched.add(match[1]);
+  const fileStream = fs.createReadStream(filePath, { encoding: 'utf8' });
+  const rl = readline.createInterface({
+    input: fileStream,
+    crlfDelay: Infinity
+  });
+  
+  for await (const line of rl) {
+    let match;
+    actionTypePattern.lastIndex = 0;
+    while ((match = actionTypePattern.exec(line)) !== null) {
+      dispatched.add(match[1]);
+    }
   }
+  
+  fileStream.close();
 }
 
 const handled = new Set();
+const casePattern = /case\s+['"`]([^'"`]+)['"`]/g;
+
 for (const filePath of reducerFiles) {
-  const text = fs.readFileSync(filePath, 'utf8');
-  for (const match of text.matchAll(/case\s+['"`]([^'"`]+)['"`]/g)) {
-    handled.add(match[1]);
+  const fileStream = fs.createReadStream(filePath, { encoding: 'utf8' });
+  const rl = readline.createInterface({
+    input: fileStream,
+    crlfDelay: Infinity
+  });
+  
+  for await (const line of rl) {
+    let match;
+    casePattern.lastIndex = 0;
+    while ((match = casePattern.exec(line)) !== null) {
+      handled.add(match[1]);
+    }
   }
+  
+  fileStream.close();
 }
 
 const missing = [...dispatched].filter((type) => !handled.has(type)).sort();

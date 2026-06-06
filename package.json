@@ -8,9 +8,12 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "node --test",
+    "test": "bash scripts/run-tests.sh",
+    "test:all": "NODE_OPTIONS='--max-old-space-size=16384' node --test",
     "audit:actions": "node scripts/audit-actions.mjs",
-    "audit:content": "node scripts/audit-content.mjs"
+    "audit:content": "node scripts/audit-content.mjs",
+    "validate:content": "node scripts/validate-content.mjs",
+    "audit": "node scripts/run-audit.mjs"
   },
   "dependencies": {
     "react": "^19.2.6",

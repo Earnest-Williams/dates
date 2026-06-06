@@ -17,5 +17,7 @@ jobs:
         node-version: '20'
         cache: 'npm'
     - run: npm ci
-    - run: npm test
-    - run: npm run audit:actions
+    - run: bash scripts/run-tests.sh
+    - run: node scripts/audit-actions.mjs
+    - run: node scripts/audit-content.mjs
+    - run: node scripts/validate-content.mjs
