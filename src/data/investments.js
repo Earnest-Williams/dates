@@ -43,5 +43,60 @@ export const ASSETS = {
     startPrice: 15.00,
     volatility: 0.25, // high volatility
     desc: "Utility blockchain token for digital asset exchanges."
+  },
+  // Phase 2 - Enhanced Investment Assets
+  tech: {
+    id: "tech",
+    name: "NovaTech Solutions",
+    ticker: "TECH",
+    type: "stock",
+    startPrice: 75,
+    volatility: 0.18, // medium-high volatility
+    desc: "Innovative AI and cloud computing company. High growth potential."
+  },
+  fashion: {
+    id: "fashion",
+    name: "Glamour Style Inc.",
+    ticker: "FASH",
+    type: "stock",
+    startPrice: 35,
+    volatility: 0.15, // medium volatility
+    desc: "Luxury fashion brand with global reach. Sensitive to trends."
+  },
+  green: {
+    id: "green",
+    name: "EcoVantage Energy",
+    ticker: "GREEN",
+    type: "stock",
+    startPrice: 50,
+    volatility: 0.10, // low-medium volatility
+    desc: "Renewable energy company. Stable growth with ESG benefits."
+  },
+  media: {
+    id: "media",
+    name: "SimMedia Entertainment",
+    ticker: "MEDIA",
+    type: "stock",
+    startPrice: 45,
+    volatility: 0.20, // high volatility
+    desc: "Streaming and entertainment conglomerate. Content-driven performance."
+  },
+  realty: {
+    id: "realty",
+    name: "Brockleigh Realty",
+    ticker: "REAL",
+    type: "reits",
+    startPrice: 80,
+    volatility: 0.08, // low volatility
+    desc: "Real estate investment trust. Steady dividends, long-term growth."
+  },
+  sol: {
+    id: "sol",
+    name: "SolanaSim",
+    ticker: "SOL",
+    type: "crypto",
+    startPrice: 20.00,
+    volatility: 0.30, // high volatility
+    desc: "High-performance blockchain for decentralized applications."
   }
 };

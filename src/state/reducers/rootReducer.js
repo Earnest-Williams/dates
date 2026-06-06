@@ -131,21 +131,39 @@ export const initialState = {
     gym: { quantity: 0, avgPrice: 0 },
     lnup: { quantity: 0, avgPrice: 0 },
     shib: { quantity: 0, avgPrice: 0 },
-    eths: { quantity: 0, avgPrice: 0 }
+    eths: { quantity: 0, avgPrice: 0 },
+    tech: { quantity: 0, avgPrice: 0 },
+    fashion: { quantity: 0, avgPrice: 0 },
+    green: { quantity: 0, avgPrice: 0 },
+    media: { quantity: 0, avgPrice: 0 },
+    realty: { quantity: 0, avgPrice: 0 },
+    sol: { quantity: 0, avgPrice: 0 }
   },
   assetPrices: {
     omni: 100,
     gym: 25,
     lnup: 40,
     shib: 0.50,
-    eths: 15.00
+    eths: 15.00,
+    tech: 75,
+    fashion: 35,
+    green: 50,
+    media: 45,
+    realty: 80,
+    sol: 20.00
   },
   priceHistories: {
     omni: [100, 100, 100, 100, 100],
     gym: [25, 25, 25, 25, 25],
     lnup: [40, 40, 40, 40, 40],
     shib: [0.50, 0.50, 0.50, 0.50, 0.50],
-    eths: [15, 15, 15, 15, 15]
+    eths: [15, 15, 15, 15, 15],
+    tech: [75, 75, 75, 75, 75],
+    fashion: [35, 35, 35, 35, 35],
+    green: [50, 50, 50, 50, 50],
+    media: [45, 45, 45, 45, 45],
+    realty: [80, 80, 80, 80, 80],
+    sol: [20, 20, 20, 20, 20]
   },
   simstagram: {
     followers: 0,
@@ -204,6 +222,7 @@ export const initialState = {
     dailyPlannerUx: true,
     marketRiskControls: false,
     adultToneTags: false,
+    organicEncounters: true,
   },
   reputation: {
     coworkers: 0,

@@ -13,6 +13,17 @@ export const DATE_TYPE_LABELS = {
   workout_date: 'Workout Date',
   quiet_evening_in: 'Quiet Evening In',
   errands_together: 'Errands Together',
+  // Phase 2 - New Date Types
+  art_gallery_date: 'Art Gallery Date',
+  cooking_class_date: 'Cooking Class Date',
+  wine_tasting_date: 'Wine Tasting Date',
+  concert_date: 'Concert Date',
+  hiking_date: 'Hiking Date',
+  beach_date: 'Beach Date',
+  museum_date: 'Museum Date',
+  comedy_show_date: 'Comedy Show Date',
+  dance_lesson_date: 'Dance Lesson Date',
+  bookstore_date: 'Bookstore Date',
 };
 
 export const NPC_DATE_PREFERENCES = {
@@ -294,6 +305,118 @@ export const DATE_TEMPLATES = {
         makeChoice({ text: 'Offer to help with a future practical burden.', connection: 8, callback: 'practical_help_callback' }),
         makeChoice({ text: 'Say this was not a real date because it was useful.', connection: -13, relationship: -5, conflict: 'dismissed_routine_intimacy', repairScene: 'routine_intimacy_repair' }),
       ] },
+    ] },
+  // Phase 2 - New Date Templates
+  art_gallery_date: {
+    id: 'art_gallery_date',
+    venueKey: 'art_gallery',
+    title: 'Art Gallery Date',
+    opportunity: 'A shared appreciation for beauty creates intimate connections.',
+    phases: [
+      {
+        id: 'arrival',
+        title: 'Arrival: First Impressions',
+        prompt: 'The gallery space invites quiet contemplation and shared discovery.',
+        choices: [
+          makeChoice({ text: 'Ask what piece first caught their attention.', connection: 12, relationship: 4, mood: 3, discovery: 'artistic_preferences', memory: 'shared_art_discovery', preferredArchetypes: ['ARTIST', 'SCHOLAR'] }),
+          makeChoice({ text: 'Share your immediate reaction to the current exhibit.', connection: 8, chemistry: 4, mood: 5, memory: 'immediate_art_reaction' }),
+          makeChoice({ text: 'Criticize modern art and suggest leaving.', connection: -10, relationship: -3, mood: -2, conflict: 'art_criticism_conflict', repairScene: 'art_appreciation_repair' }),
+        ],
+      },
+      {
+        id: 'shared_activity',
+        title: 'Shared Activity: Art Interpretation',
+        prompt: 'You both stand before a particularly striking piece, each with different interpretations.',
+        choices: [
+          makeChoice({ text: 'Ask them to explain their perspective on the artwork.', connection: 14, relationship: 5, mood: 4, discovery: 'interpretive_style', memory: 'art_interpretation_dialogue', checkStat: 'intelligence', threshold: 30, success: { connection: 8, discovery: 'deep_art_understanding' }, fail: { connection: 2, discovery: 'appreciates_effort' } }),
+          makeChoice({ text: 'Share your own interpretation and ask for their thoughts.', connection: 10, chemistry: 3, discovery: 'personal_art_perspective', memory: 'shared_art_interpretation' }),
+          makeChoice({ text: 'Dismiss the artwork as pretentious.', connection: -8, mood: -4, conflict: 'art_dismissal', repairScene: 'art_respect_repair' }),
+        ],
+      },
+      {
+        id: 'closing_moment',
+        title: 'Closing Moment: Gallery Reflection',
+        prompt: 'As you prepare to leave, the gallery gift shop offers a final moment of connection.',
+        choices: [
+          makeChoice({ text: 'Suggest buying a print of their favorite piece as a memento.', connection: 12, relationship: 5, chemistry: 4, callback: 'art_gallery_callback', memory: 'art_memento_suggestion' }),
+          makeChoice({ text: 'Ask which artist they most admire and why.', connection: 10, chemistry: 5, discovery: 'artistic_influences', memory: 'artist_admiration_dialogue' }),
+          makeChoice({ text: 'Complain about the high prices in the gift shop.', connection: -5, mood: -3, conflict: 'gift_shop_complaint', repairScene: 'positive_focus_repair' }),
+        ],
+      },
+    ] },
+  cooking_class_date: {
+    id: 'cooking_class_date',
+    venueKey: 'cooking_school',
+    title: 'Cooking Class Date',
+    opportunity: 'Creating something together builds intimacy and teamwork.',
+    phases: [
+      {
+        id: 'arrival',
+        title: 'Arrival: Kitchen Chemistry',
+        prompt: 'The cooking classroom buzzes with anticipation as you find your station.',
+        choices: [
+          makeChoice({ text: 'Ask what their favorite dish to cook is.', connection: 12, relationship: 4, mood: 3, discovery: 'culinary_preferences', memory: 'favorite_dish_dialogue', preferredArchetypes: ['EXECUTIVE', 'SOCIALITE'] }),
+          makeChoice({ text: 'Offer to be their sous-chef for the class.', connection: 8, chemistry: 4, mood: 5, memory: 'sous_chef_offer' }),
+          makeChoice({ text: 'Complain about having to cook with others.', connection: -10, relationship: -3, mood: -2, conflict: 'cooking_attitude_conflict', repairScene: 'cooking_enthusiasm_repair' }),
+        ],
+      },
+      {
+        id: 'shared_activity',
+        title: 'Shared Activity: Recipe Collaboration',
+        prompt: 'Your recipe requires teamwork and coordination.',
+        choices: [
+          makeChoice({ text: 'Take the lead and guide them through the recipe.', connection: 14, relationship: 5, mood: 4, discovery: 'leadership_style', memory: 'recipe_leadership', checkStat: 'culinary', threshold: 30, success: { connection: 8, discovery: 'culinary_skill_recognized' }, fail: { connection: 2, discovery: 'appreciates_initiative' } }),
+          makeChoice({ text: 'Work together as equal partners.', connection: 10, chemistry: 3, discovery: 'teamwork_style', memory: 'equal_cooking_partnership' }),
+          makeChoice({ text: 'Let them do all the work while you watch.', connection: -8, mood: -4, conflict: 'passive_cooking', repairScene: 'active_participation_repair' }),
+        ],
+      },
+      {
+        id: 'closing_moment',
+        title: 'Closing Moment: Taste Test',
+        prompt: 'The final taste test offers a moment to savor your creation together.',
+        choices: [
+          makeChoice({ text: 'Compliment their specific contributions to the dish.', connection: 12, relationship: 5, chemistry: 4, callback: 'cooking_compliment_callback', memory: 'specific_cooking_praise' }),
+          makeChoice({ text: 'Ask what they would do differently next time.', connection: 10, chemistry: 5, discovery: 'culinary_reflection', memory: 'cooking_reflection_dialogue' }),
+          makeChoice({ text: 'Criticize the final result harshly.', connection: -12, relationship: -5, mood: -6, conflict: 'cooking_criticism', repairScene: 'constructive_feedback_repair' }),
+        ],
+      },
+    ] },
+  wine_tasting_date: {
+    id: 'wine_tasting_date',
+    venueKey: 'wine_bar',
+    title: 'Wine Tasting Date',
+    opportunity: 'Shared sensory experiences create lasting memories.',
+    phases: [
+      {
+        id: 'arrival',
+        title: 'Arrival: First Pour',
+        prompt: 'The wine bar offers an intimate setting for exploring new flavors together.',
+        choices: [
+          makeChoice({ text: 'Ask what their favorite wine region is.', connection: 12, relationship: 4, mood: 3, discovery: 'wine_preferences', memory: 'wine_region_dialogue', preferredArchetypes: ['EXECUTIVE', 'SOCIALITE'] }),
+          makeChoice({ text: 'Share your own wine knowledge or lack thereof.', connection: 8, chemistry: 4, mood: 5, memory: 'wine_knowledge_sharing' }),
+          makeChoice({ text: 'Complain about the pretentiousness of wine culture.', connection: -10, relationship: -3, mood: -2, conflict: 'wine_culture_conflict', repairScene: 'wine_appreciation_repair' }),
+        ],
+      },
+      {
+        id: 'shared_activity',
+        title: 'Shared Activity: Flavor Analysis',
+        prompt: 'You both sample a complex wine, each noticing different nuances.',
+        choices: [
+          makeChoice({ text: 'Ask them to describe the flavors they detect.', connection: 14, relationship: 5, mood: 4, discovery: 'sensory_perception', memory: 'wine_flavor_dialogue', checkStat: 'style', threshold: 30, success: { connection: 8, discovery: 'refined_palette' }, fail: { connection: 2, discovery: 'appreciates_effort' } }),
+          makeChoice({ text: 'Share your own flavor impressions.', connection: 10, chemistry: 3, discovery: 'personal_taste_profile', memory: 'shared_wine_impressions' }),
+          makeChoice({ text: 'Pretend to detect flavors you cannot actually taste.', connection: -8, mood: -4, conflict: 'wine_pretension', repairScene: 'honest_tasting_repair' }),
+        ],
+      },
+      {
+        id: 'closing_moment',
+        title: 'Closing Moment: Final Toast',
+        prompt: 'The sommelier offers a final, special vintage to cap the experience.',
+        choices: [
+          makeChoice({ text: 'Toast to new experiences and shared discoveries.', connection: 12, relationship: 5, chemistry: 4, callback: 'wine_toast_callback', memory: 'shared_wine_toast' }),
+          makeChoice({ text: 'Ask what wine they would choose for a special occasion.', connection: 10, chemistry: 5, discovery: 'special_occasion_preferences', memory: 'wine_occasion_dialogue' }),
+          makeChoice({ text: 'Complain about the cost of the final wine.', connection: -5, mood: -3, conflict: 'wine_cost_complaint', repairScene: 'value_focus_repair' }),
+        ],
+      },
     ] },
 };
 

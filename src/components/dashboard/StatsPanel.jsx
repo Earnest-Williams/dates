@@ -4,6 +4,7 @@ import StatBar from './StatBar';
 
 const StatsPanel = () => {
   const stats = useGameStore(state => state.gameState.stats);
+  const family = useGameStore(state => state.gameState.family);
   const { 
     fitness, intelligence, charisma, style, 
     corporate, programming, marketing, finance, negotiation, 
@@ -11,8 +12,30 @@ const StatsPanel = () => {
     confidence, socialIq, empathy 
   } = stats;
 
+  const playerName = family.playerName || 'Alex';
+  const playerAge = family.age || 18;
+  const generation = family.generation || 1;
+
   return (
     <>
+      <div className="bento-card personal-info">
+        <h2 className="section-title">Personal Info</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.9rem' }}>
+          <div>
+            <span style={{ color: 'var(--text-secondary)' }}>Name:</span> <strong>{playerName}</strong>
+          </div>
+          <div>
+            <span style={{ color: 'var(--text-secondary)' }}>Age:</span> <strong>{playerAge}</strong>
+          </div>
+          <div>
+            <span style={{ color: 'var(--text-secondary)' }}>Generation:</span> <strong>{generation}</strong>
+          </div>
+          <div>
+            <span style={{ color: 'var(--text-secondary)' }}>Money:</span> <strong>${stats.money?.toLocaleString()}</strong>
+          </div>
+        </div>
+      </div>
+
       <div className="bento-card core-stats core">
         <h2 className="section-title">Core Stats</h2>
         <div className="stats-list">

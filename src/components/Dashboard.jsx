@@ -16,6 +16,8 @@ import CalendarPanel from './dashboard/CalendarPanel';
 import DailyPlannerPanel from './dashboard/DailyPlannerPanel';
 import RelationshipsJournalPanel from './dashboard/RelationshipsJournalPanel';
 import MemoryViewer from './dashboard/MemoryViewer';
+import ReputationPanel from './dashboard/ReputationPanel';
+import CompatibilityPanel from './dashboard/CompatibilityPanel';
 import TimeControls from './dashboard/TimeControls';
 import './Dashboard.css';
 
@@ -100,6 +102,8 @@ const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) =
             {gameState.features?.relationshipJournal && (
               <RelationshipsJournalPanel gameState={gameState} />
             )}
+            <CompatibilityPanel />
+            <ReputationPanel />
             <MemoryViewer gameState={gameState} />
             <RelationshipsPanel />
             <PromisesPanel />

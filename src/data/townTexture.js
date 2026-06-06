@@ -33,6 +33,47 @@ export const NPC_SCHEDULE = {
     { days: ['tue', 'fri'], time: 'evening', location: 'office', reveals: 'professional_pressure' },
     { days: ['sat'], time: 'morning', location: 'mall', reveals: 'routine_efficiency' },
   ],
+  // Phase 2 - New NPC Schedules
+  liam: [
+    { days: ['mon', 'wed', 'fri'], time: 'morning', location: 'gym', reveals: 'marathon_training' },
+    { days: ['sat'], time: 'afternoon', location: 'park', reveals: 'competitive_spirit' },
+  ],
+  ava: [
+    { days: ['tue', 'thu'], time: 'afternoon', location: 'library', reveals: 'philosophical_thoughts' },
+    { days: ['sun'], time: 'morning', location: 'mall', reveals: 'intellectual_curiosity' },
+  ],
+  ethan: [
+    { days: ['wed'], time: 'evening', location: 'mall', reveals: 'musical_inspiration' },
+    { days: ['sat'], time: 'night', location: 'club', reveals: 'performance_nerves' },
+  ],
+  olivia: [
+    { days: ['mon'], time: 'afternoon', location: 'art_gallery', reveals: 'artistic_vision' },
+    { days: ['thu'], time: 'evening', location: 'library', reveals: 'creative_process' },
+  ],
+  noah: [
+    { days: ['tue', 'thu'], time: 'morning', location: 'office', reveals: 'startup_ambition' },
+    { days: ['sun'], time: 'afternoon', location: 'mall', reveals: 'entrepreneurial_mindset' },
+  ],
+  isabella: [
+    { days: ['wed', 'fri'], time: 'afternoon', location: 'mall', reveals: 'fashion_sense' },
+    { days: ['sat'], time: 'evening', location: 'art_gallery', reveals: 'design_philosophy' },
+  ],
+  james: [
+    { days: ['mon', 'thu'], time: 'evening', location: 'office', reveals: 'legal_expertise' },
+    { days: ['sun'], time: 'morning', location: 'library', reveals: 'justice_principles' },
+  ],
+  sofia: [
+    { days: ['tue', 'sat'], time: 'evening', location: 'club', reveals: 'dance_artistry' },
+    { days: ['thu'], time: 'afternoon', location: 'park', reveals: 'graceful_movement' },
+  ],
+  emma: [
+    { days: ['wed', 'sat'], time: 'morning', location: 'park', reveals: 'nature_connection' },
+    { days: ['sun'], time: 'afternoon', location: 'mall', reveals: 'community_spirit' },
+  ],
+  alexander: [
+    { days: ['mon', 'fri'], time: 'afternoon', location: 'office', reveals: 'architectural_vision' },
+    { days: ['sun'], time: 'morning', location: 'library', reveals: 'design_principles' },
+  ],
 };
 
 export const LOCATION_EVENTS = {

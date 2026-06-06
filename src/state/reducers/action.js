@@ -55,8 +55,9 @@ export const actionReducer = (state, action) => {
       const moodHigh = currentMood >= 70;
       const hasBookshelf = state.placedFurniture.includes('bookshelf');
       const isBurnedOut = state.activeTraits?.includes('burned_out');
+      const playerAge = state.family.age || 18;
 
-      // 2. Process gains / modifiers (bookshelf, high mood, low health)
+      // 2. Process gains / modifiers (bookshelf, high mood, low health, aging wisdom)
       const finalStatChanges = { ...statChanges };
       Object.keys(finalStatChanges).forEach(key => {
         let change = finalStatChanges[key];
@@ -82,6 +83,12 @@ export const actionReducer = (state, action) => {
         // Bookshelf study boost
         if (actionName.toLowerCase().includes('study') && key === 'intelligence' && hasBookshelf) {
           change = change * 1.25;
+        }
+
+        // Aging Wisdom Bonus (starts at age 30, increases with age)
+        if (playerAge >= 30 && change > 0 && key !== 'fitness' && key !== 'energy' && key !== 'health') {
+          const wisdomBonus = 1 + ((playerAge - 30) * 0.01); // 1% bonus per year after 30
+          change = Math.floor(change * wisdomBonus);
         }
 
         finalStatChanges[key] = change;

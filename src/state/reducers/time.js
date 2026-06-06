@@ -19,6 +19,8 @@ export const simulateTicks = (state, ticks) => {
   let currentStorage = state.storage;
   let currentPlaced = state.placedFurniture;
   let currentPremiumActive = state.swipePremium?.active || false;
+  let currentAge = state.family.age || 18;
+  let currentGeneration = state.family.generation || 1;
   let tempLogs = [];
   
   // Deep clone histories once before the loop
@@ -300,7 +302,37 @@ export const simulateTicks = (state, ticks) => {
     career: state.career,
   };
 
-  // 4. Alert & Jealousy check
+  // 4. Aging System - Check for birthdays (every 365 days)
+  const daysPassed = newTime.day - state.time.day;
+  if (daysPassed > 0 && baseNextState.gamePhase === 'living') {
+    // Check if it's the player's birthday (every 365 days)
+    const birthdaysPassed = Math.floor((newTime.day - 1) / 365);
+    const previousBirthdays = Math.floor((state.time.day - 1) / 365);
+    
+    if (birthdaysPassed > previousBirthdays) {
+      currentAge = 18 + birthdaysPassed;
+      tempLogs.push(`🎂 Happy Birthday! You are now ${currentAge} years old.`);
+      
+      // Age milestones with special effects
+      if (currentAge === 21) {
+        tempLogs.push(`🎉 You're now 21! Unlocked: Access to exclusive venues and adult experiences.`);
+      } else if (currentAge === 25) {
+        tempLogs.push(`🎉 You're now 25! Unlocked: Better career opportunities and financial options.`);
+      } else if (currentAge === 30) {
+        tempLogs.push(`🎉 You're now 30! Unlocked: Wisdom bonus - stat gains are slightly more effective.`);
+      } else if (currentAge >= 35 && currentAge % 5 === 0) {
+        tempLogs.push(`🎉 You're now ${currentAge}! Life experience gives you perspective.`);
+      }
+      
+      // Update age in family state
+      baseNextState.family = {
+        ...baseNextState.family,
+        age: currentAge
+      };
+    }
+  }
+
+  // 5. Alert & Jealousy check
   const matchesKeys = Object.keys(baseNextState.matches).filter(key => baseNextState.matches[key].met);
   if (baseNextState.gamePhase === 'living' && !baseNextState.activeDateEvent && !baseNextState.activeWorkEvent && !baseNextState.activeNpcAlert && matchesKeys.length > 0) {
     const localNpcs = {
