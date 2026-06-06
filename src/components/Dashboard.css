@@ -84,11 +84,16 @@
 
 .planning-grid {
   grid-template-areas:
+    "planner planner planner planner"
+    "time time time time"
     "risk risk housing housing"
     "calendar calendar calendar calendar"
     "core prof lifestyle social"
     "perks perks logs logs";
 }
+
+.planning-grid .daily-planner { grid-area: planner; }
+.planning-grid .time-controls { grid-area: time; }
 
 .social-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -108,6 +113,8 @@
 .planning-grid .perks { grid-area: perks; }
 .planning-grid .logs { grid-area: logs; }
 
+.social-grid .relationships-journal { grid-column: span 3; }
+.social-grid .memory-viewer { grid-column: span 3; }
 .social-grid .relationships-panel {
   grid-column: span 2;
 }
@@ -126,6 +133,8 @@
 
   .planning-grid {
     grid-template-areas:
+      "planner planner"
+      "time time"
       "risk housing"
       "calendar calendar"
       "core prof"
@@ -136,6 +145,9 @@
   .social-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  
+  .social-grid .relationships-journal { grid-column: span 2; }
+  .social-grid .memory-viewer { grid-column: span 2; }
 }
 
 @media (max-width: 768px) {
@@ -152,6 +164,8 @@
 
   .planning-grid {
     grid-template-areas:
+      "planner"
+      "time"
       "risk"
       "housing"
       "calendar"
@@ -166,6 +180,9 @@
   .social-grid .relationships-panel {
     grid-column: auto;
   }
+  
+  .social-grid .relationships-journal { grid-column: auto; }
+  .social-grid .memory-viewer { grid-column: auto; }
 }
 
 .bento-card {

@@ -80,9 +80,9 @@ export const runSaveMigration = (payload) => {
       organicEncounters: false,
       compatibilityRevealUx: false,
       instantMatchRebalance: false,
-      relationshipJournal: false,
+      relationshipJournal: true,
       reputationSpillover: false,
-      dailyPlannerUx: false,
+      dailyPlannerUx: true,
       marketRiskControls: false,
       adultToneTags: false,
     };

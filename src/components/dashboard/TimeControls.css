@@ -1,0 +1,297 @@
+/* Time Controls Styles */
+
+.time-controls {
+  min-height: 300px;
+}
+
+.time-controls .section-title {
+  margin-bottom: 1rem;
+}
+
+/* Time Display */
+.time-display {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.time-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.time-day {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent-pink);
+}
+
+.time-time {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.time-daypart {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+.time-separator {
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+.time-status {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Playback Controls */
+.playback-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.control-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.control-btn:hover {
+  background: rgba(236, 72, 153, 0.2);
+  border-color: var(--accent-pink);
+  transform: scale(1.05);
+}
+
+.control-btn.active {
+  background: rgba(236, 72, 153, 0.3);
+  border-color: var(--accent-pink);
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.3);
+}
+
+.speed-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.speed-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.speed-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(236, 72, 153, 0.3);
+  color: var(--text-primary);
+}
+
+.speed-btn.active {
+  background: rgba(236, 72, 153, 0.2);
+  border-color: var(--accent-pink);
+  color: white;
+}
+
+.speed-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Manual Controls */
+.manual-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.tick-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tick-btn:hover {
+  background: rgba(236, 72, 153, 0.2);
+  border-color: var(--accent-pink);
+  transform: translateY(-2px);
+}
+
+/* Info Panel */
+.time-info-panel {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.info-text {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.info-text:not(:last-child) {
+  margin-bottom: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .playback-controls {
+    gap: 1rem;
+  }
+  
+  .control-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 1.25rem;
+  }
+  
+  .speed-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 0.8rem;
+  }
+  
+  .manual-controls {
+    gap: 0.75rem;
+  }
+  
+  .tick-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .time-info {
+    gap: 0.25rem;
+  }
+  
+  .time-day {
+    font-size: 1.25rem;
+  }
+  
+  .time-time {
+    font-size: 1.25rem;
+  }
+  
+  .time-daypart {
+    font-size: 0.85rem;
+  }
+  
+  .playback-controls {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .control-btn {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .speed-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .speed-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 0.75rem;
+  }
+  
+  .manual-controls {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .tick-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+  
+  .info-text {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .time-info {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .time-separator {
+    display: none;
+  }
+  
+  .time-day {
+    font-size: 1.1rem;
+  }
+  
+  .time-time {
+    font-size: 1.1rem;
+  }
+  
+  .time-daypart {
+    font-size: 0.8rem;
+  }
+  
+  .control-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 1.1rem;
+  }
+  
+  .speed-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+  }
+  
+  .tick-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+  }
+}

@@ -1,0 +1,160 @@
+/* Relationships Journal Panel Styles */
+
+.relationships-journal {
+  min-height: 400px;
+}
+
+.relationships-journal .section-title {
+  margin-bottom: 1rem;
+}
+
+/* NPC Grid */
+.npc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.npc-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.npc-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(236, 72, 153, 0.2);
+}
+
+.npc-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.75rem;
+  font-size: 1.5rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.npc-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.npc-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.npc-status {
+  display: flex;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.status-badge {
+  font-size: 0.65rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: var(--radius-full);
+  color: white;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.relationship-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.relationship-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.4s ease;
+}
+
+.relationship-value {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .npc-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .npc-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+  
+  .npc-card {
+    padding: 0.75rem;
+  }
+  
+  .npc-avatar {
+    width: 50px;
+    height: 50px;
+    font-size: 1.25rem;
+  }
+  
+  .npc-name {
+    font-size: 0.8rem;
+  }
+  
+  .status-badge {
+    font-size: 0.6rem;
+    padding: 0.15rem 0.3rem;
+  }
+  
+  .relationship-value {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .npc-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 0.5rem;
+  }
+  
+  .npc-card {
+    padding: 0.5rem;
+  }
+  
+  .npc-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .npc-name {
+    font-size: 0.7rem;
+  }
+  
+  .status-badge {
+    font-size: 0.55rem;
+  }
+  
+  .relationship-value {
+    font-size: 0.65rem;
+  }
+}

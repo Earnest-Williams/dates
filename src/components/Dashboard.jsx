@@ -13,6 +13,10 @@ import PromisesPanel from './dashboard/PromisesPanel';
 import OpportunitiesPanel from './dashboard/OpportunitiesPanel';
 import MoneyRiskPanel from './dashboard/MoneyRiskPanel';
 import CalendarPanel from './dashboard/CalendarPanel';
+import DailyPlannerPanel from './dashboard/DailyPlannerPanel';
+import RelationshipsJournalPanel from './dashboard/RelationshipsJournalPanel';
+import MemoryViewer from './dashboard/MemoryViewer';
+import TimeControls from './dashboard/TimeControls';
 import './Dashboard.css';
 
 const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) => {
@@ -93,6 +97,10 @@ const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) =
 
         {activeTab === 'social' && (
           <>
+            {gameState.features?.relationshipJournal && (
+              <RelationshipsJournalPanel gameState={gameState} />
+            )}
+            <MemoryViewer gameState={gameState} />
             <RelationshipsPanel />
             <PromisesPanel />
             <OpportunitiesPanel onOpenMap={onOpenMap} />
@@ -101,6 +109,10 @@ const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) =
 
         {activeTab === 'planning' && (
           <>
+            {gameState.features?.dailyPlannerUx && (
+              <DailyPlannerPanel gameState={gameState} />
+            )}
+            <TimeControls gameState={gameState} />
             <MoneyRiskPanel />
             <HousingPanel />
             <CalendarPanel gameState={gameState} />

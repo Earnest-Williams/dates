@@ -1,0 +1,289 @@
+/* Memory Viewer Styles */
+
+.memory-viewer {
+  min-height: 400px;
+}
+
+.memory-viewer .section-title {
+  margin-bottom: 1rem;
+}
+
+/* Memory Filter */
+.memory-filter {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.filter-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  padding: 0.4rem 0.8rem;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(236, 72, 153, 0.3);
+  color: var(--text-primary);
+}
+
+.filter-btn.active {
+  background: rgba(236, 72, 153, 0.2);
+  border-color: var(--accent-pink);
+  color: white;
+}
+
+/* NPC Memory List */
+.npc-memory-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.npc-memory-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.npc-memory-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(236, 72, 153, 0.3);
+  transform: translateX(4px);
+}
+
+.npc-memory-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.npc-memory-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.npc-memory-count {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-full);
+}
+
+.memory-types-breakdown {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.memory-type-badge {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: var(--radius-full);
+  color: white;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.relationship-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rel-bar {
+  flex-grow: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.rel-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-pink), #f472b6);
+  border-radius: var(--radius-full);
+  transition: width 0.4s ease;
+}
+
+.rel-value {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  min-width: 40px;
+}
+
+/* NPC Detail Header */
+.npc-detail-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.npc-detail-header h3 {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+/* Memories List */
+.memories-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.memory-item {
+  background: rgba(255, 255, 255, 0.02);
+  border-left: 3px solid var(--accent-pink);
+  border-radius: var(--radius-md);
+  padding: 0.8rem 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.memory-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateX(4px);
+}
+
+.memory-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.memory-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.memory-type {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.memory-value {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .memory-filter {
+    gap: 0.25rem;
+  }
+  
+  .filter-btn {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .npc-memory-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .npc-memory-count {
+    margin-left: 0;
+  }
+  
+  .memory-types-breakdown {
+    gap: 0.25rem;
+  }
+  
+  .memory-type-badge {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.3rem;
+  }
+  
+  .memory-item {
+    padding: 0.6rem 0.8rem;
+  }
+  
+  .memory-icon {
+    font-size: 1rem;
+  }
+  
+  .memory-type {
+    font-size: 0.65rem;
+  }
+  
+  .memory-value {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .memory-filter {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filter-btn {
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+    text-align: center;
+  }
+  
+  .npc-memory-card {
+    padding: 0.75rem;
+  }
+  
+  .npc-memory-name {
+    font-size: 0.85rem;
+  }
+  
+  .npc-memory-count {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.4rem;
+  }
+  
+  .memory-type-badge {
+    font-size: 0.6rem;
+    padding: 0.1rem 0.25rem;
+  }
+  
+  .rel-value {
+    font-size: 0.7rem;
+    min-width: 35px;
+  }
+  
+  .memory-item {
+    padding: 0.5rem 0.7rem;
+  }
+  
+  .memory-icon {
+    font-size: 0.9rem;
+  }
+  
+  .memory-value {
+    font-size: 0.75rem;
+  }
+}
