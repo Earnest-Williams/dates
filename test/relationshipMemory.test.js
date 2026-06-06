@@ -1,5 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+// Suppress console.warn to avoid Node.js v22 test runner issues with async tests
+// and console output during module loading
+const originalWarn = console.warn;
+console.warn = () => {};
+
 import { ITEMS } from '../src/data/items.js';
 import { NPCS } from '../src/data/npcs.js';
 import { giveGift } from '../src/state/actions/social.js';
@@ -79,14 +86,13 @@ test('dialogue and dates record relationship memory instead of item affection', 
   assert.ok(afterDate.relationshipMemory.elena.importantMoments.includes('memorable_date'));
 });
 
-test('design docs reject typical gift-system route progression', async () => {
-  const fs = await import('node:fs/promises');
-  const docs = await Promise.all([
-    fs.readFile('README.md', 'utf8'),
-    fs.readFile('docs/npc-content-authoring.md', 'utf8'),
-    fs.readFile('docs/relationship-memory.md', 'utf8'),
-    fs.readFile('game_design_bible.md', 'utf8'),
-  ]);
+test('design docs reject typical gift-system route progression', () => {
+  const docs = [
+    fs.readFileSync('README.md', 'utf8'),
+    fs.readFileSync('docs/npc-content-authoring.md', 'utf8'),
+    fs.readFileSync('docs/relationship-memory.md', 'utf8'),
+    fs.readFileSync('game_design_bible.md', 'utf8'),
+  ];
   const combinedDocs = docs.join('\n').toLowerCase();
 
   assert.equal(combinedDocs.includes('gift preferences are discoverable'), false);
