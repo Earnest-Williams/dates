@@ -65,7 +65,7 @@ export const applyDateDiminishingReturns = (
     // Third+ repetition within 7 days: 87.5% penalty (12.5% of original)
     const repetitionCount = recentDateTypeHistory.length;
     const basePenalty = 0.5;
-    const stackingPenalty = 1 - (0.5 ** (repetitionCount + 1));
+    const stackingPenalty = 1 - (0.5 ** repetitionCount);
     
     penaltyMultiplier *= (1 - stackingPenalty);
     penaltyReason = `repeated_${dateType}_within_7_days`;
@@ -124,7 +124,7 @@ export const applyDateDiminishingReturns = (
     chemChange: finalChemChange,
     diminished,
     penaltyReason,
-    penaltyAmount: penaltyAmount > 0 ? Math.floor(penaltyAmount * (1 - penaltyMultiplier)) : 0
+    penaltyAmount: Math.max(0, (relGain + chemChange) - (finalRelGain + finalChemChange))
   };
 };
 

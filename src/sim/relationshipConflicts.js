@@ -163,7 +163,7 @@ export const getEligibleConflictTriggers = (state, npcId) => {
   // Trigger 8: Jealousy/social reputation
   // Check if player has been on dates with multiple NPCs recently
   const recentDates = Object.entries(state.matches || {})
-    .filter(([id, match]) => id !== npcId && match.lastDateDay >= (currentDay - 7))
+    .filter(([id, match]) => id !== npcId && match.lastDateDay !== null && match.lastDateDay >= (currentDay - 7))
     .length;
   
   if (recentDates >= 3 && matchData.exclusivityExpectation === 'exclusive') {

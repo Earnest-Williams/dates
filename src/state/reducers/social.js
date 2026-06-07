@@ -559,17 +559,20 @@ export const socialReducer = (state, action) => {
       });
       
       // If conflict should trigger and there's no active conflict, start one
-      let finalActiveConflictId = dateOutcome.conflict
-        || (dateOutcome.repairScene ? updatedMatchWithHistory.activeConflictId || currentMatch.activeConflictId || dateOutcome.repairScene : updatedMatchWithHistory.activeConflictId || currentMatch.activeConflictId);
-      let finalPendingRepairScene = dateOutcome.repairScene || updatedMatchWithHistory.pendingRepairScene || currentMatch.pendingRepairScene;
-      let finalConflictStartedDay = dateOutcome.conflict || dateOutcome.repairScene
-        ? nextState.time.day
-        : updatedMatchWithHistory.conflictStartedDay || currentMatch.conflictStartedDay;
-      let finalRepairOpenedDay = dateOutcome.repairScene ? nextState.time.day : updatedMatchWithHistory.repairOpenedDay || currentMatch.repairOpenedDay;
+      const hasActiveConflict = Boolean(currentMatch.activeConflictId);
+      let finalActiveConflictId = updatedMatchWithHistory.activeConflictId || currentMatch.activeConflictId || null;
+      let finalPendingRepairScene = updatedMatchWithHistory.pendingRepairScene || currentMatch.pendingRepairScene || null;
+      let finalConflictStartedDay = updatedMatchWithHistory.conflictStartedDay || currentMatch.conflictStartedDay || null;
+      let finalRepairOpenedDay = updatedMatchWithHistory.repairOpenedDay || currentMatch.repairOpenedDay || null;
       
-      if (conflictTrigger.shouldTrigger && !currentMatch.activeConflictId) {
+      if (conflictTrigger.shouldTrigger && !hasActiveConflict) {
         finalActiveConflictId = conflictTrigger.conflictId;
         finalPendingRepairScene = conflictTrigger.repairScene || finalPendingRepairScene;
+        finalConflictStartedDay = nextState.time.day;
+        finalRepairOpenedDay = nextState.time.day;
+      } else if (dateOutcome.repairScene && !hasActiveConflict) {
+        finalActiveConflictId = dateOutcome.repairScene;
+        finalPendingRepairScene = dateOutcome.repairScene;
         finalConflictStartedDay = nextState.time.day;
         finalRepairOpenedDay = nextState.time.day;
       }
