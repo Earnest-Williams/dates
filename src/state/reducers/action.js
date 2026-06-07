@@ -30,7 +30,7 @@ const WISDOM_BONUS_STATS = new Set([
 ]);
 
 const applyWisdomBonus = (state, key, change) => {
-  if ((state.family?.age ?? 18) <= 30) return change;
+  if (!state || (state.family?.age ?? 18) <= 30) return change;
   if (change <= 0 || !WISDOM_BONUS_STATS.has(key)) return change;
   return change * 1.1;
 };
