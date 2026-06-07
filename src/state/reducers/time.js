@@ -11,7 +11,7 @@ import { getShiftForDay, getAttendanceRecord, withAttendanceRecord } from '../..
 const getBirthdayYearsPassed = (day) => Math.floor(Math.max(1, day) / 365);
 
 const applyBirthdayProgression = (state, finalDay, logs) => {
-  if (!state.family) return { family: state.family, logs };
+  if (!state || !state.family) return { family: state?.family, logs };
 
   const previousYearsPassed = getBirthdayYearsPassed(state.time?.day ?? 1);
   const nextYearsPassed = getBirthdayYearsPassed(finalDay);
