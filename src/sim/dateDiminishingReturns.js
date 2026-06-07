@@ -124,7 +124,7 @@ export const applyDateDiminishingReturns = (
     chemChange: finalChemChange,
     diminished,
     penaltyReason,
-    penaltyAmount: penaltyAmount > 0 ? Math.floor(penaltyAmount * (1 - penaltyMultiplier)) : 0
+    penaltyAmount: Math.max(0, (relGain + chemChange) - (finalRelGain + finalChemChange))
   };
 };
 
