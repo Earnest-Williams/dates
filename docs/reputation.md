@@ -24,10 +24,8 @@ reputation: {
 | NPC | Primary Circle | Secondary Circle |
 |-----|---------------|------------------|
 | Elena | academic | - |
-| Brad | friends | fitness |
 | Sophia | nightlife | - |
 | Rina | nightlife | - |
-| Marcus | coworkers | - |
 | Nora | coworkers | - |
 | Chloe | creative | - |
 | Maya | creative | - |

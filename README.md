@@ -47,7 +47,9 @@ You begin your journey in **Generation 1** as **Alex**, renting a basic Studio A
   * **Luxury Sports Car**: 20 mins (required to bypass bouncers at the Neon Beats Nightclub unless you have 50+ Style).
 
 ### 4. Dating, Matching, & Relationship Memory
-* **Swipe App**: Swipe on NPCs like **Elena** (Scholar), **Brad** (Gym Rat), **Sophia** (Socialite), **Marcus** (Executive), and **Chloe** (Artist). Matching chance depends on your Style, Charm, and how well you meet their archetype stat requirements.
+* **Swipe App**: Swipe on NPCs like **Elena** (Scholar), **Sophia** (Socialite), and **Chloe** (Artist). Matching chance depends on your Style, Charm, and how well you meet their archetype stat requirements.
+
+**Note**: Only female NPCs are currently romanceable in this version.
 * **Socializing**: Build relationships through shared time, conversations, meaningful choices, remembered context, compatibility, routines, conflict/repair, emotional support, and long-term follow-through.
 * **Relationship Memory Rule**: **Life Sim** intentionally does not include a typical visual-novel gift-giving system. Items may appear as contextual story props in specific moments, but they must not function as repeatable affection currency or advance relationships.
 * **Dates**: Meet NPCs at locations. Shared time, compatibility, conversation tone, and remembered follow-through shape relationship and mood outcomes.

@@ -331,9 +331,9 @@ export const simulateTicks = (state, ticks) => {
   const matchesKeys = Object.keys(baseNextState.matches).filter(key => baseNextState.matches[key].met);
   if (baseNextState.gamePhase === 'living' && !baseNextState.activeDateEvent && !baseNextState.activeWorkEvent && !baseNextState.activeNpcAlert && matchesKeys.length > 0) {
     const localNpcs = {
-      Brockleigh: ['elena', 'marcus'],
-      Stagborough: ['sophia', 'brad'],
-      Bramblewick: ['chloe']
+      Brockleigh: ['elena', 'nora'],
+      Stagborough: ['sophia', 'rina'],
+      Bramblewick: ['chloe', 'maya']
     }[baseNextState.activeLocation] || [];
     
     const locationLocalNpc = localNpcs.find(npcId => baseNextState.matches[npcId] && baseNextState.matches[npcId].met);

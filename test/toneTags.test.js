@@ -1,4 +1,3 @@
-import test from 'node:test';
 import assert from 'node:assert/strict';
 import { NPCS } from '../src/data/npcs.js';
 import { DATE_TEMPLATES } from '../src/data/dates.js';
@@ -173,8 +172,6 @@ console.log('Testing route-specific tone identity...');
   const rina = NPCS.find(n => n.id === 'rina');
   const maya = NPCS.find(n => n.id === 'maya');
   const nora = NPCS.find(n => n.id === 'nora');
-  const brad = NPCS.find(n => n.id === 'brad');
-  const marcus = NPCS.find(n => n.id === 'marcus');
   const chloe = NPCS.find(n => n.id === 'chloe');
   
   // Elena should have high emotionalRisk in trust/commitment events
@@ -277,38 +274,6 @@ console.log('Testing route-specific tone identity...');
     if (noraCommitment) {
       const tones = extractTonesFromChoices(noraCommitment.choices || []);
       assert.ok(tones.length > 0, 'Nora commitment event should have tone tags');
-    }
-  }
-  
-  // Brad should have tone tags
-  if (brad && brad.romanceArc) {
-    const bradTrust = brad.romanceArc.find(a => a.id === 'brad_trust');
-    const bradCommitment = brad.romanceArc.find(a => a.id === 'brad_commitment');
-    
-    if (bradTrust) {
-      const tones = extractTonesFromChoices(bradTrust.choices || []);
-      assert.ok(tones.length > 0, 'Brad trust event should have tone tags');
-    }
-    
-    if (bradCommitment) {
-      const tones = extractTonesFromChoices(bradCommitment.choices || []);
-      assert.ok(tones.length > 0, 'Brad commitment event should have tone tags');
-    }
-  }
-  
-  // Marcus should have tone tags
-  if (marcus && marcus.romanceArc) {
-    const marcusTrust = marcus.romanceArc.find(a => a.id === 'marcus_trust');
-    const marcusCommitment = marcus.romanceArc.find(a => a.id === 'marcus_commitment');
-    
-    if (marcusTrust) {
-      const tones = extractTonesFromChoices(marcusTrust.choices || []);
-      assert.ok(tones.length > 0, 'Marcus trust event should have tone tags');
-    }
-    
-    if (marcusCommitment) {
-      const tones = extractTonesFromChoices(marcusCommitment.choices || []);
-      assert.ok(tones.length > 0, 'Marcus commitment event should have tone tags');
     }
   }
   
@@ -427,7 +392,7 @@ console.log('Testing tone tags do not bypass relationship progression...');
 // Test 7: Verify all main romanceable NPCs have tone tags in trust/commitment events
 console.log('Testing all main NPCs have tone tags...');
 {
-  const mainNpcIds = ['elena', 'brad', 'sophia', 'marcus', 'chloe', 'rina', 'maya', 'nora'];
+  const mainNpcIds = ['elena', 'sophia', 'chloe', 'rina', 'maya', 'nora'];
   const errors = [];
   
   for (const npcId of mainNpcIds) {

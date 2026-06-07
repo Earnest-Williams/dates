@@ -216,11 +216,11 @@ $$\text{Match Chance \%} = 25\% + \frac{\text{Style}}{4} + \frac{\text{Charm}}{4
 | NPC ID / Name | Archetype     | Intro Stat Gate   | Location Active                   |
 +---------------+---------------+-------------------+-----------------------------------+
 | elena / Elena | Scholar       | Education > 20    | Grand Library                     |
-| brad / Brad   | Gym Rat       | Fitness > 25      | Peak Fitness Gym                  |
 | sophia/ Sophia| Socialite     | Owns a vehicle    | Neon Beats Nightclub              |
-| marcus/ Marcus| Executive     | Career > 30       | OmniCorp Headquarters             |
 | chloe / Chloe | Artist        | Charm > 20        | Greenwood Park                    |
 +---------------+---------------+-------------------+-----------------------------------+
+
+**Note**: Only female NPCs are currently romanceable.
 ```
 
 ---
@@ -439,7 +439,9 @@ This pass defines content quality checks to prevent shallow implementations:
 
 ### M. Pass 3 (Relationship Repair and Existing Cast Depth)
 
-The current core cast must demonstrate emotional resilience before more roster expansion. Each of Elena, Brad, Sophia, Marcus, and Chloe requires six romance chapters, hidden compatibility traits, relationship memories, two preferred non-gift date types, one conflict event, one repair event, one home reaction, one location-based encounter, one long-term relationship scene, one legacy/family reaction, and at least three callbacks to earlier player choices.
+The current core cast must demonstrate emotional resilience before more roster expansion. Each of Elena, Sophia, and Chloe requires six romance chapters, hidden compatibility traits, relationship memories, two preferred non-gift date types, one conflict event, one repair event, one home reaction, one location-based encounter, one long-term relationship scene, one legacy/family reaction, and at least three callbacks to earlier player choices.
+
+**Note**: Only female NPCs are currently romanceable in this version.
 
 Conflict triggers may include ignored messages, incompatible choices, low mood, jealousy or social reputation, missed planned dates, poor date endings, ambition mismatch, home/lifestyle mismatch, broken promises, and repeated inattentive dialogue. Conflict should pause, complicate, or branch the route rather than hard-failing it immediately.
 

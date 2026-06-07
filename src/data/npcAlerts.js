@@ -26,33 +26,6 @@ export const NPC_ALERTS = {
       ]
     }
   ],
-  brad: [
-    {
-      id: "brad_gym_spot",
-      npcId: "brad",
-      message: "Brad texts you: 'Yo! I'm trying to hit a new squat PR today and need a reliable spotter. You down to head to the gym right now?'",
-      choices: [
-        {
-          text: "Spot him safely (Requires Fitness > 25)",
-          checkStat: "fitness",
-          threshold: 25,
-          successRelation: 15,
-          successChemistry: 10,
-          failRelation: -5,
-          failChemistry: -5,
-          energyCost: 15,
-          successText: "You spot Brad perfectly as he hits his PR. Brad yells: 'Let's go! Absolute beast spot, thanks bro!'",
-          failText: "You struggle to lift the bar. Brad has to rack it: 'A bit sketchy there, we need to work on your form!'"
-        },
-        {
-          text: "Say you have to skip today",
-          successRelation: 0,
-          successChemistry: -5,
-          successText: "You text back you can't make it. Brad: 'All good, no gains for the weak! Catch you later.'"
-        }
-      ]
-    }
-  ],
   sophia: [
     {
       id: "sophia_vip_invite",
@@ -77,31 +50,6 @@ export const NPC_ALERTS = {
           successRelation: -5,
           successChemistry: -10,
           successText: "You decline. Sophia replies: 'Wow, okay. Guess you don't like fun. Bye.'"
-        }
-      ]
-    }
-  ],
-  marcus: [
-    {
-      id: "marcus_business_pitch",
-      npcId: "marcus",
-      message: "Marcus messages: 'Hey. I'm reviewing a pitch deck for a seed round and want an outside perspective. Do you have a few minutes to critique this model?'",
-      choices: [
-        {
-          text: "Give detailed business feedback (Requires Corporate > 30)",
-          checkStat: "corporate",
-          threshold: 30,
-          successRelation: 15,
-          successChemistry: 10,
-          energyCost: 10,
-          successText: "Marcus sends a thumbs up: 'Insightful critique on the unit economics. You've got real business acumen.'",
-          failText: "Marcus replies: 'That feedback is a bit generic... I'll stick to my advisors' inputs.'"
-        },
-        {
-          text: "Ignore the message",
-          successRelation: -10,
-          successChemistry: -5,
-          successText: "You don't reply. Marcus deletes the thread."
         }
       ]
     }

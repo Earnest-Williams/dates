@@ -53,23 +53,11 @@ Each romanceable NPC has a distinct tone identity that should be reflected in th
 - **Key Tags:** vulnerability, secrecy, emotional_hunger, late_night
 - **Narrative Focus:** Academic pressure, fear of losing control, vulnerability beneath competence
 
-### Brad (GYM_RAT)
-- **Theme:** Vulnerability beneath bravado, physical discipline, reassurance
-- **Tone Profile:** High emotionalRisk, moderate heat, moderate implication, low publicRisk
-- **Key Tags:** vulnerability, secrecy, emotional_hunger, late_night
-- **Narrative Focus:** Physical strength masking emotional fragility, fear of irrelevance, raw honesty in private
-
 ### Sophia (SOCIALITE)
 - **Theme:** Public/private identity, status pressure, being seen
 - **Tone Profile:** High publicRisk, high implication, moderate heat, moderate emotionalRisk
 - **Key Tags:** public_risk, secrecy, vulnerability, late_night, temptation
 - **Narrative Focus:** Performance vs. authenticity, fear of exposure, choosing sincerity over status
-
-### Marcus (EXECUTIVE)
-- **Theme:** Control, overwork, late-night vulnerability
-- **Tone Profile:** High emotionalRisk, moderate implication, moderate heat, moderate publicRisk
-- **Key Tags:** vulnerability, secrecy, emotional_hunger, late_night
-- **Narrative Focus:** Ruthless professionalism giving way to raw need, control slipping into intimacy
 
 ### Chloe (ARTIST)
 - **Theme:** Creative vulnerability, quiet sincerity

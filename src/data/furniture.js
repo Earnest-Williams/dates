@@ -125,9 +125,7 @@ export const HOME_STYLE_TAGS = [
 
 export const NPC_HOME_STYLE_REACTIONS = {
   elena: ['literary', 'cozy'],
-  brad: ['fitness', 'functional'],
   sophia: ['luxury', 'modern'],
-  marcus: ['organized', 'functional', 'modern'],
   chloe: ['artistic', 'cozy'],
   rina: ['luxury', 'modern'],
   maya: ['artistic', 'literary'],
