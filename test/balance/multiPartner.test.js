@@ -32,7 +32,7 @@ test('balance harness: multi-partner route drains resources', () => {
   state = gameReducer(state, { type: 'CLOSE_DATE_RECAP' });
 
   // Date 3
-  state = gameReducer(state, { type: 'GO_ON_DATE', payload: { npcId: 'sophia', locationKey: 'club', dateType: 'club_night' } });
+  state = gameReducer(state, { type: 'GO_ON_DATE', payload: { npcId: 'chloe', locationKey: 'park', dateType: 'park_walk' } });
   state = gameReducer(state, { type: 'CHOOSE_DATE_PHASE_OPTION', payload: { optionIndex: 0 } });
   state = gameReducer(state, { type: 'CHOOSE_DATE_PHASE_OPTION', payload: { optionIndex: 0 } });
   state = gameReducer(state, { type: 'CHOOSE_DATE_PHASE_OPTION', payload: { optionIndex: 0 } });
