@@ -1814,17 +1814,17 @@ Build in this order:
 | Phase 3 | 3.4 Balance Scenario Harness | ✅ Completed |
 | Phase 4 | 4.1 Relationship Event Log | ✅ Completed |
 | Phase 4 | 4.2 Relationship Journal UI | ✅ Completed |
-| Phase 5 | 5.1 Adult Tone Tags | ⬜ Pending |
-| Phase 5 | 5.2 Route-Specific Tone Pass | ⬜ Pending |
-| Phase 6 | 6.1 Arc Writing Pass | ⬜ Pending |
-| Phase 6 | 6.2 Scene QA Checklist | ⬜ Pending |
-| Phase 6 | 6.3 Content Structure Tests | ⬜ Pending |
-| Phase 7 | 7.1 Dashboard Restructure | ⬜ Pending |
-| Phase 7 | 7.2 Date Recap UX | ⬜ Pending |
-| Phase 7 | 7.3 Conflict/Repair UX | ⬜ Pending |
-| Phase 7 | 7.4 Organic Encounter UX | ⬜ Pending |
-| Phase 7 | 7.5 Home Identity UX | ⬜ Pending |
-| Phase 8 | Documentation Updates | ⬜ Pending |
+| Phase 5 | 5.1 Adult Tone Tags | ✅ Completed |
+| Phase 5 | 5.2 Route-Specific Tone Pass | ✅ Completed |
+| Phase 6 | 6.1 Arc Writing Pass | ✅ Completed |
+| Phase 6 | 6.2 Scene QA Checklist | ✅ Completed |
+| Phase 6 | 6.3 Content Structure Tests | ✅ Completed |
+| Phase 7 | 7.1 Dashboard Restructure | ✅ Completed |
+| Phase 7 | 7.2 Date Recap UX | ✅ Completed |
+| Phase 7 | 7.3 Conflict/Repair UX | ✅ Completed |
+| Phase 7 | 7.4 Organic Encounter UX | ✅ Completed |
+| Phase 7 | 7.5 Home Identity UX | ✅ Completed |
+| Phase 8 | Documentation Updates | ✅ Completed |
 | Phase 9 | 9.1 Long-Run Playtest Scenarios | ⬜ Pending |
 | Phase 9 | 9.2 Save/Load Hardening | ⬜ Pending |
 | Phase 9 | 9.3 Release Gate | ⬜ Pending |

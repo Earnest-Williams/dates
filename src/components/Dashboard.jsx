@@ -17,6 +17,9 @@ import DailyPlannerPanel from './dashboard/DailyPlannerPanel';
 import RelationshipsJournalPanel from './dashboard/RelationshipsJournalPanel';
 import MemoryViewer from './dashboard/MemoryViewer';
 import TimeControls from './dashboard/TimeControls';
+import HomeStylePanel from './dashboard/HomeStylePanel';
+import HomeActivityPanel from './dashboard/HomeActivityPanel';
+import NpcHomeReaction from './dashboard/NpcHomeReaction';
 import './Dashboard.css';
 
 const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) => {
@@ -102,6 +105,7 @@ const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) =
             )}
             <MemoryViewer gameState={gameState} />
             <RelationshipsPanel />
+            <HomeStylePanel />
             <PromisesPanel />
             <OpportunitiesPanel onOpenMap={onOpenMap} />
           </>
@@ -114,6 +118,8 @@ const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) =
             )}
             <TimeControls gameState={gameState} />
             <MoneyRiskPanel />
+            <HomeStylePanel />
+            <HomeActivityPanel />
             <HousingPanel />
             <CalendarPanel gameState={gameState} />
             <StatsPanel />
