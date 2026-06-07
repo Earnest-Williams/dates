@@ -5,17 +5,9 @@ export const NPC_SCHEDULE = {
     { days: ['mon', 'wed'], time: 'evening', location: 'library', reveals: 'quiet_evenings' },
     { days: ['sat'], time: 'afternoon', location: 'park', reveals: 'reflective_walks' },
   ],
-  brad: [
-    { days: ['tue', 'thu'], time: 'morning', location: 'gym', reveals: 'training_routine' },
-    { days: ['sun'], time: 'afternoon', location: 'park', reveals: 'public_fitness_anxiety' },
-  ],
   sophia: [
     { days: ['fri'], time: 'night', location: 'club', reveals: 'status_fatigue' },
     { days: ['sun'], time: 'morning', location: 'park', reveals: 'relaxes_away_from_status' },
-  ],
-  marcus: [
-    { days: ['mon', 'thu'], time: 'night', location: 'office', reveals: 'after_hours_overwork' },
-    { days: ['wed'], time: 'morning', location: 'mall', reveals: 'coffee_before_work' },
   ],
   chloe: [
     { days: ['tue'], time: 'afternoon', location: 'park', reveals: 'outdoor_inspiration' },

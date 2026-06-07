@@ -21,7 +21,9 @@ Contextual props are valid only when they belong to a specific authored beat and
 
 ## Current NPC depth schema
 
-Before adding more romanceable characters, the current core cast (`elena`, `brad`, `sophia`, `marcus`, and `chloe`) must each define the following authored fields in `src/data/npcs.js`:
+Before adding more romanceable characters, the current core cast (`elena`, `sophia`, and `chloe`) must each define the following authored fields in `src/data/npcs.js`:
+
+**Note**: Only female NPCs are currently romanceable in this version.
 
 - `hiddenCompatibilityTraits`: ambition, affection, conflict, social, family, spending, emotional openness, and long-term goal dimensions.
 - `relationshipMemories`: concrete memory keys that later scenes can reference.
@@ -33,4 +35,6 @@ Before adding more romanceable characters, the current core cast (`elena`, `brad
 
 Conflict triggers can come from ignored messages, incompatible choices, low mood, jealousy or social reputation, missed planned dates, poor date endings, ambition mismatch, home/lifestyle mismatch, broken promises, and repeated inattentive dialogue. Do not use bad gifts as a standard conflict trigger.
 
-Repair must not be reducible to shopping. Valid contextual item use includes replacing Chloe's damaged supplies during that specific authored repair, bringing Marcus notes from a meeting because the player promised to help, or making dinner at home after a stressful week. Disallowed patterns include apology flowers for relationship points, preferred items that clear conflict, universal repair gifts, and repeatable gift-giving.
+Repair must not be reducible to shopping. Valid contextual item use includes replacing Chloe's damaged supplies during that specific authored repair or making dinner at home after a stressful week. Disallowed patterns include apology flowers for relationship points, preferred items that clear conflict, universal repair gifts, and repeatable gift-giving.
+
+**Note**: Only female NPCs are currently romanceable in this version.

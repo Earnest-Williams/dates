@@ -712,10 +712,8 @@ reputation: {
 
 ```text
 Elena  → academic
-Brad   → friends / fitness if added later
 Sophia → nightlife
 Rina   → nightlife
-Marcus → coworkers
 Nora   → coworkers
 Chloe  → creative
 Maya   → creative
@@ -1031,13 +1029,13 @@ Apply tone tags by route:
 
 ```text
 Elena  → intellectual intimacy, restraint, ambition/shame
-Brad   → vulnerability beneath bravado, physical discipline, reassurance
 Sophia → public/private identity, status pressure, being seen
-Marcus → control, overwork, late-night vulnerability
 Chloe  → creative vulnerability, quiet sincerity
 Rina   → nightlife confidence, after-midnight honesty
 Maya   → artistic curiosity, nature/study intimacy
 Nora   → professional pressure, competence, controlled vulnerability
+
+**Note**: Only female NPCs are currently romanceable in this version.
 ```
 
 ### Definition of Done

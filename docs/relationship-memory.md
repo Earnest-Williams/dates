@@ -42,6 +42,8 @@ Items are allowed only when they are:
 - Not optimal romance commodities.
 - Not purchasable as a generic relationship shortcut.
 
-Allowed examples include bringing Elena a marked-up draft because she previously asked for thesis feedback, picking up Brad's forgotten shaker after a gym scene, helping Chloe replace damaged art supplies during a story event, or buying coffee during a specific date scene because that scene supports it.
+Allowed examples include bringing Elena a marked-up draft because she previously asked for thesis feedback, helping Chloe replace damaged art supplies during a story event, or buying coffee during a specific date scene because that scene supports it.
+
+**Note**: Only female NPCs are currently romanceable in this version.
 
 Disallowed examples include repeatedly buying books, watches, flowers, or chocolates for relationship points; any universal best-gift table; archetype item bonuses; or farming purchasable items for affection.

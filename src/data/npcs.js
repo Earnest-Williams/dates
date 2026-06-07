@@ -119,32 +119,6 @@ const BASE_NPCS = [
     }
   },
   {
-    id: "brad",
-    name: "Brad",
-    gender: "male",
-    archetype: "GYM_RAT",
-    description: "A certified fitness trainer obsessed with clean eating, protein shakes, and deadlift PRs.",
-    gatedBy: {
-      type: "stat",
-      stat: "fitness",
-      value: 25,
-      message: "Brad only matches with people who take their fitness seriously (Requires Fitness > 25)."
-    },
-    dialogue: {
-      intro: "Yo! Just finished a brutal leg day. What's your fitness routine look like?",
-      choices: [
-        { text: "I hit the gym hard every week. (+Fitness check)", checkStat: "fitness", threshold: 35, successRelation: 25, successText: "Brad grins and flexes. 'Let's go! We should lift together sometime.'", failRelation: 5, failText: "He taps your shoulder. 'Keep working on it, buddy. Consistency is key.'" },
-        { text: "I prefer working on my mind and career.", successRelation: -5, successText: "Brad chuckles. 'Hey, can't lift books to build biceps! But to each their own.'" }
-      ]
-    },
-    storyEvents: {
-      25: { prompt: "Brad is trying to hit a new deadlift PR but is doubting himself.", statCheck: "confidence", threshold: 40, successText: "You hype him up and he smashes the PR!", failText: "You try to cheer, but he misses the lift." },
-      50: { prompt: "Brad's sponsor wants him to do a cooking stream for healthy meals.", statCheck: "culinary", threshold: 30, successText: "You help him cook a perfect macro-friendly meal on stream.", failText: "You burn the chicken, but the chat finds it funny." },
-      75: { prompt: "Brad injured his shoulder. Alone in the locker room, his usual bravado shatters, revealing a desperate fear of becoming irrelevant.", sceneTags: ['vulnerability', 'secrecy', 'emotional_hunger'], tone: { heat: 5, implication: 6, emotionalRisk: 9, publicRisk: 2 }, statCheck: "empathy", threshold: 40, successText: "You convince him that recovery is just as important as lifting.", failText: "He stays moody, but appreciates your presence." },
-      100: { prompt: "Brad locks the gym doors after hours. His intense energy drops into something raw and heavy. 'I've never let anyone see me like this,' he admits, his hands gripping your waist with desperate possession before pulling you into the shadows of the studio.", sceneTags: ['late_night', 'vulnerability', 'longing', 'temptation'], tone: { heat: 9, implication: 8, emotionalRisk: 8, publicRisk: 3 }, statCheck: "empathy", threshold: 0, successText: "The First Night Together... (+100 Mood, +100 Energy, -50 Stress)", failText: "" }
-    }
-  },
-  {
     id: "sophia",
     name: "Sophia",
     gender: "female",
@@ -168,32 +142,6 @@ const BASE_NPCS = [
       50: { prompt: "Sophia is negotiating a brand deal but feels they are lowballing her.", statCheck: "negotiation", threshold: 40, successText: "You advise her on contract terms and she secures double the pay!", failText: "She takes the lower deal, but is glad you tried to help." },
       75: { prompt: "Sophia is spiraling after a private leak. She drops the influencer persona entirely, clutching your hand in her dark apartment, terrified of being completely exposed.", sceneTags: ['vulnerability', 'public_risk', 'emotional_hunger'], tone: { heat: 4, implication: 7, emotionalRisk: 9, publicRisk: 8 }, statCheck: "socialIq", threshold: 40, successText: "You help her draft a perfect PR response that wins over the public.", failText: "The PR response is mediocre, but the storm eventually passes." },
       100: { prompt: "Sophia kicks off her heels in the penthouse, dropping the VIP smile completely. She presses you against the glass windows overlooking the city. 'I just want it to be us tonight,' she breathes, sliding her hands under your shirt with demanding, unapologetic need.", sceneTags: ['late_night', 'vulnerability', 'longing', 'temptation'], tone: { heat: 9, implication: 9, emotionalRisk: 8, publicRisk: 0 }, statCheck: "empathy", threshold: 0, successText: "The First Night Together... (+100 Mood, +100 Energy, -50 Stress)", failText: "" }
-    }
-  },
-  {
-    id: "marcus",
-    name: "Marcus",
-    gender: "male",
-    archetype: "EXECUTIVE",
-    description: "A high-powered startup founder who drinks too much espresso and lives in business pitches.",
-    gatedBy: {
-      type: "stat",
-      stat: "corporate",
-      value: 30,
-      message: "Marcus values corporate ambition and networking (Requires Corporate > 30)."
-    },
-    dialogue: {
-      intro: "Hey, I've got 5 minutes between investor calls. What's your 30-second elevator pitch?",
-      choices: [
-        { text: "I'm pushing for a promotion and building connections. (+Corporate check)", checkStat: "corporate", threshold: 45, successRelation: 25, successText: "Marcus nods, impressed. 'Excellent. Let's exchange contacts.'", failRelation: 5, failText: "He looks at his watch. 'Okay, interesting. Keep grinding.'" },
-        { text: "I just try to enjoy life. No need to stress about work.", successRelation: -15, successText: "Marcus frowns. 'Lacks drive. Time is money, you know.'" }
-      ]
-    },
-    storyEvents: {
-      25: { prompt: "Marcus needs help analyzing a financial report before a board meeting.", statCheck: "finance", threshold: 40, successText: "You spot a crucial accounting error. He owes you big time!", failText: "You couldn't make sense of the spreadsheets." },
-      50: { prompt: "Marcus is stressed out and hasn't slept in two days.", statCheck: "empathy", threshold: 30, successText: "You convince him to take a day off and relax.", failText: "He refuses to rest, but appreciates your concern." },
-      75: { prompt: "Marcus's startup faces a takeover. Exhausted and running on empty, he pulls you into his office, closing the blinds. 'I need a distraction before I break,' he admits.", sceneTags: ['vulnerability', 'secrecy', 'emotional_hunger'], tone: { heat: 6, implication: 8, emotionalRisk: 8, publicRisk: 5 }, statCheck: "corporate", threshold: 60, successText: "You formulate a 'poison pill' strategy to save his company!", failText: "He loses controlling interest, but you help him through the transition." },
-      100: { prompt: "Marcus tosses his phone onto the couch. He pins you with a gaze usually reserved for ruthless negotiations. 'I'm done sharing your attention with the world.' The control slips as his hands slide to your waist, claiming you completely in the quiet of his apartment.", sceneTags: ['late_night', 'vulnerability', 'longing', 'temptation'], tone: { heat: 9, implication: 8, emotionalRisk: 8, publicRisk: 0 }, statCheck: "empathy", threshold: 0, successText: "The First Night Together... (+100 Mood, +100 Energy, -50 Stress)", failText: "" }
     }
   },
   {
@@ -350,7 +298,7 @@ const PHASE2_NPCS = [
   },
 }));
 
-export const CORE_NPC_IDS = ["elena", "brad", "sophia", "marcus", "chloe"];
+export const CORE_NPC_IDS = ["elena", "sophia", "chloe"];
 
 export const RELATIONSHIP_CONFLICT_TRIGGERS = [
   "ignored_messages",
@@ -450,77 +398,6 @@ const CORE_RELATIONSHIP_CONTENT = {
       "elena_repair_letter",
     ],
   },
-  brad: {
-    hiddenCompatibilityTraits: {
-      ambitionLevel: "steady_self_improvement",
-      affectionStyle: "enthusiastic_encouragement_and_presence",
-      conflictStyle: "direct_then_needs_reassurance",
-      socialPreference: "active_groups_with_private_cooldowns",
-      familyOrientation: "protective_team_as_family",
-      spendingStyle: "budgeted_health_routines",
-      emotionalOpenness: "jokes_first_then_honest",
-      longTermGoals: "sustainable_strength_and_shared_routines",
-    },
-    relationshipMemories: [
-      "brad_likes_motivation_talk",
-      "brad_trusts_player_prep",
-      "brad_identity_beyond_fitness",
-      "brad_opens_about_abandonment",
-      "brad_firm_coaching_dynamic",
-      "brad_committed_routine",
-    ],
-    preferredDateTypes: ["gym_date", "park_walk"],
-    conflictEvent: {
-      id: "brad_public_scoreboard_conflict",
-      trigger: "jealousy_social_reputation",
-      title: "Challenge Board Pressure",
-      routeImpact: "Brad loses confidence in the player's support but keeps the route open for repair.",
-      doesNotHardFailRoute: true,
-      setup: "The player repeatedly turns workouts into public performance and ignores Brad's low mood after an injury.",
-      memoriesChecked: ["brad_likes_motivation_talk", "brad_trusts_player_prep"],
-      compatibilityChecked: ["conflictStyle", "socialPreference", "emotionalOpenness"],
-      timingWindow: "best repaired before the next public gym challenge",
-      poorResponses: ["post_his_score_without_permission", "mock_recovery_limits"],
-    },
-    repairEvent: {
-      id: "brad_recovery_walk_repair",
-      action: "spend_quiet_time_together",
-      title: "No PRs Today",
-      successDependsOn: ["respected privacy", "acknowledged injury fear", "chose a low-pressure activity"],
-      noPurchasedItemRequired: true,
-      contextualItemRule: "A smoothie can be shared after the walk as scene dressing, but it does not function as a repeatable repair gift.",
-      choices: [
-        "apologize for making confidence a public contest",
-        "take a slow recovery walk and let him set the pace",
-        "ask his training friend how to support rehab without hovering",
-      ],
-    },
-    homeReaction: {
-      id: "brad_home_recovery_space",
-      likes: ["fitness", "cozy"],
-      dislikes: ["cramped_low_hygiene"],
-      text: "Brad lights up at room for stretching, then softens if the space also allows real rest.",
-    },
-    locationBasedEncounter: {
-      id: "brad_park_bootcamp_encounter",
-      locationKey: "park",
-      callback: "If the player once checked his boundaries, he asks for the same before inviting them into bootcamp.",
-    },
-    longTermRelationshipScene: {
-      id: "brad_sustainable_strength",
-      premise: "Brad considers stepping back from constant sponsor challenges to build a healthier routine with the player.",
-      compatibilityChecks: ["ambitionLevel", "spendingStyle", "emotionalOpenness"],
-    },
-    legacyFamilyReaction: {
-      id: "brad_team_family_barbecue",
-      text: "Brad's clients and gym friends are his family, and he notices whether the player treats them with warmth rather than ego.",
-    },
-    choiceCallbacks: [
-      "brad_sponsor_stream_callback",
-      "brad_rehab_walk_callback",
-      "brad_private_hype_callback",
-    ],
-  },
   sophia: {
     hiddenCompatibilityTraits: {
       ambitionLevel: "public_brand_growth",
@@ -590,77 +467,6 @@ const CORE_RELATIONSHIP_CONTENT = {
       "sophia_vip_lounge_boundary",
       "sophia_brand_contract_callback",
       "sophia_no_post_anniversary",
-    ],
-  },
-  marcus: {
-    hiddenCompatibilityTraits: {
-      ambitionLevel: "very_high_but_rebalancing",
-      affectionStyle: "strategic_help_and_kept_promises",
-      conflictStyle: "problem_solves_before_feeling",
-      socialPreference: "networking_with_deliberate_private_time",
-      familyOrientation: "provider_pressure_from_family_history",
-      spendingStyle: "investment_first",
-      emotionalOpenness: "controlled_until_burnout",
-      longTermGoals: "build_something_without_losing_home",
-    },
-    relationshipMemories: [
-      "marcus_relieved_by_structure",
-      "marcus_allows_care",
-      "marcus_seen_when_tired",
-      "marcus_crisis_protocol",
-      "marcus_phone_off",
-      "marcus_intentional_partnership",
-    ],
-    preferredDateTypes: ["coffee_date", "fine_dining"],
-    conflictEvent: {
-      id: "marcus_pitch_deck_promise_conflict",
-      trigger: "broken_promises",
-      title: "The Missing Meeting Notes",
-      routeImpact: "Marcus questions reliability, but the route branches into repair instead of failing.",
-      doesNotHardFailRoute: true,
-      setup: "The player promised to bring notes from a community meeting, then missed the planned date and minimized his low mood.",
-      memoriesChecked: ["marcus_relieved_by_structure", "marcus_allows_care"],
-      compatibilityChecked: ["ambitionLevel", "affectionStyle", "conflictStyle"],
-      timingWindow: "best repaired before his board meeting story event",
-      poorResponses: ["say_it_was_just_notes", "pitch_a_new_promise_without_action"],
-    },
-    repairEvent: {
-      id: "marcus_follow_through_notes_repair",
-      action: "follow_through_on_previous_promise",
-      title: "Receipts, Not Speeches",
-      successDependsOn: ["kept the original promise", "understood his burnout", "timed help before the board meeting"],
-      noPurchasedItemRequired: true,
-      contextualItemRule: "Bringing meeting notes is valid because it fulfills a specific promise; buying a business accessory cannot clear the conflict.",
-      choices: [
-        "deliver organized notes from the meeting",
-        "apologize for making him manage the reminder",
-        "protect one phone-free hour after the work is handled",
-      ],
-    },
-    homeReaction: {
-      id: "marcus_home_work_boundary",
-      likes: ["organized", "calm"],
-      dislikes: ["always_on_office"],
-      text: "Marcus admires an efficient home but needs proof that the couch is not just another desk.",
-    },
-    locationBasedEncounter: {
-      id: "marcus_coffee_investor_encounter",
-      locationKey: "cafe",
-      callback: "If the player once urged real rest, he cuts a meeting short instead of stacking another call.",
-    },
-    longTermRelationshipScene: {
-      id: "marcus_exit_strategy_for_two",
-      premise: "Marcus considers a slower growth plan that protects the relationship from permanent crunch time.",
-      compatibilityChecks: ["ambitionLevel", "spendingStyle", "longTermGoals"],
-    },
-    legacyFamilyReaction: {
-      id: "marcus_provider_history_reaction",
-      text: "Marcus's family history makes security feel like love, and he listens for whether the player understands that pressure.",
-    },
-    choiceCallbacks: [
-      "marcus_boardroom_error_callback",
-      "marcus_rest_day_callback",
-      "marcus_phone_free_hour",
     ],
   },
   chloe: {

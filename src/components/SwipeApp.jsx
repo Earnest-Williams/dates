@@ -59,9 +59,7 @@ const SwipeApp = ({ onClose, onTalkNpc }) => {
   if (preferredStat) {
     const npcPrimaryStatMap = {
       elena: 'intelligence',
-      brad: 'fitness',
       sophia: 'style',
-      marcus: 'corporate',
       chloe: 'charisma'
     };
     swipePool.sort((a, b) => {
