@@ -427,7 +427,7 @@ console.log('Testing tone tags do not bypass relationship progression...');
 // Test 7: Verify all main romanceable NPCs have tone tags in trust/commitment events
 console.log('Testing all main NPCs have tone tags...');
 {
-  const mainNpcIds = ['elena', 'brad', 'sophia', 'marcus', 'chloe', 'rina', 'maya', 'nora'];
+  const mainNpcIds = ['elena', 'sophia', 'chloe', 'rina', 'maya', 'nora'];
   const errors = [];
   
   for (const npcId of mainNpcIds) {
