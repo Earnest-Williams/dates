@@ -196,7 +196,7 @@ export const initialState = {
     "You are 18, newly done with high school, and alone in a tiny Endleigh flat above a fried chicken shop.",
   ],
   features: {
-    organicEncounters: false,
+    organicEncounters: true,
     compatibilityRevealUx: false,
     instantMatchRebalance: false,
     relationshipJournal: true,
