@@ -57,6 +57,49 @@ export const selectProposalReadinessHint = (state, npcId) => {
   return 'They seem ready whenever you are.';
 };
 
+/**
+ * Get compatibility signal for an NPC (internal use)
+ * @param {Object} state - Game state
+ * @param {string} npcId - NPC identifier
+ * @returns {Object} - { band: string, score: number }
+ */
+export const selectCompatibilitySignal = (state, npcId) => {
+  const match = state.matches?.[npcId];
+  if (!match || match.compatibilityScore === undefined) {
+    return { band: 'unknown', score: null };
+  }
+  
+  const score = match.compatibilityScore;
+  if (score >= 70) return { band: 'strong', score };
+  if (score >= 40) return { band: 'mixed', score };
+  return { band: 'fragile', score };
+};
+
+/**
+ * Get cohabitation fit hint for an NPC
+ * @param {Object} state - Game state
+ * @param {string} npcId - NPC identifier
+ * @returns {string} - Narrative hint about cohabitation fit
+ */
+export const selectCohabitationFitHint = (state, npcId) => {
+  const match = state.matches?.[npcId];
+  if (!match) return 'Unknown';
+  
+  const signal = selectCompatibilitySignal(state, npcId);
+  
+  if (signal.band === 'strong') {
+    return 'You connect easily in quiet moments. Living together would feel natural.';
+  }
+  if (signal.band === 'mixed') {
+    return 'You connect easily in quiet moments, but long-term ambition still feels unresolved.';
+  }
+  if (signal.band === 'fragile') {
+    return 'Your lifestyles and values may clash. Cohabitation could be challenging.';
+  }
+  
+  return 'Spend more time together to understand your compatibility.';
+};
+
 import { getNpcEncounters, LOCATION_EVENTS } from '../data/townTexture.js';
 
 export const selectCurrentLocationEncounters = (state, venueKey) => {
@@ -224,4 +267,84 @@ export const selectNpcSuggestedNextStep = (state, npcId) => {
   if (match.relationship > 50 && !state.living?.roommateId) return 'Consider asking them to move in.';
   
   return 'Plan another date to build more memories.';
+};
+
+/**
+ * Reputation System Selectors
+ */
+
+import { REPUTATION_CIRCLES, selectRelevantReputationCircle } from '../sim/reputation.js';
+
+/**
+ * Get reputation for a specific circle
+ * @param {Object} state - Game state
+ * @param {string} circle - Reputation circle name
+ * @returns {number} - Reputation score (-100 to 100)
+ */
+export const selectReputation = (state, circle) => {
+  return state.reputation?.[circle] || 0;
+};
+
+/**
+ * Get reputation for an NPC's circle
+ * @param {Object} state - Game state
+ * @param {string} npcId - NPC identifier
+ * @returns {number} - Reputation score for the NPC's circle
+ */
+export const selectNpcReputation = (state, npcId) => {
+  const circle = selectRelevantReputationCircle(npcId);
+  if (!circle) return 0;
+  return selectReputation(state, circle);
+};
+
+/**
+ * Get all reputation circles with their scores
+ * @param {Object} state - Game state
+ * @returns {Object} - All reputation circles and their scores
+ */
+export const selectAllReputation = (state) => {
+  return state.reputation || {};
+};
+
+/**
+ * Get reputation hint for display
+ * @param {Object} state - Game state
+ * @param {string} circle - Reputation circle name
+ * @returns {string} - Narrative description of reputation level
+ */
+export const selectReputationHint = (state, circle) => {
+  const rep = selectReputation(state, circle);
+  
+  if (rep >= 50) return 'Well-respected';
+  if (rep >= 20) return 'Liked';
+  if (rep >= -20) return 'Neutral';
+  if (rep >= -50) return 'Disliked';
+  return 'Feared';
+};
+
+/**
+ * Check if reputation spillover is enabled
+ * @param {Object} state - Game state
+ * @returns {boolean} - Whether reputation spillover is enabled
+ */
+export const isReputationSpilloverEnabled = (state) => {
+  return state.features?.reputationSpillover === true;
+};
+
+/**
+ * Get reputation circles that need attention
+ * @param {Object} state - Game state
+ * @returns {Array} - Circles with reputation < 0
+ */
+export const selectReputationWarnings = (state) => {
+  const warnings = [];
+  const rep = state.reputation || {};
+  
+  for (const [circle, score] of Object.entries(rep)) {
+    if (score < 0) {
+      warnings.push({ circle, score, hint: selectReputationHint(state, circle) });
+    }
+  }
+  
+  return warnings;
 };

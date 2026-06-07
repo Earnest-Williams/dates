@@ -97,7 +97,7 @@ export const initialState = {
   properties: {
     vehicles: [], // list of vehicleKeys
   },
-  matches: {}, // Format: { [npcId]: { met: boolean, relationship: number, chemistry: number, dateCount: number } }
+  matches: {}, // Format: { [npcId]: { met: boolean, relationship: number, chemistry: number, dateCount: number, storyTier: number, activeConflictId: null, pendingRepairScene: null, repairHistory: [], lastDateQuality: null, compatibilityScore: null, relationshipStage: 'matched', exclusivityExpectation: 'unknown', publicKnowledge: 0, dateHistory: [], lastDateDay: null, lastDateType: null } }
   relationshipMemory: {}, // Format: { [npcId]: remembered choices, shared activities, promises, moments, comfort, last day }
   compatibility: {
     playerTraits: {
@@ -196,11 +196,11 @@ export const initialState = {
     "You are 18, newly done with high school, and alone in a tiny Endleigh flat above a fried chicken shop.",
   ],
   features: {
-    organicEncounters: false,
-    compatibilityRevealUx: false,
+    organicEncounters: true,
+    compatibilityRevealUx: true,
     instantMatchRebalance: false,
     relationshipJournal: true,
-    reputationSpillover: false,
+    reputationSpillover: true,
     dailyPlannerUx: true,
     marketRiskControls: false,
     adultToneTags: false,
