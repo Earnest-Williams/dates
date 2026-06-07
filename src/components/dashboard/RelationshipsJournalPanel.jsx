@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useGameStore } from '../../state/store';
+import { useState } from 'react';
 import { RelationshipJournal } from '../journal/RelationshipJournal';
 import { NPCS } from '../../data/npcs';
 import './RelationshipsJournalPanel.css';
@@ -11,7 +10,7 @@ const RelationshipsJournalPanel = ({ gameState }) => {
   
   // Get NPCs that have been met
   const metNPCs = Object.entries(matches || {})
-    .filter(([npcId, match]) => match.met)
+    .filter(([, match]) => match.met)
     .map(([npcId]) => {
       const npc = NPCS.find(n => n.id === npcId);
       return { id: npcId, ...npc };

@@ -1,5 +1,6 @@
 import { simulateTicks } from './time.js';
 import { describeTimePassage } from '../../sim/time.js';
+import { calculateSimstagramStatMultiplier } from '../../sim/simstagram.js';
 
 export const socialMediaReducer = (state, action) => {
   switch (action.type) {
@@ -16,19 +17,8 @@ export const socialMediaReducer = (state, action) => {
         nextState.needs.health = Math.max(0, nextState.needs.health - 5);
       }
 
-      // Calculate followers gained
-      let statMultiplier = 1.0;
-      let totalStats = 0;
-      let requiredTotal = 0;
-      
-      for (const [stat, weight] of Object.entries(statRequirements)) {
-        totalStats += (nextState.stats[stat] || 0) * weight;
-        requiredTotal += 100 * weight; // 100 is max stat
-      }
-
-      if (requiredTotal > 0) {
-        statMultiplier = 0.5 + (totalStats / requiredTotal) * 2.0; // scales from 0.5x to 2.5x
-      }
+      // Calculate followers gained. Requirement values are stat weights, not hard thresholds.
+      const statMultiplier = calculateSimstagramStatMultiplier(nextState.stats, statRequirements);
 
       // Apply active buffs (e.g. foodie, gym_pump)
       let buffMultiplier = 1.0;

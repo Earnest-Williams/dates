@@ -1,5 +1,6 @@
 import { useGameStore } from '../state/store';
 import { NPCS } from '../data/npcs';
+import { formatOrganicEncounterRewardSummary } from './organicEncounterRewards';
 
 const OrganicEncounterUI = () => {
   const { gameState, resolveOrganicEncounter } = useGameStore();
@@ -41,6 +42,11 @@ const OrganicEncounterUI = () => {
             style={{ textAlign: 'left', padding: '1rem', background: 'rgba(59, 130, 246, 0.2)', border: '1px solid rgba(59, 130, 246, 0.5)' }}
           >
             <div style={{ fontWeight: 'bold' }}>{choice.text}</div>
+            {formatOrganicEncounterRewardSummary(choice) && (
+              <div style={{ fontSize: '0.8rem', color: '#c4b5fd', marginTop: '0.25rem' }}>
+                {formatOrganicEncounterRewardSummary(choice)}
+              </div>
+            )}
             {choice.discovery && <div style={{ fontSize: '0.8rem', color: '#7bed9f', marginTop: '0.25rem' }}>May reveal character information</div>}
             {choice.repairScene && <div style={{ fontSize: '0.8rem', color: '#ffb86c', marginTop: '0.25rem' }}>Could create tension</div>}
           </button>
