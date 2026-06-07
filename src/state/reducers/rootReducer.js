@@ -197,10 +197,10 @@ export const initialState = {
   ],
   features: {
     organicEncounters: true,
-    compatibilityRevealUx: false,
+    compatibilityRevealUx: true,
     instantMatchRebalance: false,
     relationshipJournal: true,
-    reputationSpillover: false,
+    reputationSpillover: true,
     dailyPlannerUx: true,
     marketRiskControls: false,
     adultToneTags: false,
