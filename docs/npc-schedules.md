@@ -108,9 +108,7 @@ export const getNpcEncounters = (time, locationKey) => {
 | NPC | Primary Locations | Best Times | Notes |
 |-----|------------------|------------|-------|
 | Elena | library, university | morning, afternoon | Studying, research |
-| Brad | gym, park | morning, afternoon | Working out |
 | Sophia | mall, nightclub | afternoon, evening | Shopping, socializing |
-| Marcus | office, coffee shop | morning, afternoon | Working, meetings |
 | Chloe | park, art gallery | afternoon, evening | Painting, relaxing |
 | Rina | nightclub, lounge | evening, night | Working, socializing |
 | Maya | park, studio | afternoon, evening | Photography, art |
