@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useGameStore } from '../../state/store';
+import { useState } from 'react';
 import { NPCS } from '../../data/npcs';
 import './MemoryViewer.css';
 
@@ -11,7 +10,7 @@ const MemoryViewer = ({ gameState }) => {
   
   // Get NPCs that have memories
   const npcWithMemories = Object.entries(relationshipMemory || {})
-    .filter(([npcId, memory]) => {
+    .filter(([, memory]) => {
       return memory && (
         (memory.rememberedChoices?.length || 0) > 0 ||
         (memory.sharedActivities?.length || 0) > 0 ||

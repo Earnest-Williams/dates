@@ -6,6 +6,9 @@ import fs from 'node:fs';
 // and console output during module loading
 const originalWarn = console.warn;
 console.warn = () => {};
+test.after(() => {
+  console.warn = originalWarn;
+});
 
 import { ITEMS } from '../src/data/items.js';
 import { NPCS } from '../src/data/npcs.js';

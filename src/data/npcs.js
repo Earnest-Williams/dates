@@ -307,6 +307,49 @@ const BASE_NPCS = [
   }
 ];
 
+
+const makePhase2RomanceArc = (npcId, name) => [
+  { id: `${npcId}_intro`, type: "introduction", minRelationship: 0, title: "First Real Conversation", prompt: `${name} gives you a careful opening to show who you are.`, emotionalBeat: "Curiosity and first-impression nerves.", choices: [{ text: "Ask what kind of day they are having before trying to impress them.", relationshipImpact: 6, chemistryImpact: 5, unlocksMemory: `${npcId}_honest_opening` }, { text: "Share a small honest detail about yourself.", relationshipImpact: 5, chemistryImpact: 6 }, { text: "Try too hard to sound impressive.", checkStat: "charisma", threshold: 35, onSuccess: { relationshipImpact: 4, chemistryImpact: 4 }, onFail: { relationshipImpact: -2, chemistryImpact: -1 } }] },
+  { id: `${npcId}_early`, type: "early connection", minRelationship: 18, title: "A Shared Rhythm", prompt: `${name} lets the conversation slow down enough for trust to start forming.`, emotionalBeat: "Warmth, pacing, and guarded hope.", choices: [{ text: "Match their pace and listen for what matters.", relationshipImpact: 7, chemistryImpact: 5, unlocksMemory: `${npcId}_shared_rhythm` }, { text: "Suggest a low-pressure follow-up together.", relationshipImpact: 5, chemistryImpact: 6 }, { text: "Fill every silence.", relationshipImpact: 1, chemistryImpact: -1 }] },
+  { id: `${npcId}_reveal`, type: "personal reveal", minRelationship: 35, title: "Something Underneath", prompt: `${name} admits there is more going on than their usual public routine shows.`, emotionalBeat: "Vulnerability balanced against self-protection.", choices: [{ text: "Thank them for trusting you with the truth.", relationshipImpact: 9, chemistryImpact: 6, unlocksMemory: `${npcId}_trusted_reveal` }, { text: "Ask what support would actually help.", relationshipImpact: 7, chemistryImpact: 6 }, { text: "Rush into advice.", checkStat: "empathy", threshold: 35, onSuccess: { relationshipImpact: 4, chemistryImpact: 3 }, onFail: { relationshipImpact: -2, chemistryImpact: -1 } }] },
+  { id: `${npcId}_conflict`, type: "conflict", minRelationship: 52, title: "A Misread Moment", prompt: `${name} pulls back after a choice lands differently than you intended.`, emotionalBeat: "Hurt, uncertainty, and a chance to repair without defensiveness.", choices: [{ text: "Own the impact before explaining intent.", relationshipImpact: 7, chemistryImpact: 5, unlocksMemory: `${npcId}_owned_impact` }, { text: "Give them room, then follow up clearly.", relationshipImpact: 5, chemistryImpact: 4 }, { text: "Act like they are overreacting.", relationshipImpact: -6, chemistryImpact: -4 }] },
+  { id: `${npcId}_trust`, type: "trust event", minRelationship: 70, title: "Choosing Trust", prompt: `${name} lets you see a private fear and waits to see whether you stay present.`, emotionalBeat: "Trust tested by pressure.", choices: [{ text: "Stay steady and ask what they need right now.", relationshipImpact: 9, chemistryImpact: 8, unlocksMemory: `${npcId}_steady_trust` }, { text: "Offer reassurance without making promises you cannot keep.", relationshipImpact: 7, chemistryImpact: 7 }, { text: "Try to fix the feeling instantly.", checkStat: "empathy", threshold: 45, onSuccess: { relationshipImpact: 5, chemistryImpact: 3 }, onFail: { relationshipImpact: 0, chemistryImpact: -2 } }] },
+  { id: `${npcId}_commitment`, type: "commitment event", minRelationship: 90, title: "A Future Named Out Loud", prompt: `${name} asks what building something real would look like after the rush fades.`, emotionalBeat: "Commitment, longing, and practical hope.", choices: [{ text: "Name the future you want and the habits that will protect it.", relationshipImpact: 13, chemistryImpact: 12, futureCallback: `${npcId}_future_habits` }, { text: "Admit you are scared but willing to keep choosing them.", relationshipImpact: 10, chemistryImpact: 11 }, { text: "Keep the future vague.", relationshipImpact: 1, chemistryImpact: 0 }] },
+];
+
+const PHASE2_NPCS = [
+  { id: "liam", name: "Liam", gender: "male", archetype: "ARTIST", stat: "creativity", description: "A community muralist who notices the stories people leave on walls." },
+  { id: "ava", name: "Ava", gender: "female", archetype: "SOCIALITE", stat: "style", description: "A boutique event planner with a sharp eye for whether people feel included." },
+  { id: "ethan", name: "Ethan", gender: "male", archetype: "SCHOLAR", stat: "intelligence", description: "A local archivist who turns small-town history into living gossip." },
+  { id: "olivia", name: "Olivia", gender: "female", archetype: "EXECUTIVE", stat: "corporate", description: "A startup operations lead trying to build ambition without burning out." },
+  { id: "noah", name: "Noah", gender: "male", archetype: "GYM_RAT", stat: "fitness", description: "A climbing coach who treats patience as seriously as strength." },
+  { id: "isabella", name: "Isabella", gender: "female", archetype: "ARTIST", stat: "music", description: "A violin teacher who hears sincerity before polish." },
+  { id: "james", name: "James", gender: "male", archetype: "EXECUTIVE", stat: "finance", description: "A junior analyst learning that stability and status are not the same thing." },
+  { id: "sofia", name: "Sofia", gender: "female", archetype: "SCHOLAR", stat: "empathy", description: "A language tutor who values thoughtful attention over perfect words." },
+  { id: "emma", name: "Emma", gender: "female", archetype: "SOCIALITE", stat: "charisma", description: "A friendly cafe regular who remembers everyone's small victories." },
+  { id: "alexander", name: "Alexander", gender: "male", archetype: "EXECUTIVE", stat: "negotiation", description: "A theatre producer balancing charm, logistics, and fragile egos." },
+].map((npc) => ({
+  ...npc,
+  gatedBy: {
+    type: "stat",
+    stat: npc.stat,
+    value: 20,
+    message: `${npc.name} notices people with ${npc.stat} above 20.`,
+  },
+  dialogue: {
+    intro: `${npc.name} seems open to a real conversation if you meet the moment honestly.`,
+    choices: [
+      { text: `Lead with curiosity about ${npc.name}'s day.`, successRelation: 12, successText: `${npc.name} relaxes into the conversation.` },
+      { text: "Make the moment all about yourself.", successRelation: -6, successText: `${npc.name} politely creates some distance.` },
+    ],
+  },
+  romanceArc: makePhase2RomanceArc(npc.id, npc.name),
+  storyEvents: {
+    25: { prompt: `${npc.name} needs encouragement before a stressful obligation.`, statCheck: npc.stat, threshold: 35, successText: "Your support lands well.", failText: "The moment is imperfect, but the effort matters." },
+    50: { prompt: `${npc.name} has to choose between image and honesty.`, statCheck: "empathy", threshold: 35, successText: "You help keep the choice grounded.", failText: "It stays messy, but trust survives." },
+  },
+}));
+
 export const CORE_NPC_IDS = ["elena", "brad", "sophia", "marcus", "chloe"];
 
 export const RELATIONSHIP_CONFLICT_TRIGGERS = [
@@ -693,7 +736,8 @@ const CORE_RELATIONSHIP_CONTENT = {
   },
 };
 
-export const NPCS = BASE_NPCS.map((npc) => ({
+export const NPCS = [...BASE_NPCS, ...PHASE2_NPCS].map((npc) => ({
   ...npc,
+  romanceArc: npc.romanceArc || makePhase2RomanceArc(npc.id, npc.name),
   ...(CORE_RELATIONSHIP_CONTENT[npc.id] || {}),
 }));

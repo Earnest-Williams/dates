@@ -12,6 +12,28 @@ import { describeTimePassage, getTimeWindowStatus } from '../../sim/time.js';
 const clampRoutineValue = (value) => Math.min(100, Math.max(0, value));
 const ADMIN_WINDOW = { startHour: 7, endHour: 22, requireFinish: true };
 const COURSE_ENROLL_WINDOW = { startHour: 8, endHour: 20, requireFinish: true };
+const WISDOM_BONUS_STATS = new Set([
+  'intelligence',
+  'charisma',
+  'corporate',
+  'programming',
+  'marketing',
+  'finance',
+  'negotiation',
+  'culinary',
+  'creativity',
+  'music',
+  'gaming',
+  'confidence',
+  'socialIq',
+  'empathy',
+]);
+
+const applyWisdomBonus = (state, key, change) => {
+  if ((state.family?.age ?? 18) <= 30) return change;
+  if (change <= 0 || !WISDOM_BONUS_STATS.has(key)) return change;
+  return change * 1.1;
+};
 
 export const applyRoutineEffects = (nextState, routine) => {
   const updatedStats = { ...nextState.stats };
@@ -83,6 +105,8 @@ export const actionReducer = (state, action) => {
         if (actionName.toLowerCase().includes('study') && key === 'intelligence' && hasBookshelf) {
           change = change * 1.25;
         }
+
+        change = applyWisdomBonus(state, key, change);
 
         finalStatChanges[key] = change;
       });

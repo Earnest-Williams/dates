@@ -7,6 +7,30 @@ import { NPC_ALERTS, JEALOUSY_CONFRONTATION } from '../../data/npcAlerts.js';
 import { applyMarketNews } from '../../sim/markets.js';
 import { getShiftForDay, getAttendanceRecord, withAttendanceRecord } from '../../sim/workSchedule.js';
 
+
+const getBirthdayYearsPassed = (day) => Math.floor(Math.max(1, day) / 365);
+
+const applyBirthdayProgression = (state, finalDay, logs) => {
+  if (!state.family) return { family: state.family, logs };
+
+  const previousYearsPassed = getBirthdayYearsPassed(state.time?.day ?? 1);
+  const nextYearsPassed = getBirthdayYearsPassed(finalDay);
+  const birthdaysCrossed = nextYearsPassed - previousYearsPassed;
+
+  if (birthdaysCrossed <= 0) return { family: state.family, logs };
+
+  const previousAge = state.family.age ?? 18;
+  const nextAge = previousAge + birthdaysCrossed;
+
+  return {
+    family: {
+      ...state.family,
+      age: nextAge,
+    },
+    logs: [`🎂 Happy birthday! You are now ${nextAge}.`, ...logs],
+  };
+};
+
 export const simulateTicks = (state, ticks) => {
   const { time: newTime, daysCrossed } = incrementTime(state.time, ticks);
   
@@ -270,9 +294,12 @@ export const simulateTicks = (state, ticks) => {
     newLogs.unshift(`✨ You recovered from Burnout by resting!`);
   }
 
+  const birthdayProgression = applyBirthdayProgression(state, finalDay, newLogs);
+
   const baseNextState = {
     ...state,
     time: { day: finalDay, hour: finalHour, minute: finalMinute },
+    family: birthdayProgression.family,
     activeTraits: updatedTraits,
     stats: {
       ...state.stats,
@@ -296,7 +323,7 @@ export const simulateTicks = (state, ticks) => {
     storage: currentStorage,
     assetPrices: currentPrices,
     priceHistories: currentHistories,
-    logs: newLogs,
+    logs: birthdayProgression.logs,
     career: state.career,
   };
 
