@@ -97,7 +97,7 @@ export const initialState = {
   properties: {
     vehicles: [], // list of vehicleKeys
   },
-  matches: {}, // Format: { [npcId]: { met: boolean, relationship: number, chemistry: number, dateCount: number } }
+  matches: {}, // Format: { [npcId]: { met: boolean, relationship: number, chemistry: number, dateCount: number, storyTier: number, activeConflictId: null, pendingRepairScene: null, repairHistory: [], lastDateQuality: null, compatibilityScore: null, relationshipStage: 'matched', exclusivityExpectation: 'unknown', publicKnowledge: 0, dateHistory: [], lastDateDay: null, lastDateType: null } }
   relationshipMemory: {}, // Format: { [npcId]: remembered choices, shared activities, promises, moments, comfort, last day }
   compatibility: {
     playerTraits: {
