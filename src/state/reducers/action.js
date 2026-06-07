@@ -12,8 +12,30 @@ import { describeTimePassage, getTimeWindowStatus } from '../../sim/time.js';
 const clampRoutineValue = (value) => Math.min(100, Math.max(0, value));
 const ADMIN_WINDOW = { startHour: 7, endHour: 22, requireFinish: true };
 const COURSE_ENROLL_WINDOW = { startHour: 8, endHour: 20, requireFinish: true };
+const WISDOM_BONUS_STATS = new Set([
+  'intelligence',
+  'charisma',
+  'corporate',
+  'programming',
+  'marketing',
+  'finance',
+  'negotiation',
+  'culinary',
+  'creativity',
+  'music',
+  'gaming',
+  'confidence',
+  'socialIq',
+  'empathy',
+]);
 
-export const applyRoutineEffects = (nextState, routine) => {
+const applyWisdomBonus = (state, key, change) => {
+  if ((state.family?.age ?? 18) <= 30) return change;
+  if (change <= 0 || !WISDOM_BONUS_STATS.has(key)) return change;
+  return change * 1.1;
+};
+
+export const applyRoutineEffects = (nextState, routine, sourceState = nextState) => {
   const updatedStats = { ...nextState.stats };
   const updatedNeeds = { ...nextState.needs };
 
@@ -21,7 +43,9 @@ export const applyRoutineEffects = (nextState, routine) => {
     if (typeof updatedNeeds[key] === 'number') {
       updatedNeeds[key] = clampRoutineValue(updatedNeeds[key] + value);
     } else if (typeof updatedStats[key] === 'number') {
-      updatedStats[key] = clampRoutineValue(updatedStats[key] + value);
+      updatedStats[key] = clampRoutineValue(
+        updatedStats[key] + applyWisdomBonus(sourceState, key, value)
+      );
     }
   });
 
@@ -83,6 +107,8 @@ export const actionReducer = (state, action) => {
         if (actionName.toLowerCase().includes('study') && key === 'intelligence' && hasBookshelf) {
           change = change * 1.25;
         }
+
+        change = applyWisdomBonus(state, key, change);
 
         finalStatChanges[key] = change;
       });
@@ -230,10 +256,11 @@ export const actionReducer = (state, action) => {
       const moodBonus = (hasGasRange ? 15 : 0) + (skillBonus ? 5 : 0);
       const hygieneCost = skillBonus ? 2 : 5;
 
-      const newCulinary = Math.min(100, culinaryLevel + 2);
+      const culinaryGain = applyWisdomBonus(state, 'culinary', 2);
+      const newCulinary = Math.min(100, culinaryLevel + culinaryGain);
       const mealName = hasGasRange ? "premium meal on your Gas Range" : "basic meal on your Hot Plate";
 
-      const logMsg = `${timePassage} ${mealName}. (-$${cost}, -${hygieneCost} Hygiene, -${hungerRecovery} Hunger${moodBonus ? `, +${moodBonus} Mood` : ''}, +2.0 Culinary Skill)`;
+      const logMsg = `${timePassage} ${mealName}. (-$${cost}, -${hygieneCost} Hygiene, -${hungerRecovery} Hunger${moodBonus ? `, +${moodBonus} Mood` : ''}, +${culinaryGain.toFixed(1)} Culinary Skill)`;
       const finalLogs = [logMsg, ...nextState.logs].slice(0, 20);
 
       return {
@@ -370,7 +397,7 @@ export const actionReducer = (state, action) => {
 
       const nextState = simulateTicks(state, routine.durationTicks);
       const timePassage = describeTimePassage(state.time, nextState.time, `completed ${routine.label}`);
-      const { updatedStats, updatedNeeds } = applyRoutineEffects(nextState, routine);
+      const { updatedStats, updatedNeeds } = applyRoutineEffects(nextState, routine, state);
 
       const memoryRoll = routine.memoryChance && Math.random() < routine.memoryChance;
       const memoryLog = memoryRoll ? ' A memory of someone close surfaced.' : '';
@@ -581,7 +608,8 @@ export const actionReducer = (state, action) => {
            // Apply benefits
            if (course.benefits && course.benefits.stats) {
               for (const [stat, val] of Object.entries(course.benefits.stats)) {
-                 newStats[stat] = Math.min(100, (newStats[stat] || 0) + val);
+                 const statGain = applyWisdomBonus(state, stat, val);
+                 newStats[stat] = Math.min(100, (newStats[stat] || 0) + statGain);
               }
            }
 

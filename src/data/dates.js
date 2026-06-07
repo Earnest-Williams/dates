@@ -22,6 +22,16 @@ export const NPC_DATE_PREFERENCES = {
   rina: ['nightclub_date', 'coffee_date', 'movie_night'],
   maya: ['park_walk', 'study_date', 'home_dinner'],
   nora: ['coffee_date', 'errands_together', 'study_date'],
+  liam: ['park_walk', 'coffee_date'],
+  ava: ['mall_outing', 'coffee_date'],
+  ethan: ['library_date', 'study_date'],
+  olivia: ['coffee_date', 'errands_together'],
+  noah: ['workout_date', 'park_walk'],
+  isabella: ['movie_night', 'quiet_evening_in'],
+  james: ['coffee_date', 'study_date'],
+  sofia: ['library_date', 'quiet_evening_in'],
+  emma: ['coffee_date', 'park_walk'],
+  alexander: ['nightclub_date', 'movie_night'],
 };
 
 const makeChoice = ({

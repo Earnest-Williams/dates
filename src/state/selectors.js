@@ -10,7 +10,7 @@ export const getFormattedTime = (state) => {
 export const calculateMatchChance = (state, npcId) => {
   const npc = NPCS.find(n => n.id === npcId);
   if (!npc) return 0;
-  return calculateMatchProbability(state.stats, npc, state.swipePreferences, state.swipePremium?.active);
+  return calculateMatchProbability(state.stats, npc, state.swipePreferences, state.swipePremium?.active) / 100;
 };
 
 export const checkActionFeasibility = (state, actionName, energyCost, moneyCost = 0) => {

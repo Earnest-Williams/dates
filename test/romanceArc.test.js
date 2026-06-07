@@ -44,7 +44,7 @@ const REQUIRED_REPAIR_ACTIONS = [
 test('all romanceable npcs have six romance arc chapters with required beats', () => {
   // Only female NPCs are romanceable
   const romanceableNPCs = NPCS.filter(n => n.gender === 'female');
-  assert.equal(romanceableNPCs.length, 6);
+  assert.ok(romanceableNPCs.length >= 6);
 
   for (const npc of romanceableNPCs) {
     assert.ok(Array.isArray(npc.romanceArc));

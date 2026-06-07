@@ -1,10 +1,11 @@
 import { useGameStore } from '../state/store';
 import { SOCIAL_MEDIA_CONTENT, SPONSORSHIP_TIERS } from '../data/socialMedia';
+import { canPostSimstagramContent } from '../sim/simstagram';
 import './SimstagramApp.css';
 
 export default function SimstagramApp({ onClose }) {
   const { gameState, postSimstagram } = useGameStore();
-  const { simstagram, needs } = gameState;
+  const { simstagram } = gameState;
 
   return (
     <div className="simstagram-app">
@@ -57,7 +58,7 @@ export default function SimstagramApp({ onClose }) {
         <h4>Create Post</h4>
         <div className="create-post-grid">
           {SOCIAL_MEDIA_CONTENT.map(content => {
-            const canAfford = needs.energy >= content.energyCost;
+            const canAfford = canPostSimstagramContent(gameState, content);
             return (
               <button 
                 key={content.id}

@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
-import { useGameStore } from '../../state/store';
+import { useState } from 'react';
 import { getDaypart, formatTime } from '../../sim/time';
-import { getShiftForDay, getDayKeyForDayNumber } from '../../sim/workSchedule';
+import { getShiftForDay } from '../../sim/workSchedule';
 import { ROUTINES } from '../../data/routines';
 import { NPCS } from '../../data/npcs';
 import { LOCATIONS } from '../../data/locations';
-import { ACTIVITY_WINDOWS } from '../../data/activityWindows';
 import './DailyPlannerPanel.css';
 
 const DAYS_TO_SHOW = 7;
@@ -26,10 +24,6 @@ const getTimeSlots = () => {
 const getNpcName = (npcId) => {
   const npc = NPCS.find(n => n.id === npcId);
   return npc ? npc.name : npcId;
-};
-
-const getLocationName = (locationKey) => {
-  return LOCATIONS[locationKey]?.name || locationKey || 'Home';
 };
 
 const getActivityColor = (category) => {
@@ -124,7 +118,7 @@ const DailyPlannerPanel = ({ gameState }) => {
 
   // Get available NPCs for dates
   const availableNPCs = Object.entries(matches || {})
-    .filter(([npcId, match]) => match.met && match.relationship > 10)
+    .filter(([, match]) => match.met && match.relationship > 10)
     .map(([npcId]) => ({ id: npcId, name: getNpcName(npcId) }));
 
   // Get available locations

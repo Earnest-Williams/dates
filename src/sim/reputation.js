@@ -1,11 +1,11 @@
 const clamp = (value, min = -100, max = 100) => Math.max(min, Math.min(max, value));
 
 export const REPUTATION_CIRCLES = {
-  coworkers: ['marcus', 'nora'],
-  friends: ['brad'],
-  nightlife: ['sophia', 'rina'],
-  creative: ['chloe', 'maya'],
-  academic: ['elena'],
+  coworkers: ['marcus', 'nora', 'olivia', 'james'],
+  friends: ['brad', 'emma', 'noah'],
+  nightlife: ['sophia', 'rina', 'ava', 'alexander'],
+  creative: ['chloe', 'maya', 'liam', 'isabella'],
+  academic: ['elena', 'ethan', 'sofia'],
   exes: []
 };
 

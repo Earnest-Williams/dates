@@ -33,6 +33,36 @@ export const NPC_SCHEDULE = {
     { days: ['tue', 'fri'], time: 'evening', location: 'office', reveals: 'professional_pressure' },
     { days: ['sat'], time: 'morning', location: 'mall', reveals: 'routine_efficiency' },
   ],
+  liam: [
+    { days: ['mon'], time: 'evening', location: 'park', reveals: 'mural_walks' },
+  ],
+  ava: [
+    { days: ['tue'], time: 'afternoon', location: 'mall', reveals: 'event_window_shopping' },
+  ],
+  ethan: [
+    { days: ['wed'], time: 'evening', location: 'library', reveals: 'archive_hours' },
+  ],
+  olivia: [
+    { days: ['thu'], time: 'evening', location: 'office', reveals: 'late_operations' },
+  ],
+  noah: [
+    { days: ['fri'], time: 'morning', location: 'gym', reveals: 'climbing_warmups' },
+  ],
+  isabella: [
+    { days: ['sat'], time: 'evening', location: 'home', reveals: 'violin_practice' },
+  ],
+  james: [
+    { days: ['mon'], time: 'morning', location: 'mall', reveals: 'coffee_before_markets' },
+  ],
+  sofia: [
+    { days: ['sun'], time: 'afternoon', location: 'library', reveals: 'language_tutoring' },
+  ],
+  emma: [
+    { days: ['sun'], time: 'morning', location: 'park', reveals: 'friend_group_picnic' },
+  ],
+  alexander: [
+    { days: ['fri'], time: 'night', location: 'club', reveals: 'theatre_afterparty' },
+  ],
 };
 
 export const LOCATION_EVENTS = {

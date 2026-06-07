@@ -1,10 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useGameStore } from '../../state/store';
 import { formatTime, getDaypart } from '../../sim/time';
 import './TimeControls.css';
 
+const SPEED_INTERVALS = {
+  1: 3000,
+  2: 1500,
+  4: 750,
+  8: 375,
+};
+
 const TimeControls = ({ gameState }) => {
-  const { time, features } = gameState;
+  const { time } = gameState;
   const { day, hour, minute } = time;
   
   const [isPlaying, setIsPlaying] = useState(false);
@@ -17,14 +24,6 @@ const TimeControls = ({ gameState }) => {
   const daypart = getDaypart(hour);
   const timeString = formatTime(hour, minute);
   
-  // Tick intervals in milliseconds for different speeds
-  const speedIntervals = {
-    1: 3000,  // 3 seconds per tick (10 minutes game time)
-    2: 1500,  // 1.5 seconds per tick
-    4: 750,   // 0.75 seconds per tick
-    8: 375,   // 0.375 seconds per tick
-  };
-
   // Start auto-ticking
   const startAutoTick = useCallback(() => {
     if (autoTickInterval) {
@@ -34,7 +33,7 @@ const TimeControls = ({ gameState }) => {
     const interval = setInterval(() => {
       advanceTime(1);
       applyNeedsDecay(1);
-    }, speedIntervals[speed]);
+    }, SPEED_INTERVALS[speed]);
     
     setAutoTickInterval(interval);
     setIsPlaying(true);
