@@ -273,7 +273,7 @@ export const selectNpcSuggestedNextStep = (state, npcId) => {
  * Reputation System Selectors
  */
 
-import { REPUTATION_CIRCLES, selectRelevantReputationCircle } from '../sim/reputation.js';
+import { selectRelevantReputationCircle } from '../sim/reputation.js';
 
 /**
  * Get reputation for a specific circle
