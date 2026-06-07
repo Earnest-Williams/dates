@@ -138,6 +138,42 @@ npm run lint
 
 ---
 
+## 🎯 Current Features (Enabled)
+
+### ✅ Core Systems
+- **Needs Management**: Energy, Hunger, Hygiene, Health, Mood with real-time decay
+- **Stats & Skills**: Fitness, Intelligence, Charm, Style, Career skills, and more
+- **Housing**: Upgrade from Studio → 1-Bedroom → Condo with furniture bonuses
+- **Dating**: Swipe app matching with style, charm, and preference-based probabilities
+
+### ✅ Relationship Core (Phase 1)
+- **Date Phase System**: Multi-phase dates with meaningful choices at each step
+- **Diminishing Returns**: Prevents farming relationships through repeated optimal dates
+  - Time-based penalties (7-day window)
+  - Lifetime repetition penalties (3+ dates)
+  - Boredom penalties for low-effort dates
+  - Callback and repair date bypasses
+  - Compatibility-based softening
+- **Conflict & Repair**: 11 conflict trigger types with context-based repair options
+- **Compatibility Hints**: Narrative hints (not raw numbers) for long-term fit
+
+### ✅ Discovery & World Texture (Phase 2)
+- **Organic NPC Encounters**: Discover NPCs at locations based on their schedules
+- **Location Events**: Special events at each location (library sale, gym challenge, park market, etc.)
+- **Daily Planner**: Primary day-entry experience with time buckets (morning/afternoon/evening/night)
+
+### ✅ Reputation & Social Systems (Phase 3)
+- **Reputation Circles**: 6 circles (coworkers, friends, nightlife, creative, academic, exes)
+- **Reputation Effects**: Affects gossip risk, repair difficulty, and public date visibility
+- **Compatibility Reveal UX**: Narrative hints for long-term fit assessment
+
+### 🔜 Coming Soon (Feature Flags Disabled)
+- `instantMatchRebalance`: Swipe app matching balance improvements
+- `marketRiskControls`: Investment risk management
+- `adultToneTags`: Adult content tone tagging system
+
+---
+
 ## 🧭 Contributor Content Guardrails
 
 * Keep romance progression grounded in shared time, meaningful choices, remembered context, compatibility, dates, routines, conflict/repair, and long-term follow-through.
