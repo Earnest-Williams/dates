@@ -266,4 +266,4 @@ const MemoryViewer = ({ gameState }) => {
   );
 };
 
-export default MemoryViewer;
+export default memo(MemoryViewer);

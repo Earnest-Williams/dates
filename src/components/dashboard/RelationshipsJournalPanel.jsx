@@ -1,7 +1,39 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { RelationshipJournal } from '../journal/RelationshipJournal';
 import { NPCS } from '../../data/npcs';
 import './RelationshipsJournalPanel.css';
+
+const NpcCard = memo(({ npc, status, color, relationship, onClick }) => (
+  <div 
+    className="npc-card"
+    onClick={onClick}
+    style={{ borderColor: color }}
+  >
+    <div className="npc-avatar" style={{ backgroundColor: color }}>
+      {npc.avatar || '👤'}
+    </div>
+    <div className="npc-info">
+      <div className="npc-name">{npc.name}</div>
+      <div className="npc-status">
+        <span className="status-badge" style={{ backgroundColor: color }}>
+          {status}
+        </span>
+      </div>
+      <div className="relationship-bar">
+        <div 
+          className="relationship-fill"
+          style={{ 
+            width: `${Math.min(100, relationship)}%`,
+            backgroundColor: color 
+          }}
+        />
+      </div>
+      <div className="relationship-value">{relationship}%</div>
+    </div>
+  </div>
+));
+
+NpcCard.displayName = 'NpcCard';
 
 const RelationshipsJournalPanel = ({ gameState }) => {
   const [selectedNpcId, setSelectedNpcId] = useState(null);
@@ -129,4 +161,4 @@ const RelationshipsJournalPanel = ({ gameState }) => {
   );
 };
 
-export default RelationshipsJournalPanel;
+export default memo(RelationshipsJournalPanel);

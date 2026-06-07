@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { getDaypart, formatTime } from '../../sim/time';
 import { getShiftForDay } from '../../sim/workSchedule';
 import { ROUTINES } from '../../data/routines';
@@ -409,4 +409,4 @@ const DailyPlannerPanel = ({ gameState }) => {
   );
 };
 
-export default DailyPlannerPanel;
+export default memo(DailyPlannerPanel);

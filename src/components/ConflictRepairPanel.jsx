@@ -1,4 +1,6 @@
 import { useGameStore } from '../state/store';
+import { memo } from "react";
+import { memo } from "react";
 import { NPCS } from '../data/npcs';
 import { getAvailableRepairActions } from '../sim/relationshipRepair';
 
@@ -51,4 +53,4 @@ const ConflictRepairPanel = ({ npcId, onClose }) => {
   );
 };
 
-export default ConflictRepairPanel;
+export default memo(ConflictRepairPanel);

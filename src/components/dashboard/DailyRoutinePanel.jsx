@@ -31,4 +31,4 @@ const DailyRoutinePanel = ({ gameState, doRoutine }) => {
   );
 };
 
-export default DailyRoutinePanel;
+export default memo(DailyRoutinePanel);

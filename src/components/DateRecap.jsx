@@ -1,4 +1,6 @@
 import { useGameStore } from '../state/store';
+import { memo } from "react";
+import { memo } from "react";
 
 const DateRecap = () => {
   const { gameState, closeDateRecap } = useGameStore();
@@ -74,4 +76,4 @@ const DateRecap = () => {
   );
 };
 
-export default DateRecap;
+export default memo(DateRecap);

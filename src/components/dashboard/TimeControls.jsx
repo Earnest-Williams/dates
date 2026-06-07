@@ -188,4 +188,4 @@ const TimeControls = ({ gameState }) => {
   );
 };
 
-export default TimeControls;
+export default memo(TimeControls);

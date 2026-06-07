@@ -14,7 +14,10 @@
     "audit:actions": "node scripts/audit-actions.mjs",
     "audit:content": "node scripts/audit-content.mjs",
     "validate:content": "node scripts/validate-content.mjs",
-    "audit": "node scripts/run-audit.mjs"
+    "audit": "node scripts/run-audit.mjs",
+    "qa:content": "node scripts/content-qa-checklist.mjs",
+    "precommit": "npm run lint && npm run validate:content && npm run audit:actions && npm run qa:content",
+    "prepare": "husky install"
   },
   "dependencies": {
     "react": "^19.2.6",
@@ -30,6 +33,19 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
     "vite": "^8.0.12"
+  },
+  "lint-staged": {
+    "*.{js,jsx}": [
+      "eslint --fix",
+      "git add"
+    ],
+    "src/data/*.js": [
+      "node scripts/validate-content.mjs",
+      "node scripts/content-qa-checklist.mjs",
+      "git add"
+    ]
   }
 }

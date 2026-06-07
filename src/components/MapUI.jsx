@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { memo } from "react";
+import { memo } from "react";
 import { useGameStore } from '../state/store';
 import { ITEMS } from '../state/ItemDatabase';
 import { HOUSING_TIERS } from '../data/housing';
@@ -1120,4 +1122,4 @@ const MapUI = ({ onClose, onTalkNpc }) => {
   );
 };
 
-export default MapUI;
+export default memo(MapUI);

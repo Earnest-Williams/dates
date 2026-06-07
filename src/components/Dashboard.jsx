@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { useGameStore } from '../state/store';
 import { abilities } from '../data/abilities';
 import { ACTIVITY_WINDOWS } from '../data/activityWindows';
@@ -20,6 +20,9 @@ import TimeControls from './dashboard/TimeControls';
 import HomeStylePanel from './dashboard/HomeStylePanel';
 import HomeActivityPanel from './dashboard/HomeActivityPanel';
 import NpcHomeReaction from './dashboard/NpcHomeReaction';
+import VirtualList from './common/VirtualList';
+import VirtualList from './common/VirtualList';
+import VirtualList from './common/VirtualList';
 import './Dashboard.css';
 
 const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) => {
@@ -154,10 +157,15 @@ const Dashboard = ({ onOpenSwipe, onOpenMap, onOpenSimstagram, onOpenCareer }) =
 
             <div className="bento-card logs">
               <h2 className="section-title">Activity Log</h2>
-              <div className="logs-panel">
-                {gameState.logs.map((log, index) => (
-                  <div key={index} className="log-entry">{log}</div>
-                ))}
+              <div className="logs-panel" style={{ height: '200px' }}>
+                <VirtualList
+                  items={gameState.logs}
+                  renderItem={(index, log) => (
+                    <div key={index} className="log-entry">{log}</div>
+                  )}
+                  itemHeight={24}
+                  height={200}
+                />
               </div>
             </div>
           </>

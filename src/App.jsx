@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGameStore } from './state/store';
+import { startSession, endSession, trackError, trackEvent, trackBalanceMetrics, trackRelationship, trackLegacy } from './utils/monitoring';
 import Dashboard from './components/Dashboard';
 import SwipeApp from './components/SwipeApp';
 import MapUI from './components/MapUI';
@@ -17,13 +18,79 @@ import Intro from './components/Intro';
 
 function AppContent() {
   const gamePhase = useGameStore(state => state.gameState.gamePhase);
+  const gameState = useGameStore(state => state.gameState);
+  const dispatch = useGameStore(state => state.dispatch);
 
   const [activeView, setActiveView] = useState('dashboard'); // 'dashboard', 'swipe', 'map', 'dialogue'
   const [activeNpcId, setActiveNpcId] = useState(null);
 
+  // Start monitoring session on app load
+  useEffect(() => {
+    const playerId = gameState.family?.playerName || 'unknown';
+    const session = startSession(playerId);
+    
+    // Track app start
+    trackEvent('app_start', {
+      phase: gamePhase,
+      playerId,
+    });
+    
+    // Track balance metrics periodically
+    const interval = setInterval(() => {
+      if (gameState.stats) {
+        trackBalanceMetrics({
+          money: gameState.stats.money,
+          day: gameState.time?.day,
+          housingTier: gameState.stats.housingTier,
+        });
+      }
+    }, 30000); // Every 30 seconds
+    
+    return () => {
+      clearInterval(interval);
+      endSession();
+    };
+  }, []);
+
+  // Track game phase changes
+  useEffect(() => {
+    trackEvent('phase_change', { 
+      from: 'unknown', 
+      to: gamePhase 
+    });
+  }, [gamePhase]);
+
+  // Track errors globally
+  useEffect(() => {
+    const handleError = (event) => {
+      trackError(event.error, {
+        message: event.message,
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno,
+      });
+    };
+    
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
+
+  // Track unhandled promise rejections
+  useEffect(() => {
+    const handleUnhandledRejection = (event) => {
+      trackError(event.reason, {
+        type: 'unhandled_rejection',
+      });
+    };
+    
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    return () => window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+  }, []);
+
   const triggerTalk = (npcId) => {
     setActiveNpcId(npcId);
     setActiveView('dialogue');
+    trackEvent('dialogue_start', { npcId });
   };
 
   if (gamePhase === 'intro') {
@@ -95,10 +162,22 @@ function AppContent() {
     <div className="app-background">
       {activeView === 'dashboard' && (
         <Dashboard 
-          onOpenSwipe={() => setActiveView('swipe')} 
-          onOpenMap={() => setActiveView('map')} 
-          onOpenSimstagram={() => setActiveView('simstagram')}
-          onOpenCareer={() => setActiveView('career')}
+          onOpenSwipe={() => {
+            setActiveView('swipe');
+            trackEvent('view_swipe_app');
+          }} 
+          onOpenMap={() => {
+            setActiveView('map');
+            trackEvent('view_map');
+          }}
+          onOpenSimstagram={() => {
+            setActiveView('simstagram');
+            trackEvent('view_simstagram');
+          }}
+          onOpenCareer={() => {
+            setActiveView('career');
+            trackEvent('view_career');
+          }}
         />
       )}
 
@@ -119,7 +198,7 @@ function AppContent() {
       {activeView === 'dialogue' && activeNpcId && (
         <DialogueUI 
           npcId={activeNpcId} 
-          onClose={() => setActiveView('dashboard')} 
+          onClose={() => setActiveView('dashboard')}
         />
       )}
 

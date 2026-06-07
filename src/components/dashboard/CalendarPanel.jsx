@@ -65,4 +65,4 @@ const CalendarPanel = ({ gameState }) => {
   );
 };
 
-export default CalendarPanel;
+export default memo(CalendarPanel);
