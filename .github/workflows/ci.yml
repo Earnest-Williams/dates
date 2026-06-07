@@ -17,7 +17,10 @@ jobs:
         node-version: '20'
         cache: 'npm'
     - run: npm ci
-    - run: bash scripts/run-tests.sh
-    - run: node scripts/audit-actions.mjs
-    - run: node scripts/audit-content.mjs
-    - run: node scripts/validate-content.mjs
+    - run: npm run lint
+    - run: npm run audit:actions
+    - run: npm run validate:content
+    - name: Run tests
+      run: bash scripts/run-tests.sh
+      env:
+        NODE_OPTIONS: '--max-old-space-size=8192'

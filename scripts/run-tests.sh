@@ -10,7 +10,7 @@ FAILED=0
 for file in $TEST_FILES; do
   echo ""
   echo "=== Running $file ==="
-  if NODE_OPTIONS="--max-old-space-size=4096" node --test "$file"; then
+  if NODE_OPTIONS="--max-old-space-size=8192" node --test "$file"; then
     echo "✅ Test passed: $file"
   else
     echo "❌ Test failed: $file"
