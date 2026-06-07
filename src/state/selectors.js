@@ -57,6 +57,49 @@ export const selectProposalReadinessHint = (state, npcId) => {
   return 'They seem ready whenever you are.';
 };
 
+/**
+ * Get compatibility signal for an NPC (internal use)
+ * @param {Object} state - Game state
+ * @param {string} npcId - NPC identifier
+ * @returns {Object} - { band: string, score: number }
+ */
+export const selectCompatibilitySignal = (state, npcId) => {
+  const match = state.matches?.[npcId];
+  if (!match || match.compatibilityScore === undefined) {
+    return { band: 'unknown', score: null };
+  }
+  
+  const score = match.compatibilityScore;
+  if (score >= 70) return { band: 'strong', score };
+  if (score >= 40) return { band: 'mixed', score };
+  return { band: 'fragile', score };
+};
+
+/**
+ * Get cohabitation fit hint for an NPC
+ * @param {Object} state - Game state
+ * @param {string} npcId - NPC identifier
+ * @returns {string} - Narrative hint about cohabitation fit
+ */
+export const selectCohabitationFitHint = (state, npcId) => {
+  const match = state.matches?.[npcId];
+  if (!match) return 'Unknown';
+  
+  const signal = selectCompatibilitySignal(state, npcId);
+  
+  if (signal.band === 'strong') {
+    return 'You connect easily in quiet moments. Living together would feel natural.';
+  }
+  if (signal.band === 'mixed') {
+    return 'You connect easily in quiet moments, but long-term ambition still feels unresolved.';
+  }
+  if (signal.band === 'fragile') {
+    return 'Your lifestyles and values may clash. Cohabitation could be challenging.';
+  }
+  
+  return 'Spend more time together to understand your compatibility.';
+};
+
 import { getNpcEncounters, LOCATION_EVENTS } from '../data/townTexture.js';
 
 export const selectCurrentLocationEncounters = (state, venueKey) => {

@@ -101,6 +101,9 @@ export const runSaveMigration = (payload) => {
           relationshipStage: match.relationshipStage ?? 'matched',
           exclusivityExpectation: match.exclusivityExpectation ?? 'unknown',
           publicKnowledge: match.publicKnowledge ?? 0,
+          dateHistory: match.dateHistory ?? [],
+          lastDateDay: match.lastDateDay ?? null,
+          lastDateType: match.lastDateType ?? null,
         };
       }
     }

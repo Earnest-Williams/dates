@@ -13,9 +13,10 @@ import {
   inferPlayerCompatibilityTraits,
 } from '../../sim/compatibility.js';
 import { scoreDatePhaseChoice } from '../../sim/dateScoring.js';
-import { applyDateDiminishingReturns } from '../../sim/dateDiminishingReturns.js';
+import { applyDateDiminishingReturns, recordDateInHistory } from '../../sim/dateDiminishingReturns.js';
 import { appendRelationshipEvent } from '../../sim/relationshipEvents.js';
 import { evaluateRepairAction } from '../../sim/relationshipRepair.js';
+import { checkDateConflictTrigger } from '../../sim/relationshipConflicts.js';
 import {
   adjustReputationForOrganicEncounter,
   adjustReputationForPublicDate,
@@ -509,9 +510,28 @@ export const socialReducer = (state, action) => {
         chemChange -= 3;
       }
 
-      const diminished = applyDateDiminishingReturns(relGain, chemChange, npcId, dateType, state.relationshipMemory);
+      // Check if this is a callback date or repair date
+      const isCallbackDate = Boolean(dateOutcome.callbacks && dateOutcome.callbacks.length > 0);
+      const isRepairDate = Boolean(dateOutcome.repairScene || currentMatch.activeConflictId);
+      
+      // Apply enhanced diminishing returns with all parameters
+      const diminished = applyDateDiminishingReturns(
+        relGain,
+        chemChange,
+        npcId,
+        dateType,
+        state.relationshipMemory,
+        currentMatch,
+        finalVibe,
+        isCallbackDate,
+        isRepairDate,
+        currentMatch.compatibilityScore
+      );
       relGain = diminished.relGain;
       chemChange = diminished.chemChange;
+      
+      // Record this date in history for future diminishing returns calculations
+      const updatedMatchWithHistory = recordDateInHistory(currentMatch, dateType, nextState.time.day);
 
       const newChem = Math.min(100, Math.max(0, (currentMatch.chemistry || 10) + chemChange));
 
@@ -529,6 +549,33 @@ export const socialReducer = (state, action) => {
       finalRelGain -= gossipPenalty;
 
       const newRel = applyRelationshipCap(currentMatch.relationship, finalRelGain, currentMatch.storyTier, nextState.stats);
+      
+      // Check for conflict triggers based on date outcome
+      const conflictTrigger = checkDateConflictTrigger(nextState, npcId, {
+        qualityScore,
+        finalVibe,
+        conflict: dateOutcome.conflict,
+        repairScene: dateOutcome.repairScene
+      });
+      
+      // If conflict should trigger and there's no active conflict, start one
+      const hasActiveConflict = Boolean(currentMatch.activeConflictId);
+      let finalActiveConflictId = updatedMatchWithHistory.activeConflictId || currentMatch.activeConflictId || null;
+      let finalPendingRepairScene = updatedMatchWithHistory.pendingRepairScene || currentMatch.pendingRepairScene || null;
+      let finalConflictStartedDay = updatedMatchWithHistory.conflictStartedDay || currentMatch.conflictStartedDay || null;
+      let finalRepairOpenedDay = updatedMatchWithHistory.repairOpenedDay || currentMatch.repairOpenedDay || null;
+      
+      if (conflictTrigger.shouldTrigger && !hasActiveConflict) {
+        finalActiveConflictId = conflictTrigger.conflictId;
+        finalPendingRepairScene = conflictTrigger.repairScene || finalPendingRepairScene;
+        finalConflictStartedDay = nextState.time.day;
+        finalRepairOpenedDay = nextState.time.day;
+      } else if (dateOutcome.repairScene && !hasActiveConflict) {
+        finalActiveConflictId = dateOutcome.repairScene;
+        finalPendingRepairScene = dateOutcome.repairScene;
+        finalConflictStartedDay = nextState.time.day;
+        finalRepairOpenedDay = nextState.time.day;
+      }
       
       let moodIncrease = qualityScore >= 50 ? Math.floor(qualityScore / 5) : 0;
       moodIncrease += dateOutcome.mood || 0;
@@ -585,19 +632,16 @@ export const socialReducer = (state, action) => {
         matches: {
           ...nextState.matches,
           [npcId]: {
-            ...currentMatch,
+            ...updatedMatchWithHistory,
             relationship: newRel,
             chemistry: newChem,
-            dateCount: (currentMatch.dateCount || 0) + 1,
+            dateCount: (updatedMatchWithHistory.dateCount || currentMatch.dateCount || 0) + 1,
             compatibilityScore,
             lastDateQuality: qualityScore,
-            activeConflictId: dateOutcome.conflict
-              || (dateOutcome.repairScene ? currentMatch.activeConflictId || dateOutcome.repairScene : currentMatch.activeConflictId),
-            conflictStartedDay: dateOutcome.conflict || dateOutcome.repairScene
-              ? nextState.time.day
-              : currentMatch.conflictStartedDay,
-            pendingRepairScene: dateOutcome.repairScene || currentMatch.pendingRepairScene,
-            repairOpenedDay: dateOutcome.repairScene ? nextState.time.day : currentMatch.repairOpenedDay
+            activeConflictId: finalActiveConflictId,
+            conflictStartedDay: finalConflictStartedDay,
+            pendingRepairScene: finalPendingRepairScene,
+            repairOpenedDay: finalRepairOpenedDay
           }
         },
         compatibility: {
