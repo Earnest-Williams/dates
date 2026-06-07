@@ -1,4 +1,5 @@
 export const formatOrganicEncounterRewardSummary = (choice) => {
+  if (!choice) return null;
   const hasRelationship = choice.relationship !== undefined;
   const hasChemistry = choice.chemistry !== undefined;
 
