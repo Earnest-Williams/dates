@@ -1,5 +1,6 @@
 export const canPostSimstagramContent = (state, content) => {
-  return (state.needs?.energy ?? 0) >= content.energyCost;
+  if (!state || !content) return false;
+  return (state.needs?.energy ?? 0) >= (content.energyCost ?? 0);
 };
 
 export const calculateSimstagramStatMultiplier = (stats, statRequirements) => {
