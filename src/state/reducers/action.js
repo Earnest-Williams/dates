@@ -106,7 +106,7 @@ export const actionReducer = (state, action) => {
           change = change * 1.25;
         }
 
-        change = applyWisdomBonus(state, key, change);
+        change = applyWisdomBonus(nextState, key, change);
 
         finalStatChanges[key] = change;
       });
