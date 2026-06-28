@@ -46,9 +46,9 @@ test('balance harness: date pacing prevents spamming the same date', () => {
 
   const relAfterDate2 = state.matches.elena.relationship;
   const gain2 = relAfterDate2 - relAfterDate1;
-  assert.equal(gain2, gain1); // First repeat is fine
+  assert.ok(gain2 < gain1); // Diminishing returns start immediately
 
-  // Date 3 (Starts seeing diminishing returns)
+  // Date 3
   state = runLibraryDate(state);
 
   const relAfterDate3 = state.matches.elena.relationship;

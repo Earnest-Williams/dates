@@ -2,6 +2,7 @@ import { HOUSING_TIERS } from '../../data/housing.js';
 import { incrementTime } from '../../sim/time.js';
 import { decayNeeds } from '../../sim/needs.js';
 import { calculateStorageFee } from '../../sim/economy.js';
+import { processPendingRumors } from '../../sim/reputation.js';
 import { NPCS } from '../../data/npcs.js';
 import { NPC_ALERTS, JEALOUSY_CONFRONTATION } from '../../data/npcAlerts.js';
 import { applyMarketNews } from '../../sim/markets.js';
@@ -51,6 +52,9 @@ export const simulateTicks = (state, ticks) => {
   for (let asset in state.priceHistories) {
     currentHistories[asset] = [...(state.priceHistories[asset] || [])];
   }
+
+  let rumorState = processPendingRumors(state, daysCrossed.length);
+  let currentReputation = rumorState.reputation;
 
   daysCrossed.forEach(dayNum => {
     const dayClosed = dayNum - 1;
@@ -325,6 +329,7 @@ export const simulateTicks = (state, ticks) => {
     priceHistories: currentHistories,
     logs: birthdayProgression.logs,
     career: state.career,
+    reputation: currentReputation,
   };
 
   // 4. Alert & Jealousy check

@@ -7,6 +7,7 @@ const cloneState = () => structuredClone(initialState);
 
 test('organic encounters selector hides encounters when flag is disabled', () => {
   const state = cloneState();
+  state.features = { ...state.features, organicEncounters: false };
   state.time = { day: 1, hour: 19, minute: 0 };
   state.activeLocation = 'Brockleigh';
 

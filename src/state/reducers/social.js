@@ -21,6 +21,7 @@ import {
   adjustReputationForOrganicEncounter,
   adjustReputationForPublicDate,
   calculateGossipRisk,
+  generateRumor,
   selectRelevantReputationCircle,
 } from '../../sim/reputation.js';
 import { describeTimePassage, getTimeWindowStatus } from '../../sim/time.js';
@@ -343,12 +344,23 @@ export const socialReducer = (state, action) => {
 
       const dateLocationKey = locationKey || dateTemplate.venueKey;
       const reputationCircle = selectRelevantReputationCircle(npcId);
-      const reputationAfterPublicDate = isPublicLocation(dateLocationKey)
+      
+      let nextReputation = isPublicLocation(dateLocationKey)
         ? adjustReputationForPublicDate(nextState, npcId, dateLocationKey)
         : nextState.reputation;
+      
+      const rumor = generateRumor(nextState, npcId, dateType, state.activeLocation || 'Brockleigh');
+      if (rumor) {
+        nextReputation = {
+          ...nextReputation,
+          pendingRumors: [...(nextReputation.pendingRumors || []), rumor]
+        };
+      }
+
+      nextState.reputation = nextReputation;
       const reputationDelta = getReputationChange(
-        nextState.reputation,
-        reputationAfterPublicDate,
+        state.reputation,
+        nextReputation,
         reputationCircle
       );
       const reputationLog = describeReputationChange(
@@ -374,7 +386,7 @@ export const socialReducer = (state, action) => {
           memoryContext: state.relationshipMemory?.[npcId] || createEmptyMemory()
         },
         stats: newStats,
-        reputation: reputationAfterPublicDate,
+        reputation: nextReputation,
         needs: {
           ...nextState.needs,
           energy: finalEnergy
@@ -521,7 +533,7 @@ export const socialReducer = (state, action) => {
         npcId,
         dateType,
         state.relationshipMemory,
-        currentMatch,
+        { ...currentMatch, currentDay: nextState.time.day },
         finalVibe,
         isCallbackDate,
         isRepairDate,

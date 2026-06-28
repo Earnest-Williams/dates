@@ -6,6 +6,7 @@
  */
 
 import { NPCS } from '../data/npcs.js';
+import { selectRelevantReputationCircle } from './reputation.js';
 
 /**
  * Conflict trigger types
@@ -195,8 +196,23 @@ export const getEligibleConflictTriggers = (state, npcId) => {
     });
   }
 
-  // Trigger 10: Public date with another NPC after exclusivity
-  // This is checked when a date is initiated, not here
+  // Trigger 10: Grounded Gossip (Public date with another NPC)
+  const activeRumors = state.reputation?.activeRumors || [];
+  for (const rumor of activeRumors) {
+    if (rumor.targetNpcId !== npcId) {
+      const thisNpcCircle = selectRelevantReputationCircle(npcId);
+      if (rumor.witnessCircle === thisNpcCircle || matchData.exclusivityExpectation === 'exclusive') {
+        triggers.push({
+          id: 'public_date_with_another',
+          type: CONFLICT_TRIGGER_TYPES.PUBLIC_DATE_WITH_ANOTHER,
+          npcId,
+          severity: matchData.exclusivityExpectation === 'exclusive' ? 3 : 2,
+          reason: `${npc.name} heard a rumor about you on a date at the ${rumor.locationKey} in ${rumor.settlementId}.`,
+          repairHint: 'You need to explain yourself and rebuild trust',
+        });
+      }
+    }
+  }
 
   // Trigger 11: Major compatibility mismatch at tier transition
   if (matchData.storyTier >= 2 && npcCompatibility && playerCompatibility) {
@@ -276,21 +292,21 @@ export const checkDateConflictTrigger = (state, npcId, dateOutcome) => {
   const matchData = state.matches?.[npcId] || {};
   const qualityScore = dateOutcome.qualityScore || dateOutcome.finalVibe || 0;
 
-  // Poor date ending trigger
-  if (qualityScore < 30 && !matchData.activeConflictId) {
-    return {
-      shouldTrigger: true,
-      conflictId: 'poor_date_ending',
-      repairScene: npc.repairEvent?.id || null,
-    };
-  }
-
   // Conflict from date outcome
   if (dateOutcome.conflict && !matchData.activeConflictId) {
     return {
       shouldTrigger: true,
       conflictId: dateOutcome.conflict,
       repairScene: dateOutcome.repairScene || npc.repairEvent?.id || null,
+    };
+  }
+
+  // Poor date ending trigger
+  if (qualityScore < 30 && !matchData.activeConflictId) {
+    return {
+      shouldTrigger: true,
+      conflictId: 'poor_date_ending',
+      repairScene: npc.repairEvent?.id || null,
     };
   }
 

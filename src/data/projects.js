@@ -63,7 +63,7 @@ export const JOB_SEARCH_OPTIONS = {
     id: 'job_center',
     name: 'Visit the Job Centre',
     description: 'Queue up, scan the notice boards, and let an adviser point you at starter roles.',
-    durationTicks: 12,
+    durationTicks: 6,
     energyCost: 12,
     moodCost: 4,
     targetTrack: 'service',

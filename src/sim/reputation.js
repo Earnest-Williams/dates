@@ -1,3 +1,5 @@
+import { SETTLEMENTS } from '../data/geography.js';
+
 const clamp = (value, min = -100, max = 100) => Math.max(min, Math.min(max, value));
 
 export const REPUTATION_CIRCLES = {
@@ -88,5 +90,81 @@ export const adjustReputationForOrganicEncounter = (
   return {
     ...(state?.reputation || {}),
     [circle]: clamp(getCurrentReputation(state, circle) + reputationDelta)
+  };
+};
+
+export const generateRumor = (state, npcId, locationKey, settlementId = 'Brockleigh') => {
+  const settlement = SETTLEMENTS[settlementId];
+  if (!settlement) return null;
+
+  // Base bump-in chance based on population tier
+  let bumpInChance = 0;
+  if (settlement.popTier === 'Very Low') bumpInChance = 0.05;
+  else if (settlement.popTier === 'Low') bumpInChance = 0.15;
+  else if (settlement.popTier === 'Medium') bumpInChance = 0.35;
+  else if (settlement.popTier === 'High') bumpInChance = 0.60;
+  else if (settlement.popTier === 'Medium-High') bumpInChance = 0.45;
+  else if (settlement.popTier === 'Low-Medium') bumpInChance = 0.25;
+
+  if (Math.random() > bumpInChance) return null;
+
+  // We got bumped into! Who saw us?
+  // Pick a random circle from the player's active dating circles (excluding current date)
+  const activeCircles = new Set();
+  if (state.matches) {
+    for (const [id, match] of Object.entries(state.matches)) {
+      if (id !== npcId && match.relationship > 20) {
+        const circle = selectRelevantReputationCircle(id);
+        if (circle) activeCircles.add(circle);
+      }
+    }
+  }
+  
+  // If no other active circles, they get spotted by the date's own circle
+  if (activeCircles.size === 0) {
+    const ownCircle = selectRelevantReputationCircle(npcId);
+    if (ownCircle) activeCircles.add(ownCircle);
+    else return null;
+  }
+
+  const circlesArray = Array.from(activeCircles);
+  const witnessCircle = circlesArray[Math.floor(Math.random() * circlesArray.length)];
+
+  return {
+    targetNpcId: npcId,
+    witnessCircle,
+    locationKey,
+    settlementId,
+    discoveredDay: state.time?.day || 1,
+    daysUntilMature: 2
+  };
+};
+
+export const processPendingRumors = (state, daysPassed = 1) => {
+  if (!state.reputation) return state;
+  const pending = state.reputation.pendingRumors || [];
+  const active = state.reputation.activeRumors || [];
+  
+  if (pending.length === 0) return state;
+
+  const newPending = [];
+  const newActive = [...active];
+
+  for (const rumor of pending) {
+    const updatedRumor = { ...rumor, daysUntilMature: rumor.daysUntilMature - daysPassed };
+    if (updatedRumor.daysUntilMature <= 0) {
+      newActive.push(updatedRumor);
+    } else {
+      newPending.push(updatedRumor);
+    }
+  }
+
+  return {
+    ...state,
+    reputation: {
+      ...state.reputation,
+      pendingRumors: newPending,
+      activeRumors: newActive
+    }
   };
 };
